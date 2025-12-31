@@ -1,8 +1,14 @@
 #include <SDL2/SDL.h>
+#include <iostream>
+#include "handleErrors.h"
 
 int main(int argc, char *argv[])
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    {
+        std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        return SDL_INITIALIZE_ERROR;
+    }
 
     SDL_Window *window = SDL_CreateWindow(
         "Scratch",
