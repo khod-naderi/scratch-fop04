@@ -6,3 +6,14 @@
 - Raed Ghanbari (raed.ghanbari8507@gmail.com)
 - Amirreza Liravi (liraviamirreza85@gmail.com)
 - Ali Naderi (a.naderi.04@sharif.edu)
+
+
+### Build
+
+- in Linux:
+```
+mkdir build && cd build
+cmake ..
+make
+./white_window
+```
