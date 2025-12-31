@@ -15,5 +15,5 @@
 mkdir build && cd build
 cmake ..
 make
-./white_window
+./scratch
 ```
