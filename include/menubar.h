@@ -25,10 +25,13 @@ struct MenuState
 };
 
 // File menu Items
-const char *fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
-const unsigned int fileMenuItemsCount = 3;
+extern const char *fileMenuItems[];
+extern const int fileMenuItemsCount;
 // Edit menu items
-const char *editMenuItems[] = {"Help"};
-const unsigned int editMenuItemsCount = 1;
+extern const char *editMenuItems[];
+extern const int editMenuItemsCount;
+
+// Menu state
+extern MenuState menuState;
 
 #endif
