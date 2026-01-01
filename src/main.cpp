@@ -32,6 +32,13 @@ bool isPointInRect(int x, int y, SDL_Rect rect)
 
 int main(int argc, char *argv[])
 {
+    /*
+    ---------------------------------------------
+    Initialization part
+    in this part we intialize SDL2 library and resources like
+    fonts, SDL_Renderer, SDL_event handler, Windows
+    ---------------------------------------------
+    */
     // Initialize SDL2 everything
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -69,6 +76,12 @@ int main(int argc, char *argv[])
 
     SDL_Event eventSDL;
 
+    /*
+    ---------------------------------------------
+    Importing Image Logo
+    in this part we load logo image for menubar
+    ---------------------------------------------
+    */
     // Import logo image
     SDL_Surface *logoSurface = IMG_Load("assets/images/logo.png");
     if (!logoSurface)
@@ -79,6 +92,12 @@ int main(int argc, char *argv[])
     SDL_Texture *logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
     SDL_FreeSurface(logoSurface);
 
+    /*
+    ---------------------------------------------
+    Initialize menubar
+    in this part we create menubar first structure
+    ---------------------------------------------
+    */
     // Menu state
     MenuState menuState = {false, false, -1, -1};
     // Define menu reactangles
@@ -87,12 +106,23 @@ int main(int argc, char *argv[])
     SDL_Texture *fileMenuText = renderText(renderer, font, "File", {255, 255, 255, 255});
     SDL_Texture *editMenuText = renderText(renderer, font, "Edit", {255, 255, 255, 255});
 
+    /*
+    ---------------------------------------------
+    Main while of program
+    ---------------------------------------------
+    */
     while (running)
     {
         // Get mouse pointer state
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
 
+        /*
+        ---------------------------------------------
+        Event Handler
+        in this part we handle SDL evnets before rendering next frame
+        ---------------------------------------------
+        */
         while (SDL_PollEvent(&eventSDL))
         {
             // handle Quit button on top-right corner of page
@@ -104,6 +134,12 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
+
+                    /*
+                    ---------------------------------------------
+                    In this part we check if any part of menubar or menu options clicked
+                    ---------------------------------------------
+                    */
                     // Check if File menu clicked
                     if (isPointInRect(mouseX, mouseY, fileMenuRect))
                     {
@@ -168,7 +204,12 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Update hover states
+        /*
+        ---------------------------------------------
+        In This part we will update hover status of every hoverable thing
+        ---------------------------------------------
+        */
+        // Update hover states of menus
         menuState.hoveredFileItem = -1;
         menuState.hoveredEditItem = -1;
 
@@ -192,10 +233,20 @@ int main(int argc, char *argv[])
             }
         }
 
+        /*
+        ---------------------------------------------
+        Now it's to render next frame
+        ---------------------------------------------
+        */
         // Clear background color to white.
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
 
+        /*
+        ---------------------------------------------
+        Draw menubar
+        ---------------------------------------------
+        */
         // Draw blue rectangle at top as menu bar
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_Rect menubar = {
@@ -354,6 +405,7 @@ int main(int argc, char *argv[])
             }
         }
 
+        // show next frame
         SDL_RenderPresent(renderer);
     }
 
