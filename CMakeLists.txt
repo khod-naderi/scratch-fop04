@@ -19,8 +19,8 @@ target_include_directories(scratch PRIVATE
 # Platform-specific SDL2 configuration
 if(WIN32)
     find_package(SDL2 CONFIG REQUIRED)
-    find_package(sdl2-image CONFIG REQUIRED)
-    find_package(sdl2-ttf CONFIG REQUIRED)
+    find_package(SDL2_image CONFIG REQUIRED)
+    find_package(SDL2_ttf CONFIG REQUIRED)
 
     target_link_libraries(scratch PRIVATE 
         SDL2::SDL2 
