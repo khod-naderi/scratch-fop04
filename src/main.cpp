@@ -135,9 +135,14 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
 
-    // Exiting from program.
+    // Cleanup and exiting from program.
+    SDL_DestroyTexture(fileMenuText);
+    SDL_DestroyTexture(editMenuText);
+    SDL_DestroyTexture(logoTexture);
+    TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
 
     return 0;
