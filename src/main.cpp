@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
 #include "generaldef.h"
 
@@ -7,7 +8,7 @@ int main(int argc, char *argv[])
     // Initialize SDL2 everything
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return SDL_INITIALIZE_ERROR;
     }
 
@@ -25,6 +26,16 @@ int main(int argc, char *argv[])
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
     SDL_Event eventSDL;
+
+    // Import logo image
+    SDL_Surface *logoSurface = IMG_Load("assets/images/logo.png");
+    if (!logoSurface)
+    {
+        std::cerr << "Faild to load logo image: " << IMG_GetError();
+        return SDL_IMAGE_LOAD_ERROR;
+    }
+    SDL_Texture *logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
+    SDL_FreeSurface(logoSurface);
 
     while (running)
     {
@@ -47,8 +58,16 @@ int main(int argc, char *argv[])
             0,
             0,
             MAIN_WINDOW_WIDTH,
-            30};
+            MENUBAR_HEIGHT};
         SDL_RenderFillRect(renderer, &menubar);
+
+        SDL_Rect logoRect = {
+            LOGO_MARGIN_LEFT, // margin left
+            (MENUBAR_HEIGHT - LOGO_HEIGHT) / 2,
+            LOGO_WIDTH,
+            LOGO_HEIGHT};
+
+        SDL_RenderCopy(renderer, logoTexture, NULL, &logoRect);
 
         SDL_RenderPresent(renderer);
     }
