@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
     int errcode = menu_init(renderer, font);
     if (errcode != 0)
         return errcode;
+    errcode = categoryColumnInit(renderer, font);
+    if (errcode != 0)
+        return errcode;
 
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
@@ -110,6 +113,7 @@ int main(int argc, char *argv[])
 
         // Draw Menu Bar
         drawMenubar(renderer, font, mouseX, mouseY);
+        drawCatagoryColumn(renderer, font, mouseX, mouseY);
 
         // show next frame
         SDL_RenderPresent(renderer);

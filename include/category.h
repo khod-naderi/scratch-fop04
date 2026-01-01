@@ -19,9 +19,12 @@ struct Category
     Category(const char *f_name, SDL_Color f_color);
 };
 
+extern const SDL_Texture *categoriesText[];
+
 // all categories will be here
 extern const Category categories[];
 
+int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 
 #endif
