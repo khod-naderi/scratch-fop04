@@ -16,18 +16,28 @@ extern const SDL_Color colort_controlBlocks = {255, 178, 44, 255};
 extern const SDL_Color colort_motionBlocks = {160, 255, 88, 255};
 extern const SDL_Color colort_soundBlocks = {143, 52, 255, 255};
 
+#define COLOR_DIM_SCALE 30
+
 SDL_Color colorDim(SDL_Color color)
 {
     SDL_Color color_new;
-    color_new.r = (color.r + 5);
-    if (color_new.r > 255)
-        color_new.r = 255;
-    color_new.g = (color.g + 5);
-    if (color_new.g > 255)
-        color_new.g = 255;
-    color_new.b = (color.b + 5);
-    if (color_new.b > 255)
-        color_new.b = 255;
+
+    if (color.r < COLOR_DIM_SCALE)
+        color_new.r = 0;
+    else
+        color_new.r = (color.r - COLOR_DIM_SCALE);
+
+    if (color.b < COLOR_DIM_SCALE)
+        color_new.b = 0;
+    else
+        color_new.b = (color.b - COLOR_DIM_SCALE);
+
+    if (color.g < COLOR_DIM_SCALE)
+        color_new.g = 0;
+    else
+        color_new.g = (color.g - COLOR_DIM_SCALE);
+
     color_new.a = color.a;
+
     return color_new;
 }
