@@ -22,6 +22,23 @@ SDL_Texture *logoTexture = nullptr;
 SDL_Texture *fileMenuText = nullptr;
 SDL_Texture *editMenuText = nullptr;
 
+int menu_init(SDL_Renderer *renderer, TTF_Font *font)
+{
+    logoSurface = IMG_Load("assets/images/logo.png");
+    if (!logoSurface)
+    {
+        std::cerr << "Faild to load logo image: " << IMG_GetError() << std::endl;
+        return SDL_IMAGE_LOAD_ERROR;
+    }
+    logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
+    SDL_FreeSurface(logoSurface);
+
+    fileMenuText = renderText(renderer, font, "File", color_white);
+    editMenuText = renderText(renderer, font, "Edit", color_white);
+
+    return 0;
+}
+
 // Update hover states of menus
 void updateMenuHoverState(int mouseX, int mouseY)
 {

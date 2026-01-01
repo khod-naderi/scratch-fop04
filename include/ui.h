@@ -47,7 +47,4 @@ extern SDL_Texture *editMenuText;
 const SDL_Rect fileMenuRect = {LOGO_MARGIN_LEFT + LOGO_WIDTH + 2 * MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
 const SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
 
-void render_menu(SDL_Renderer *renderer);
-int menu_init(SDL_Renderer *renderer, TTF_Font *font);
-
 #endif
