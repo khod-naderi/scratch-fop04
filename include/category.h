@@ -8,19 +8,15 @@ This header file is for handling block category column
 #ifndef CATEGORYCOLUMN_HEADER
 #define CATEGORYCOLUMN_HEADER
 
-int selectedCategoryId;
-int categoryCount;
+extern int selectedCategoryId;
+extern const int categoryCount;
 
 struct Category
 {
     const char *name;
     SDL_Color color;
 
-    Category(const char *f_name, SDL_Color f_color)
-    {
-        name = f_name;
-        color = f_color;
-    }
+    Category(const char *f_name, SDL_Color f_color);
 };
 
 // all categories will be here

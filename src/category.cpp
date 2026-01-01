@@ -4,6 +4,12 @@
 #include "category.h"
 #include "color.h"
 
+Category::Category(const char *f_name, SDL_Color f_color)
+{
+    name = f_name;
+    color = f_color;
+}
+
 int selectedCategoryId = 0;
 
 const int categoryCount = 4;

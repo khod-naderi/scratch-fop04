@@ -8,6 +8,7 @@ This header file is for handling UI component
 #include "block.h"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include "category.h"
 
 #ifndef UI_HEADER
 #define UI_HEADER
