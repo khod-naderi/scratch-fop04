@@ -20,6 +20,14 @@ int main(int argc, char *argv[])
         return SDL_TTF_INIT_ERROR;
     }
 
+    // Load font
+    TTF_Font *font = TTF_OpenFont("assets/fonts/Sans_Serif.ttf", 16);
+    if (!font)
+    {
+        std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
+        return SDL_FONT_NOT_FOUND;
+    }
+
     // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(
         "Scratch",

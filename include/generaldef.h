@@ -15,6 +15,7 @@ Error Codes
 #define SDL_INITIALIZE_ERROR 1
 #define SDL_IMAGE_LOAD_ERROR 2
 #define SDL_TTF_INIT_ERROR 3
+#define SDL_FONT_NOT_FOUND 4
 
 /*
 ---------------------------------------
