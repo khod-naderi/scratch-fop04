@@ -2,7 +2,38 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
+#include <string>
 #include "generaldef.h"
+
+// handle state of menu buttons
+struct MenuState
+{
+    bool isfileMenuOpen;
+    bool iseditMenuOpen;
+    int hoveredFileItem;
+    int hoveredEditItem;
+};
+
+/*
+    This function render text
+    input:
+    - target renderer
+    - font
+    - text
+    - color
+
+    output:
+    - SDL_Texture form that textbox.
+*/
+SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color)
+{
+    SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
+    if (!surface)
+        return nullptr;
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    return texture;
+}
 
 int main(int argc, char *argv[])
 {
@@ -53,8 +84,23 @@ int main(int argc, char *argv[])
     SDL_Texture *logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
     SDL_FreeSurface(logoSurface);
 
+    // Menu state
+    MenuState menuState = {false, false, -1, -1};
+    // Define menu reactangles
+    SDL_Rect fileMenuRect = {LOGO_MARGIN_LEFT + LOGO_WIDTH + 2 * MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
+    SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
+
+    // File menu Items
+    const std::string fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
+    // Edit menu items
+    const std::string editMenuItems[] = {"Help"};
+
+    SDL_Texture *fileMenuText = renderText(renderer, font, "File", {255, 255, 255, 255});
+    SDL_Texture *editMenuText = renderText(renderer, font, "Edit", {255, 255, 255, 255});
+
     while (running)
     {
+
         while (SDL_PollEvent(&eventSDL))
         {
             // handle Quit button on top-right corner of page
@@ -77,6 +123,7 @@ int main(int argc, char *argv[])
             MENUBAR_HEIGHT};
         SDL_RenderFillRect(renderer, &menubar);
 
+        // Draw Logo
         SDL_Rect logoRect = {
             LOGO_MARGIN_LEFT, // margin left
             (MENUBAR_HEIGHT - LOGO_HEIGHT) / 2,
