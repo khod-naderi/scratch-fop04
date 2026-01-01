@@ -19,9 +19,15 @@ extern const SDL_Color colort_soundBlocks = {143, 52, 255, 255};
 SDL_Color colorDim(SDL_Color color)
 {
     SDL_Color color_new;
-    color_new.r = (color.r + 20) % 256;
-    color_new.g = (color.g + 20) % 256;
-    color_new.b = (color.b + 20) % 256;
+    color_new.r = (color.r + 5);
+    if (color_new.r > 255)
+        color_new.r = 255;
+    color_new.g = (color.g + 5);
+    if (color_new.g > 255)
+        color_new.g = 255;
+    color_new.b = (color.b + 5);
+    if (color_new.b > 255)
+        color_new.b = 255;
     color_new.a = color.a;
     return color_new;
 }
