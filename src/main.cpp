@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
         600,
         SDL_WINDOW_SHOWN);
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    bool running = true; // this is root app running indenticator
+    SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
     SDL_Event eventSDL;
 
@@ -33,12 +33,23 @@ int main(int argc, char *argv[])
             // handle Quit button on top-right corner of page
             if (eventSDL.type == SDL_QUIT)
             {
-                running = false;
+                running = SDL_FALSE;
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set background color to white.
+        // Clear background color to white.
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
+
+        // Draw blue rectangle at top as menu bar
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        SDL_Rect menubar = {
+            0,
+            0,
+            800,
+            30};
+        SDL_RenderFillRect(renderer, &menubar);
+
         SDL_RenderPresent(renderer);
     }
 
