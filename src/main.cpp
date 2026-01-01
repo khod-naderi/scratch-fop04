@@ -5,6 +5,9 @@
 #include <string>
 #include "generaldef.h"
 
+// for DebugMode
+#define DEBUG_MODE
+
 // handle state of menu buttons
 struct MenuState
 {
@@ -120,6 +123,96 @@ int main(int argc, char *argv[])
             if (eventSDL.type == SDL_QUIT)
             {
                 running = SDL_FALSE;
+            }
+            else if (eventSDL.type == SDL_MOUSEBUTTONDOWN)
+            {
+                if (eventSDL.button.button == SDL_BUTTON_LEFT)
+                {
+                    // Check if File menu clicked
+                    if (isPointInRect(mouseX, mouseY, fileMenuRect))
+                    {
+                        menuState.isfileMenuOpen = !menuState.isfileMenuOpen;
+                        menuState.iseditMenuOpen = false;
+                    }
+                    // Check if Edit menu clicked
+                    else if (isPointInRect(mouseX, mouseY, editMenuRect))
+                    {
+                        menuState.iseditMenuOpen = !menuState.iseditMenuOpen;
+                        menuState.isfileMenuOpen = false;
+                    }
+                    // Check if File dropdown item clicked
+                    else if (menuState.isfileMenuOpen)
+                    {
+                        SDL_Rect fileDropdown = {fileMenuRect.x, MENUBAR_HEIGHT,
+                                                 MENU_DROPDOX_WIDTH, MENU_DROPDOX_ITEM_HEIGHT * fileMenuItemsCount};
+                        if (isPointInRect(mouseX, mouseY, fileDropdown))
+                        {
+                            int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
+                            if (itemIndex >= 0 && itemIndex < fileMenuItemsCount)
+                            {
+#ifdef DEBUG_MODE
+                                std::cout << "Clicked: " << fileMenuItems[itemIndex] << std::endl;
+#endif
+
+                                menuState.isfileMenuOpen = false;
+                            }
+                        }
+                        else
+                        {
+                            menuState.isfileMenuOpen = false;
+                        }
+                    }
+                    // Check if Edit dropdown item clicked
+                    else if (menuState.iseditMenuOpen)
+                    {
+                        SDL_Rect editDropdown = {editMenuRect.x, MENUBAR_HEIGHT,
+                                                 MENU_DROPDOX_WIDTH, MENU_DROPDOX_ITEM_HEIGHT * editMenuItemsCount};
+                        if (isPointInRect(mouseX, mouseY, editDropdown))
+                        {
+                            int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
+                            if (itemIndex >= 0 && itemIndex < editMenuItemsCount)
+                            {
+#ifdef DEBUG_MODE
+                                std::cout << "Clicked: " << editMenuItems[itemIndex] << std::endl;
+#endif
+                                menuState.iseditMenuOpen = false;
+                            }
+                        }
+                        else
+                        {
+                            menuState.iseditMenuOpen = false;
+                        }
+                    }
+                    else
+                    {
+                        menuState.isfileMenuOpen = false;
+                        menuState.iseditMenuOpen = false;
+                    }
+                }
+            }
+        }
+
+        // Update hover states
+        menuState.hoveredFileItem = -1;
+        menuState.hoveredEditItem = -1;
+
+        if (menuState.isfileMenuOpen && mouseY >= MENUBAR_HEIGHT)
+        {
+            int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
+            if (mouseX >= fileMenuRect.x && mouseX < fileMenuRect.x + MENU_DROPDOX_WIDTH &&
+                itemIndex >= 0 && itemIndex < fileMenuItemsCount)
+            {
+                menuState.hoveredFileItem = itemIndex;
+            }
+        }
+
+        if (menuState.iseditMenuOpen && mouseY >= MENUBAR_HEIGHT)
+        {
+            int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
+            if (mouseX >= editMenuRect.x && mouseX < editMenuRect.x + MENU_DROPDOX_WIDTH &&
+                itemIndex >= 0 && itemIndex < editMenuItemsCount)
+            {
+                menuState.hoveredEditItem = itemIndex;
             }
         }
 
