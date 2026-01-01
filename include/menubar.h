@@ -34,4 +34,8 @@ extern const int editMenuItemsCount;
 // Menu state
 extern MenuState menuState;
 
+void updateMenuHoverState(int mouseX, int mouseY);
+void drawMenubar(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
+void controlMenubarClickDown(const int mouseX, const int mouseY);
+
 #endif

@@ -35,4 +35,7 @@ Menubar Logo properties
 #define LOGO_HEIGHT (MENUBAR_HEIGHT - 5)
 #define LOGO_WIDTH (int(LOGO_HEIGHT * 2.675))
 
+// for DebugMode
+#define DEBUG_MODE
+
 #endif
