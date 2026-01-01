@@ -35,6 +35,14 @@ SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text
     return texture;
 }
 
+/*
+    This function will check that a point is inside a rectangle or not
+*/
+bool isPointInRect(int x, int y, SDL_Rect rect)
+{
+    return (x >= rect.x) && (x <= (rect.x + rect.w)) && (y >= rect.y) && (y <= (rect.y + rect.h));
+}
+
 int main(int argc, char *argv[])
 {
     // Initialize SDL2 everything
@@ -100,6 +108,9 @@ int main(int argc, char *argv[])
 
     while (running)
     {
+        // Get mouse pointer state
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
 
         while (SDL_PollEvent(&eventSDL))
         {
@@ -131,6 +142,58 @@ int main(int argc, char *argv[])
             LOGO_HEIGHT};
 
         SDL_RenderCopy(renderer, logoTexture, NULL, &logoRect);
+
+        // Draw File menu button
+        bool fileMenuHoverd = isPointInRect(mouseX, mouseY, fileMenuRect);
+        if (fileMenuHoverd || menuState.isfileMenuOpen)
+        {
+            SDL_SetRenderDrawColor(renderer, 50, 50, 200, 255);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        }
+        SDL_RenderFillRect(renderer, &fileMenuRect);
+
+        // Draw File menu text
+        if (fileMenuText)
+        {
+            int tw, th;
+            SDL_QueryTexture(fileMenuText, NULL, NULL, &tw, &th);
+            SDL_Rect textRect = {
+                fileMenuRect.x + (fileMenuRect.w - tw) / 2,
+                fileMenuRect.y + (fileMenuRect.h - th) / 2,
+                tw,
+                th,
+            };
+            SDL_RenderCopy(renderer, fileMenuText, NULL, &textRect);
+        }
+
+        // Draw Edit menu button
+        bool editMenuHoverd = isPointInRect(mouseX, mouseY, editMenuRect);
+        if (editMenuHoverd || menuState.iseditMenuOpen)
+        {
+            SDL_SetRenderDrawColor(renderer, 50, 50, 200, 255);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        }
+        SDL_RenderFillRect(renderer, &editMenuRect);
+
+        // Draw Edit menu text
+        if (editMenuText)
+        {
+            int tw, th;
+            SDL_QueryTexture(editMenuText, NULL, NULL, &tw, &th);
+            SDL_Rect textRect = {
+                editMenuRect.x + (editMenuRect.w - tw) / 2,
+                editMenuRect.y + (editMenuRect.h - th) / 2,
+                tw,
+                th,
+            };
+            SDL_RenderCopy(renderer, editMenuText, NULL, &textRect);
+        }
 
         SDL_RenderPresent(renderer);
     }
