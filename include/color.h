@@ -24,4 +24,9 @@ extern const SDL_Color color_menuDropbox;
 // const SDL_Color color_menuDropbox = color_menubarBackground;
 extern const SDL_Color color_borderMenuDropbox;
 
+extern const SDL_Color colort_eventBlocks;
+extern const SDL_Color colort_controlBlocks;
+extern const SDL_Color colort_motionBlocks;
+extern const SDL_Color colort_soundBlocks;
+
 #endif

@@ -10,3 +10,8 @@ const SDL_Color color_hoveredMenuButton = {50, 50, 200, 255};
 const SDL_Color color_hoveredMenuOption = {200, 200, 200, 255};
 const SDL_Color color_menuDropbox = {240, 240, 240, 255};
 const SDL_Color color_borderMenuDropbox = {150, 150, 150, 255};
+
+extern const SDL_Color colort_eventBlocks = {43, 255, 255, 255};
+extern const SDL_Color colort_controlBlocks = {255, 178, 44, 255};
+extern const SDL_Color colort_motionBlocks = {160, 255, 88, 255};
+extern const SDL_Color colort_soundBlocks = {143, 52, 255, 255};
