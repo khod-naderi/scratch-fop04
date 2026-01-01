@@ -5,6 +5,7 @@
 #include <string>
 #include "generaldef.h"
 #include "menubar.h"
+#include "color.h"
 
 // for DebugMode
 #define DEBUG_MODE
@@ -103,8 +104,8 @@ int main(int argc, char *argv[])
     // Define menu reactangles
     SDL_Rect fileMenuRect = {LOGO_MARGIN_LEFT + LOGO_WIDTH + 2 * MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
     SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
-    SDL_Texture *fileMenuText = renderText(renderer, font, "File", {255, 255, 255, 255});
-    SDL_Texture *editMenuText = renderText(renderer, font, "Edit", {255, 255, 255, 255});
+    SDL_Texture *fileMenuText = renderText(renderer, font, "File", color_white);
+    SDL_Texture *editMenuText = renderText(renderer, font, "Edit", color_white);
 
     /*
     ---------------------------------------------
@@ -239,7 +240,7 @@ int main(int argc, char *argv[])
         ---------------------------------------------
         */
         // Clear background color to white.
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(renderer, color_white);
         SDL_RenderClear(renderer);
 
         /*
@@ -248,7 +249,7 @@ int main(int argc, char *argv[])
         ---------------------------------------------
         */
         // Draw blue rectangle at top as menu bar
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        SDL_SetRenderDrawColor(renderer, color_menubarBackground);
         SDL_Rect menubar = {
             0,
             0,
@@ -269,11 +270,11 @@ int main(int argc, char *argv[])
         bool fileMenuHoverd = isPointInRect(mouseX, mouseY, fileMenuRect);
         if (fileMenuHoverd || menuState.isfileMenuOpen)
         {
-            SDL_SetRenderDrawColor(renderer, 50, 50, 200, 255);
+            SDL_SetRenderDrawColor(renderer, color_hoveredMenuButton);
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_SetRenderDrawColor(renderer, color_menubarBackground);
         }
         SDL_RenderFillRect(renderer, &fileMenuRect);
 
@@ -295,11 +296,11 @@ int main(int argc, char *argv[])
         bool editMenuHoverd = isPointInRect(mouseX, mouseY, editMenuRect);
         if (editMenuHoverd || menuState.iseditMenuOpen)
         {
-            SDL_SetRenderDrawColor(renderer, 50, 50, 200, 255);
+            SDL_SetRenderDrawColor(renderer, color_hoveredMenuButton);
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_SetRenderDrawColor(renderer, color_menubarBackground);
         }
         SDL_RenderFillRect(renderer, &editMenuRect);
 
@@ -332,20 +333,20 @@ int main(int argc, char *argv[])
                 // Background
                 if (i == menuState.hoveredFileItem)
                 {
-                    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+                    SDL_SetRenderDrawColor(renderer, color_hoveredMenuOption);
                 }
                 else
                 {
-                    SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
+                    SDL_SetRenderDrawColor(renderer, color_menuDropbox);
                 }
                 SDL_RenderFillRect(renderer, &itemRect);
 
                 // Border
-                SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
-                SDL_RenderFillRect(renderer, &itemRect);
+                SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
+                SDL_RenderDrawRect(renderer, &itemRect);
 
                 // Text
-                SDL_Texture *itemTextText = renderText(renderer, font, fileMenuItems[i], {0, 0, 0, 0});
+                SDL_Texture *itemTextText = renderText(renderer, font, fileMenuItems[i], color_black);
                 if (itemTextText)
                 {
                     int tw, th;
@@ -376,20 +377,20 @@ int main(int argc, char *argv[])
                 // Background
                 if (i == menuState.hoveredEditItem)
                 {
-                    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+                    SDL_SetRenderDrawColor(renderer, color_hoveredMenuOption);
                 }
                 else
                 {
-                    SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
+                    SDL_SetRenderDrawColor(renderer, color_menuDropbox);
                 }
                 SDL_RenderFillRect(renderer, &itemRect);
 
                 // Border
-                SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
-                SDL_RenderFillRect(renderer, &itemRect);
+                SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
+                SDL_RenderDrawRect(renderer, &itemRect);
 
                 // Text
-                SDL_Texture *itemTextText = renderText(renderer, font, editMenuItems[i], {0, 0, 0, 0});
+                SDL_Texture *itemTextText = renderText(renderer, font, editMenuItems[i], color_black);
                 if (itemTextText)
                 {
                     int tw, th;
