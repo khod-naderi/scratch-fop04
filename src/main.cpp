@@ -99,9 +99,11 @@ int main(int argc, char *argv[])
     SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
 
     // File menu Items
-    const std::string fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
+    const char *fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
+    const unsigned int fileMenuItemsCount = 3;
     // Edit menu items
-    const std::string editMenuItems[] = {"Help"};
+    const char *editMenuItems[] = {"Help"};
+    const unsigned int editMenuItemsCount = 1;
 
     SDL_Texture *fileMenuText = renderText(renderer, font, "File", {255, 255, 255, 255});
     SDL_Texture *editMenuText = renderText(renderer, font, "Edit", {255, 255, 255, 255});
@@ -193,6 +195,94 @@ int main(int argc, char *argv[])
                 th,
             };
             SDL_RenderCopy(renderer, editMenuText, NULL, &textRect);
+        }
+
+        // Draw File menu Dropbox
+        if (menuState.isfileMenuOpen)
+        {
+            for (int i = 0; i < fileMenuItemsCount; i++)
+            {
+                SDL_Rect itemRect = {
+                    fileMenuRect.x,
+                    MENUBAR_HEIGHT + i * MENU_DROPDOX_ITEM_HEIGHT,
+                    MENU_DROPDOX_WIDTH,
+                    MENU_DROPDOX_ITEM_HEIGHT,
+                };
+
+                // Background
+                if (i == menuState.hoveredFileItem)
+                {
+                    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+                }
+                else
+                {
+                    SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
+                }
+                SDL_RenderFillRect(renderer, &itemRect);
+
+                // Border
+                SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+                SDL_RenderFillRect(renderer, &itemRect);
+
+                // Text
+                SDL_Texture *itemTextText = renderText(renderer, font, fileMenuItems[i], {0, 0, 0, 0});
+                if (itemTextText)
+                {
+                    int tw, th;
+                    SDL_QueryTexture(itemTextText, NULL, NULL, &tw, &th);
+                    SDL_Rect textRect = {
+                        itemRect.x + 10,
+                        itemRect.y + (itemRect.h - th) / 2,
+                        tw,
+                        th,
+                    };
+                    SDL_RenderCopy(renderer, itemTextText, NULL, &textRect);
+                }
+            }
+        }
+
+        // Draw Edit menu Dropbox
+        if (menuState.iseditMenuOpen)
+        {
+            for (int i = 0; i < editMenuItemsCount; i++)
+            {
+                SDL_Rect itemRect = {
+                    editMenuRect.x,
+                    MENUBAR_HEIGHT + i * MENU_DROPDOX_ITEM_HEIGHT,
+                    MENU_DROPDOX_WIDTH,
+                    MENU_DROPDOX_ITEM_HEIGHT,
+                };
+
+                // Background
+                if (i == menuState.hoveredEditItem)
+                {
+                    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+                }
+                else
+                {
+                    SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
+                }
+                SDL_RenderFillRect(renderer, &itemRect);
+
+                // Border
+                SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+                SDL_RenderFillRect(renderer, &itemRect);
+
+                // Text
+                SDL_Texture *itemTextText = renderText(renderer, font, editMenuItems[i], {0, 0, 0, 0});
+                if (itemTextText)
+                {
+                    int tw, th;
+                    SDL_QueryTexture(itemTextText, NULL, NULL, &tw, &th);
+                    SDL_Rect textRect = {
+                        itemRect.x + 10,
+                        itemRect.y + (itemRect.h - th) / 2,
+                        tw,
+                        th,
+                    };
+                    SDL_RenderCopy(renderer, itemTextText, NULL, &textRect);
+                }
+            }
         }
 
         SDL_RenderPresent(renderer);
