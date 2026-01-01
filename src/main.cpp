@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
                     controlMenubarClickDown(mouseX, mouseY);
+                    controlCategoryColumnClickDown(mouseX, mouseY);
                 }
             }
         }
