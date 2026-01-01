@@ -4,29 +4,13 @@
 #include <iostream>
 #include <string>
 #include "generaldef.h"
+#include "menubar.h"
 
 // for DebugMode
 #define DEBUG_MODE
 
-// handle state of menu buttons
-struct MenuState
-{
-    bool isfileMenuOpen;
-    bool iseditMenuOpen;
-    int hoveredFileItem;
-    int hoveredEditItem;
-};
-
 /*
     This function render text
-    input:
-    - target renderer
-    - font
-    - text
-    - color
-
-    output:
-    - SDL_Texture form that textbox.
 */
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color)
 {
@@ -100,14 +84,6 @@ int main(int argc, char *argv[])
     // Define menu reactangles
     SDL_Rect fileMenuRect = {LOGO_MARGIN_LEFT + LOGO_WIDTH + 2 * MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
     SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
-
-    // File menu Items
-    const char *fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
-    const unsigned int fileMenuItemsCount = 3;
-    // Edit menu items
-    const char *editMenuItems[] = {"Help"};
-    const unsigned int editMenuItemsCount = 1;
-
     SDL_Texture *fileMenuText = renderText(renderer, font, "File", {255, 255, 255, 255});
     SDL_Texture *editMenuText = renderText(renderer, font, "Edit", {255, 255, 255, 255});
 

@@ -28,15 +28,11 @@ Page properties
 
 /*
 ---------------------------------------
-Menubar properties
+Menubar Logo properties
 ---------------------------------------
 */
-#define MENUBAR_HEIGHT 40
 #define LOGO_MARGIN_LEFT 10
 #define LOGO_HEIGHT (MENUBAR_HEIGHT - 5)
 #define LOGO_WIDTH (int(LOGO_HEIGHT * 2.675))
-#define MENU_MARGIN_LEFT 10
-#define MENU_DROPDOX_WIDTH 150
-#define MENU_DROPDOX_ITEM_HEIGHT 30
 
 #endif
