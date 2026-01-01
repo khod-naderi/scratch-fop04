@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include "generaldef.h"
 
@@ -10,6 +11,13 @@ int main(int argc, char *argv[])
     {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return SDL_INITIALIZE_ERROR;
+    }
+
+    // Initialize SDL_ttf
+    if (TTF_Init() != 0)
+    {
+        std::cerr << "TTF_Init Error: " << TTF_GetError() << std::endl;
+        return SDL_TTF_INIT_ERROR;
     }
 
     // Creating a static windows
@@ -31,7 +39,7 @@ int main(int argc, char *argv[])
     SDL_Surface *logoSurface = IMG_Load("assets/images/logo.png");
     if (!logoSurface)
     {
-        std::cerr << "Faild to load logo image: " << IMG_GetError();
+        std::cerr << "Faild to load logo image: " << IMG_GetError() << std::endl;
         return SDL_IMAGE_LOAD_ERROR;
     }
     SDL_Texture *logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
