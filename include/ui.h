@@ -31,18 +31,6 @@ void render_categories(SDL_Renderer *renderer, Category categories[], int count,
 void render_blocks(SDL_Renderer *renderer, Block blocks[], int count, float scroll_offset, SDL_Rect viewport);
 void render_extension_button(SDL_Renderer *renderer, SDL_Rect bounds);
 
-/*
----------------------------------------------
-Importing Image Logo
-in this part we load logo image for menubar
----------------------------------------------
-*/
-// Import logo image
-extern SDL_Surface *logoSurface;
-extern SDL_Texture *logoTexture;
-extern SDL_Texture *fileMenuText;
-extern SDL_Texture *editMenuText;
-
 // Define menu reactangles
 extern const SDL_Rect fileMenuRect;
 extern const SDL_Rect editMenuRect;

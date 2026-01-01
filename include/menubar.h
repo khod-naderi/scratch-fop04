@@ -31,6 +31,11 @@ extern const int fileMenuItemsCount;
 extern const char *editMenuItems[];
 extern const int editMenuItemsCount;
 
+extern SDL_Surface *logoSurface;
+extern SDL_Texture *logoTexture;
+extern SDL_Texture *fileMenuText;
+extern SDL_Texture *editMenuText;
+
 // Menu state
 extern MenuState menuState;
 
