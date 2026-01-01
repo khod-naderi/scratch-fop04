@@ -4,6 +4,9 @@ This file is for defineing default properties.
 - initialize page defenitions
 */
 
+#ifndef GENERALDEF
+#define GENERALDEF
+
 /*
 ---------------------------------------
 Error Codes
@@ -19,3 +22,5 @@ Page properties
 
 #define MAIN_WINDOW_WIDTH 1800
 #define MAIN_WINDOW_HEIGHT 1000
+
+#endif
