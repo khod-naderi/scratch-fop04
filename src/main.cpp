@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
-#include "handleErrors.h"
+#include "generaldef.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
         "Scratch",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        800,
-        600,
+        MAIN_WINDOW_WIDTH,
+        MAIN_WINDOW_HEIGHT,
         SDL_WINDOW_SHOWN);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         SDL_Rect menubar = {
             0,
             0,
-            800,
+            MAIN_WINDOW_WIDTH,
             30};
         SDL_RenderFillRect(renderer, &menubar);
 
