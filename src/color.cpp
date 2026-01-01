@@ -15,3 +15,13 @@ extern const SDL_Color colort_eventBlocks = {43, 255, 255, 255};
 extern const SDL_Color colort_controlBlocks = {255, 178, 44, 255};
 extern const SDL_Color colort_motionBlocks = {160, 255, 88, 255};
 extern const SDL_Color colort_soundBlocks = {143, 52, 255, 255};
+
+SDL_Color colorDim(SDL_Color color)
+{
+    SDL_Color color_new;
+    color_new.r = (color.r + 20) % 256;
+    color_new.g = (color.g + 20) % 256;
+    color_new.b = (color.b + 20) % 256;
+    color_new.a = color.a;
+    return color_new;
+}
