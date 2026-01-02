@@ -16,6 +16,7 @@ And Ui part of Blocks list
 enum block_t
 {
     BLOCK_COMMAND,
+    BLOCK_EVENT,
     BLOCK_STATEMENT,
     BLOCK_OPERATOR,
 };
@@ -25,7 +26,16 @@ struct Block
     const char *label;
     const unsigned int categoryId;
     const block_t type;
-    int (*command)();
+    void (*command)();
+
+    Block(const char *f_label, const unsigned int f_categoryId, const block_t f_type, void (*command)())
+        : label(f_label), categoryId(f_categoryId), type(f_type), command(command)
+    {
+    }
+    Block(const char *f_label, const unsigned int f_categoryId, const block_t f_type)
+        : label(f_label), categoryId(f_categoryId), type(f_type)
+    {
+    }
 };
 
 extern const Block blocksLibrary[];
