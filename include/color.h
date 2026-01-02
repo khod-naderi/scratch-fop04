@@ -30,6 +30,7 @@ extern const SDL_Color colort_motionBlocks;
 extern const SDL_Color colort_soundBlocks;
 
 extern const SDL_Color color_categoryColumneBackground;
+extern const SDL_Color color_addExtentionBtn;
 
 SDL_Color colorDim(SDL_Color color);
 

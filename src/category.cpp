@@ -17,6 +17,8 @@ int selectedCategoryId = 0;
 const int categoryCount = 4;
 SDL_Texture *categoriesText[categoryCount];
 
+SDL_Texture *addExtentionBtnText;
+
 const Category categories[] = {
     Category("Event", colort_eventBlocks),
     Category("Control", colort_controlBlocks),
@@ -30,6 +32,7 @@ int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font)
     for (int i = 0; i < categoryCount; i++)
         categoriesText[i] = renderText(renderer, font, categories[i].name, color_white);
 
+    addExtentionBtnText = renderText(renderer, font, "Add Extra", color_white);
     return 0;
 }
 
@@ -76,6 +79,41 @@ void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX
         };
         SDL_RenderCopy(renderer, categoriesText[i], NULL, &textRect);
     }
+
+    /*
+    --------------------------------
+    Draw Add extention button
+    --------------------------------
+    */
+    SDL_Rect addExtentionBtnRect = {
+        CATEGORY_COLUMN.x,
+        MAIN_WINDOW_HEIGHT - CATEGORY_ITEM_HEIGTH - 10,
+        CATEGORY_COLUMN_WIDTH,
+        CATEGORY_ITEM_HEIGTH,
+    };
+
+    // Background
+    if (isPointInRect(mouseX, mouseY, addExtentionBtnRect))
+        SDL_SetRenderDrawColor(renderer, colorDim(color_addExtentionBtn));
+    else
+        SDL_SetRenderDrawColor(renderer, color_addExtentionBtn);
+
+    SDL_RenderFillRect(renderer, &addExtentionBtnRect);
+
+    // border
+    SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
+    SDL_RenderDrawRect(renderer, &addExtentionBtnRect);
+
+    // text
+    int tw, th;
+    SDL_QueryTexture(addExtentionBtnText, NULL, NULL, &tw, &th);
+    SDL_Rect addExtentionBtnTextRect = {
+        addExtentionBtnRect.x + (addExtentionBtnRect.w - tw) / 2,
+        addExtentionBtnRect.y + (addExtentionBtnRect.h - th) / 2,
+        tw,
+        th,
+    };
+    SDL_RenderCopy(renderer, addExtentionBtnText, NULL, &addExtentionBtnTextRect);
 }
 
 // this will control event of click-down
