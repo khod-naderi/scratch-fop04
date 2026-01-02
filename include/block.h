@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include "category.h"
 
 /*
 This header file is for handling command Blocks
@@ -24,21 +25,24 @@ enum block_t
 struct Block
 {
     const char *label;
-    const unsigned int categoryId;
+    const CATEGORY_ID categoryId;
     const block_t type;
     void (*command)();
+    int width, height;
+    SDL_Texture *textrue;
 
-    Block(const char *f_label, const unsigned int f_categoryId, const block_t f_type, void (*command)())
+    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type, void (*command)())
         : label(f_label), categoryId(f_categoryId), type(f_type), command(command)
     {
     }
-    Block(const char *f_label, const unsigned int f_categoryId, const block_t f_type)
+    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type)
         : label(f_label), categoryId(f_categoryId), type(f_type)
     {
     }
 };
 
-extern const Block blocksLibrary[];
+extern int blocks_count;
+extern Block blocksLibrary[];
 
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
