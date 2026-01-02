@@ -13,6 +13,14 @@ This header file is for handling block category column
 extern int selectedCategoryId;
 extern const int categoryCount;
 
+enum CATEGORY_ID
+{
+    CATEGORY_EVENT,
+    CATEGORY_CONTROL,
+    CATEGORY_MOTION,
+    CATEGORY_SOUND,
+};
+
 struct Category
 {
     const char *name;
