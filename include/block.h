@@ -44,7 +44,10 @@ struct Block
 extern int blocks_count;
 extern Block blocksLibrary[];
 
+extern int scrollIndex;
+
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 void controlBlockColumnClickDown(const int mouseX, const int mouseY);
+void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sint32 scrollY);
 #endif

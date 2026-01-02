@@ -97,6 +97,13 @@ int main(int argc, char *argv[])
                     controlCategoryColumnClickDown(mouseX, mouseY);
                 }
             }
+            else if (eventSDL.type == SDL_MOUSEWHEEL)
+            {
+                int direction = -1;
+                if (eventSDL.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                    direction = 1;
+                controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
+            }
         }
 
         /*
