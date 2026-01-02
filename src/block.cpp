@@ -103,6 +103,8 @@ int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font)
     return 0;
 }
 
+int blocksScrollLimit = 0;
+
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
     // Draw background of Block column with it's border
@@ -161,16 +163,23 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             SDL_RenderCopy(renderer, blocksLibrary[i].textrue, NULL, &textRect);
         }
     }
+    blocksScrollLimit = blocksTotalHeight - scrollIndex - (blocksLibrary[blocks_count - 1].height);
 }
 
 void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sint32 scrollY)
 {
     if (isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
     {
-        std::cout << scrollY << std::endl;
         scrollIndex += scrollY * SCROLL_Y_SENSIVITY;
+
+#ifdef DEBUG_MODE
+        std::cout << "ScrollY: " << scrollY << std::endl;
+        std::cout << "Scroll Index: " << scrollIndex << " blocksScrollLimit:" << blocksScrollLimit << std::endl;
+#endif
 
         if (scrollIndex < 0)
             scrollIndex = 0;
+        if (scrollIndex > blocksScrollLimit)
+            scrollIndex = blocksScrollLimit;
     }
 }
