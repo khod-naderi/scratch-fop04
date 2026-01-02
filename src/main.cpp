@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
         // Draw Menu Bar
         drawMenubar(renderer, font, mouseX, mouseY);
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
+        drawBlockColumn(renderer, font, mouseX, mouseY);
 
         // show next frame
         SDL_RenderPresent(renderer);
