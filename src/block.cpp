@@ -11,7 +11,7 @@ And Ui part of Blocks list
 #include "generaldef.h"
 #include <iostream>
 
-int scrollIndex = 0;
+int scrollBlockColumnIndex = 0;
 
 void CMD_Move10StepForward()
 {
@@ -122,7 +122,7 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
         {
             SDL_Rect itemRect = {
                 BLOCKS_COLUMN.x + 5,
-                BLOCKS_COLUMN.y + blocksTotalHeight - scrollIndex,
+                BLOCKS_COLUMN.y + blocksTotalHeight - scrollBlockColumnIndex,
                 blocksLibrary[i].width,
                 blocksLibrary[i].height,
             };
@@ -130,7 +130,7 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             block_count++;
 
             // skip of not in the scrolled section.
-            if ((blocksTotalHeight - scrollIndex < 0) || (blocksTotalHeight - scrollIndex > MAIN_WINDOW_HEIGHT))
+            if ((blocksTotalHeight - scrollBlockColumnIndex < 0) || (blocksTotalHeight - scrollBlockColumnIndex > MAIN_WINDOW_HEIGHT))
             {
                 continue;
             }
@@ -163,23 +163,23 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             SDL_RenderCopy(renderer, blocksLibrary[i].textrue, NULL, &textRect);
         }
     }
-    blocksScrollLimit = blocksTotalHeight - scrollIndex - (blocksLibrary[blocks_count - 1].height);
+    blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[blocks_count - 1].height);
 }
 
 void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sint32 scrollY)
 {
     if (isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
     {
-        scrollIndex += scrollY * SCROLL_Y_SENSIVITY;
+        scrollBlockColumnIndex += scrollY * SCROLL_Y_SENSIVITY;
 
 #ifdef DEBUG_MODE
         std::cout << "ScrollY: " << scrollY << std::endl;
-        std::cout << "Scroll Index: " << scrollIndex << " blocksScrollLimit:" << blocksScrollLimit << std::endl;
+        std::cout << "Scroll Index: " << scrollBlockColumnIndex << " blocksScrollLimit:" << blocksScrollLimit << std::endl;
 #endif
 
-        if (scrollIndex < 0)
-            scrollIndex = 0;
-        if (scrollIndex > blocksScrollLimit)
-            scrollIndex = blocksScrollLimit;
+        if (scrollBlockColumnIndex < 0)
+            scrollBlockColumnIndex = 0;
+        if (scrollBlockColumnIndex > blocksScrollLimit)
+            scrollBlockColumnIndex = blocksScrollLimit;
     }
 }

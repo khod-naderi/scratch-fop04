@@ -5,6 +5,7 @@
 #include "color.h"
 #include "ui.h"
 #include "generaldef.h"
+#include "block.h"
 
 Category::Category(const char *f_name, SDL_Color f_color)
 {
@@ -123,6 +124,9 @@ void controlCategoryColumnClickDown(const int mouseX, const int mouseY)
     {
         int selectedIndex = (mouseY - CATEGORY_COLUMN.y) / CATEGORY_ITEM_HEIGTH;
         if (selectedIndex < categoryCount)
+        {
             selectedCategoryId = selectedIndex;
+            scrollBlockColumnIndex = 0;
+        }
     }
 }
