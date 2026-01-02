@@ -35,6 +35,12 @@ int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 
 void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
+
+    // Draw column background
+    SDL_SetRenderDrawColor(renderer, color_categoryColumneBackground);
+    SDL_RenderFillRect(renderer, &CATEGORY_COLUMN);
+
+    // Draw each item
     for (int i = 0; i < categoryCount; i++)
     {
         SDL_Rect itemRect = {

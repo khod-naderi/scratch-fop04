@@ -16,6 +16,8 @@ extern const SDL_Color colort_controlBlocks = {255, 178, 44, 255};
 extern const SDL_Color colort_motionBlocks = {160, 255, 88, 255};
 extern const SDL_Color colort_soundBlocks = {143, 52, 255, 255};
 
+const SDL_Color color_categoryColumneBackground = {142, 142, 142, 255};
+
 #define COLOR_DIM_SCALE 30
 
 SDL_Color colorDim(SDL_Color color)

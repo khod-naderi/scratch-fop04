@@ -29,6 +29,8 @@ extern const SDL_Color colort_controlBlocks;
 extern const SDL_Color colort_motionBlocks;
 extern const SDL_Color colort_soundBlocks;
 
+extern const SDL_Color color_categoryColumneBackground;
+
 SDL_Color colorDim(SDL_Color color);
 
 #endif
