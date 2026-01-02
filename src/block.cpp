@@ -168,7 +168,7 @@ void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sin
     if (isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
     {
         std::cout << scrollY << std::endl;
-        scrollIndex += scrollY;
+        scrollIndex += scrollY * SCROLL_Y_SENSIVITY;
 
         if (scrollIndex < 0)
             scrollIndex = 0;
