@@ -10,6 +10,8 @@ And Ui part of Blocks list
 #include "ui.h"
 #include "generaldef.h"
 
+const Block blocksLibrary[] = {};
+
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
     // Draw background of Block column with it's border

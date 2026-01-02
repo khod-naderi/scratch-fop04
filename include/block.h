@@ -13,13 +13,22 @@ And Ui part of Blocks list
 
 #define BLOCK_ITEM_HEIGTH 50
 
+enum block_t
+{
+    BLOCK_COMMAND,
+    BLOCK_STATEMENT,
+    BLOCK_OPERATOR,
+};
+
 struct Block
 {
     const char *label;
-    unsigned int categoryId;
-    SDL_Color color;
-    SDL_Rect bounds;
+    const unsigned int categoryId;
+    const block_t type;
+    int (*command)();
 };
+
+extern const Block blocksLibrary[];
 
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
