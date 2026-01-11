@@ -7,6 +7,7 @@
 #include "menubar.h"
 #include "color.h"
 #include "ui.h"
+#include "canvas.h"
 
 int main(int argc, char *argv[])
 {
@@ -126,6 +127,7 @@ int main(int argc, char *argv[])
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
         drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
+        drawCanvasScreen(renderer, font, mouseX, mouseY);
 
         // show next frame
         SDL_RenderPresent(renderer);
