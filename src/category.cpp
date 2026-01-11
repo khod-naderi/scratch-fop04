@@ -13,24 +13,23 @@ Category::Category(const char *f_name, SDL_Color f_color)
     color = f_color;
 }
 
-int selectedCategoryId = 0;
-
-const int categoryCount = 4;
-SDL_Texture *categoriesText[categoryCount];
-
-SDL_Texture *addExtentionBtnText;
-
-const Category categories[] = {
+std::vector<Category> categories = {
     Category("Event", colort_eventBlocks),
     Category("Control", colort_controlBlocks),
     Category("Motion", colort_motionBlocks),
     Category("Sound", colort_soundBlocks),
 };
 
+int selectedCategoryId = 0;
+
+SDL_Texture *categoriesText[4]; // TODO [BUG] : Use dynamic allocation.
+
+SDL_Texture *addExtentionBtnText;
+
 // initialize category column
 int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 {
-    for (int i = 0; i < categoryCount; i++)
+    for (int i = 0; i < CATEGORIES_COUNT; i++)
         categoriesText[i] = renderText(renderer, font, categories[i].name, color_white);
 
     addExtentionBtnText = renderText(renderer, font, "Add Extra", color_white);
@@ -45,7 +44,7 @@ void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX
     SDL_RenderFillRect(renderer, &CATEGORY_COLUMN);
 
     // Draw each item
-    for (int i = 0; i < categoryCount; i++)
+    for (int i = 0; i < CATEGORIES_COUNT; i++)
     {
         SDL_Rect itemRect = {
             CATEGORY_COLUMN.x,
@@ -123,7 +122,7 @@ void controlCategoryColumnClickDown(const int mouseX, const int mouseY)
     if (isPointInRect(mouseX, mouseY, CATEGORY_COLUMN))
     {
         int selectedIndex = (mouseY - CATEGORY_COLUMN.y) / CATEGORY_ITEM_HEIGTH;
-        if (selectedIndex < categoryCount)
+        if (selectedIndex < CATEGORIES_COUNT)
         {
             selectedCategoryId = selectedIndex;
             scrollBlockColumnIndex = 0;

@@ -4,6 +4,7 @@ This header file is for handling block category column
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <vector>
 
 #ifndef CATEGORYCOLUMN_HEADER
 #define CATEGORYCOLUMN_HEADER
@@ -11,7 +12,6 @@ This header file is for handling block category column
 #define CATEGORY_ITEM_HEIGTH 50
 
 extern int selectedCategoryId;
-extern const int categoryCount;
 
 enum CATEGORY_ID
 {
@@ -32,7 +32,8 @@ struct Category
 extern SDL_Texture *categoriesText[];
 
 // all categories will be here
-extern const Category categories[];
+extern std::vector<Category> categories;
+#define CATEGORIES_COUNT (categories.size())
 
 int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
