@@ -62,6 +62,9 @@ int main(int argc, char *argv[])
     errcode = blockColumnInit(renderer, font);
     if (errcode != 0)
         return errcode;
+    errcode = sprintBoxInit(renderer, font);
+    if (errcode != 0)
+        return errcode;
 
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 

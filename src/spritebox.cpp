@@ -71,3 +71,16 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &SPRITE_BOX);
 }
+
+/*
+----------------------------------------------------
+This function is for initializing Sprint Screen
+----------------------------------------------------
+*/
+int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
+{
+    // Add default Sprint
+    addSprintToScreen(renderer, "Mad Man", "assets/images/sprints/madman.png");
+
+    return 0;
+}
