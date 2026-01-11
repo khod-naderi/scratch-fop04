@@ -28,6 +28,6 @@ struct SprintBody
 // This will hold live sprints
 extern std::vector<SprintBody> sprints;
 
-int addSprintToScreen(std::string name, const char *imgPath);
+int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgPath);
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 #endif
