@@ -30,8 +30,8 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.name = name;
 
     // spon on the center of screen
-    newSptint.posX = SPRITE_BOX.w / 2;
-    newSptint.posY = SPRITE_BOX.h / 2;
+    newSptint.posX = CANVAS_SCREEN_WIDTH / 2;
+    newSptint.posY = CANVAS_SCREEN_HEIGTH / 2;
 
     int id = 0;
     for (SprintBody s : sprints) // founding new latest ID
@@ -53,6 +53,8 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.nowCustome = SDL_CreateTextureFromSurface(renderer, custome);
     SDL_FreeSurface(custome);
 
+    sprints.push_back(newSptint);
+
     return id;
 }
 
@@ -70,6 +72,22 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Draw border of Canvas
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &SPRITE_BOX);
+
+    /*
+    ------------------
+    Draw Sprints on screen
+    ------------------
+    */
+    for (SprintBody thisSprint : sprints)
+    {
+        SDL_Rect imageRect = {
+            CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
+            CANVAS_BOX.y + (thisSprint.posY - (SPRINT_IMG_HEIGHT / 2)),
+            SPRINT_IMG_WITDH,
+            SPRINT_IMG_HEIGHT,
+        };
+        SDL_RenderCopy(renderer, thisSprint.nowCustome, NULL, &imageRect);
+    }
 }
 
 /*
@@ -80,7 +98,9 @@ This function is for initializing Sprint Screen
 int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
 {
     // Add default Sprint
-    addSprintToScreen(renderer, "Mad Man", "assets/images/sprints/madman.png");
+    int errcode = addSprintToScreen(renderer, "Mad Man", "assets/images/sprints/madman.png");
+    if (errcode)
+        return errcode;
 
     return 0;
 }

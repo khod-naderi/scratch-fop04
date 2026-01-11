@@ -16,14 +16,18 @@ This header file is for managing custome and backgorund setting area named sprit
 // This struct will handle sprint bodies
 struct SprintBody
 {
-    int id;                  // sprint id
-    std::string name;        // sprint name, like "bob".
-    unsigned int posX, posY; // sprint position related to Canvas Screen.
+    int id;           // sprint id
+    std::string name; // sprint name, like "bob".
+    int posX, posY;   // sprint position related to Canvas Screen.
     SDL_Texture *nowCustome;
     // SDL_Texture **allCustome // TODO: Add this later for multicostume sprints
     // unsigned int selectedCustome = 0;
     // int customeCount;
 };
+
+// Sprint image dimenstion
+#define SPRINT_IMG_WITDH 100
+#define SPRINT_IMG_HEIGHT 100
 
 // This will hold live sprints
 extern std::vector<SprintBody> sprints;
