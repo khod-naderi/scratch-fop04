@@ -10,6 +10,7 @@ And Ui part of Blocks list
 #include "ui.h"
 #include "generaldef.h"
 #include <iostream>
+#include <vector>
 
 int scrollBlockColumnIndex = 0;
 
@@ -33,9 +34,7 @@ void CMD_Sleep2Second()
 {
 }
 
-int blocks_count = 50;
-
-Block blocksLibrary[] = {
+std::vector<Block> blocksLibrary = {
     Block("On Keyboard Press 'SPACE'", CATEGORY_EVENT, BLOCK_EVENT),
     Block("Move 10 step forward", CATEGORY_CONTROL, BLOCK_COMMAND, CMD_Move10StepForward),
     Block("Move 10 step backward", CATEGORY_CONTROL, BLOCK_COMMAND, CMD_Move10StepBackward),
@@ -93,7 +92,7 @@ Block blocksLibrary[] = {
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 {
     // Prerender every command texture and bound
-    for (int i = 0; i < blocks_count; i++)
+    for (int i = 0; i < BLOCKS_COUNT; i++)
     {
         blocksLibrary[i].textrue = renderText(renderer, font, blocksLibrary[i].label, color_white);
         SDL_QueryTexture(blocksLibrary[i].textrue, NULL, NULL, &blocksLibrary[i].width, &blocksLibrary[i].height);
@@ -116,7 +115,7 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
     // Draw Blocks in Block Column
     int block_count = 0, visibleBlockCount = 0;
     int blocksTotalHeight = 5;
-    for (int i = 0; i < blocks_count; i++)
+    for (int i = 0; i < BLOCKS_COUNT; i++)
     {
         if (blocksLibrary[i].categoryId == selectedCategoryId)
         {
@@ -163,7 +162,7 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             SDL_RenderCopy(renderer, blocksLibrary[i].textrue, NULL, &textRect);
         }
     }
-    blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[blocks_count - 1].height);
+    blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[BLOCKS_COUNT - 1].height);
 }
 
 void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sint32 scrollY)

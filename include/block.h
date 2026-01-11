@@ -3,6 +3,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include "category.h"
+#include <vector>
 
 /*
 This header file is for handling command Blocks
@@ -41,8 +42,8 @@ struct Block
     }
 };
 
-extern int blocks_count;
-extern Block blocksLibrary[];
+extern std::vector<Block> blocksLibrary;
+#define BLOCKS_COUNT (blocksLibrary.size())
 
 extern int scrollBlockColumnIndex;
 
