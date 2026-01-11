@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         SDL_WINDOWPOS_CENTERED,
         MAIN_WINDOW_WIDTH,
         MAIN_WINDOW_HEIGHT,
-        SDL_WINDOW_SHOWN);
+        SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
