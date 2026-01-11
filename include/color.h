@@ -34,6 +34,8 @@ extern const SDL_Color color_addExtentionBtn;
 
 extern const SDL_Color color_blockColumneBackground;
 
+extern const SDL_Color color_spriteBoxBackground;
+
 SDL_Color colorDim(SDL_Color color);
 
 #endif

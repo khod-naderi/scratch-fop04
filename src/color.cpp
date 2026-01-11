@@ -21,6 +21,8 @@ const SDL_Color color_addExtentionBtn = {120, 115, 44, 255};
 
 const SDL_Color color_blockColumneBackground = {200, 200, 200, 255};
 
+const SDL_Color color_spriteBoxBackground = {240, 240, 240, 255};
+
 #define COLOR_DIM_SCALE 30
 
 SDL_Color colorDim(SDL_Color color)
