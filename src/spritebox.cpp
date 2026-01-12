@@ -35,7 +35,7 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.angleRotation = 0; // render at it's original oriantation.
 
     int id = 0;
-    for (SprintBody s : aliveSprints) // founding new latest ID
+    for (const SprintBody &s : aliveSprints) // founding new latest ID
     {
         if (id <= s.id)
         {

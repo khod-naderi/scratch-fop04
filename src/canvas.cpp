@@ -32,7 +32,7 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
     Draw Sprints on screen
     ------------------
     */
-    for (SprintBody thisSprint : aliveSprints)
+    for (const SprintBody &thisSprint : aliveSprints)
     {
         SDL_Rect imageRect = {
             CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
