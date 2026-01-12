@@ -8,6 +8,7 @@ This cpp file is for handling UI component
 #include "ui.h"
 #include "menubar.h"
 #include <iostream>
+#include "generaldef.h"
 #include "color.h"
 
 const SDL_Rect MENUBAR_ROW = {0, 0, MAIN_WINDOW_WIDTH, MENUBAR_HEIGHT};
@@ -39,4 +40,22 @@ SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text
 bool isPointInRect(int x, int y, SDL_Rect rect)
 {
     return (x >= rect.x) && (x <= (rect.x + rect.w)) && (y >= rect.y) && (y <= (rect.y + rect.h));
+}
+
+/*
+-----------------------------------
+Load an image from a file path
+-----------------------------------
+this will return texture of that photo.
+*/
+SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
+{
+    SDL_Surface *custome = IMG_Load(imgPath);
+    if (!custome)
+        return nullptr;
+
+    SDL_Texture *imgText = SDL_CreateTextureFromSurface(renderer, custome);
+    SDL_FreeSurface(custome);
+
+    return imgText;
 }

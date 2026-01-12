@@ -28,6 +28,7 @@ extern const SDL_Rect CANVAS_BOX;
 extern const SDL_Rect SPRITE_BOX;
 
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color);
+SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath);
 bool isPointInRect(int x, int y, SDL_Rect rect);
 
 void render_categories(SDL_Renderer *renderer, Category categories[], int count, int selected);
