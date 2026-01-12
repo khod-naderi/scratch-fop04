@@ -72,22 +72,6 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Draw border of Canvas
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &SPRITE_BOX);
-
-    /*
-    ------------------
-    Draw Sprints on screen
-    ------------------
-    */
-    for (SprintBody thisSprint : sprints)
-    {
-        SDL_Rect imageRect = {
-            CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
-            CANVAS_BOX.y + (thisSprint.posY - (SPRINT_IMG_HEIGHT / 2)),
-            SPRINT_IMG_WITDH,
-            SPRINT_IMG_HEIGHT,
-        };
-        SDL_RenderCopy(renderer, thisSprint.nowCustome, NULL, &imageRect);
-    }
 }
 
 /*
