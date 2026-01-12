@@ -12,8 +12,7 @@ This header file is for managing custome and backgorund setting area named sprit
 #include "ui.h"
 #include "generaldef.h"
 #include <iostream>
-
-std::vector<SprintBody> sprints;
+#include "canvas.h"
 
 /*
 -------------------------------------------------
@@ -34,7 +33,7 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.posY = CANVAS_SCREEN_HEIGTH / 2;
 
     int id = 0;
-    for (SprintBody s : sprints) // founding new latest ID
+    for (SprintBody s : aliveSprints) // founding new latest ID
     {
         if (id <= s.id)
         {
@@ -53,7 +52,7 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.nowCustome = SDL_CreateTextureFromSurface(renderer, custome);
     SDL_FreeSurface(custome);
 
-    sprints.push_back(newSptint);
+    aliveSprints.push_back(newSptint);
 
     return id;
 }

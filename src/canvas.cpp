@@ -11,6 +11,9 @@ This CPP file is for managing stage view named canvas
 #include "color.h"
 #include "ui.h"
 #include "spritebox.h"
+#include <vector>
+
+std::vector<SprintBody> aliveSprints;
 
 /*
 -------------------------------------------------
@@ -29,7 +32,7 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
     Draw Sprints on screen
     ------------------
     */
-    for (SprintBody thisSprint : sprints)
+    for (SprintBody thisSprint : aliveSprints)
     {
         SDL_Rect imageRect = {
             CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
