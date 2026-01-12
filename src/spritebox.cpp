@@ -45,14 +45,12 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.id = id;
 
     // load texture of it's custome.
-    SDL_Surface *custome = IMG_Load(imgPath);
-    if (!custome)
+    newSptint.nowCustome = renderImage(renderer, imgPath);
+    if (!newSptint.nowCustome)
     {
         std::cerr << "Faild to load Custome image of \"" << name << "\": " << IMG_GetError() << std::endl;
         return SDL_IMAGE_LOAD_ERROR;
     }
-    newSptint.nowCustome = SDL_CreateTextureFromSurface(renderer, custome);
-    SDL_FreeSurface(custome);
 
     aliveSprints.push_back(newSptint);
 
