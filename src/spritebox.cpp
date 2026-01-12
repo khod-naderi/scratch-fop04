@@ -32,6 +32,8 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
     newSptint.posX = CANVAS_SCREEN_WIDTH / 2;
     newSptint.posY = CANVAS_SCREEN_HEIGTH / 2;
 
+    newSptint.angleRotation = 0; // render at it's original oriantation.
+
     int id = 0;
     for (SprintBody s : aliveSprints) // founding new latest ID
     {

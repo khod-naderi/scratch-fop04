@@ -40,6 +40,6 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
             SPRINT_IMG_WITDH,
             SPRINT_IMG_HEIGHT,
         };
-        SDL_RenderCopy(renderer, thisSprint.nowCustome, NULL, &imageRect);
+        SDL_RenderCopyEx(renderer, thisSprint.nowCustome, NULL, &imageRect, thisSprint.angleRotation, NULL, SDL_FLIP_NONE);
     }
 }

@@ -23,6 +23,7 @@ struct SprintBody
     // SDL_Texture **allCustome // TODO: Add this later for multicostume sprints
     // unsigned int selectedCustome = 0;
     // int customeCount;
+    double angleRotation; // rotation of the sprint. ROTATION IS CLOCKWISE
 };
 
 // Sprint image dimenstion
