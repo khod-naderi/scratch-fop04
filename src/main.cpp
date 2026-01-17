@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
                 {
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
+                    controlBlockColumnClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEWHEEL)

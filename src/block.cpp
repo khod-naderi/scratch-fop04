@@ -182,3 +182,16 @@ void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sin
             scrollBlockColumnIndex = blocksScrollLimit;
     }
 }
+
+/*
+--------------------------------------------
+This function is for controling mouse button down on BLock columne
+--------------------------------------------
+- drag & drop
+*/
+void controlBlockColumnClickDown(const int mouseX, const int mouseY)
+{
+    // check if signal is about block columne
+    if (!isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
+        return;
+}
