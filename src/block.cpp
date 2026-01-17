@@ -194,4 +194,26 @@ void controlBlockColumnClickDown(const int mouseX, const int mouseY)
     // check if signal is about block columne
     if (!isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
         return;
+
+    const int heightFromOffset = mouseY - BLOCKS_COLUMN.y + scrollBlockColumnIndex; // This is distance from first offset of the blocks columne height
+
+    int blocksTotalHeight = 5, selectBlockIndex = -1;
+    for (int i = 0; i < BLOCKS_COUNT; i++)
+    {
+        if (blocksLibrary[i].categoryId == selectedCategoryId)
+        {
+            if (heightFromOffset >= blocksTotalHeight && heightFromOffset <= (blocksTotalHeight + blocksLibrary[i].height))
+            {
+                selectBlockIndex = i;
+                break;
+            }
+
+            blocksTotalHeight += blocksLibrary[i].height + 5;
+        }
+    }
+
+    if (selectBlockIndex == -1) // None of blocks selected
+        return;
+
+    std::cout << blocksLibrary[selectBlockIndex].label << std::endl;
 }
