@@ -274,13 +274,13 @@ This function is for controling mouse button up on BLock columne
 */
 void controlBlockColumnClickUp(const int mouseX, const int mouseY)
 {
-    // check if signal is about block columne
-    if (!isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
-        return;
-
-    // Cancel Drag process
-    if (isBLockDraged)
+    // check if signal is not about workspace
+    if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
     {
-        isBLockDraged = false;
+        // Cancel Drag process
+        if (isBLockDraged)
+        {
+            isBLockDraged = false;
+        }
     }
 }
