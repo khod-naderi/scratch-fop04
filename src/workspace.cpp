@@ -275,6 +275,34 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         }
     }
 
+    // Draw shadow for connecting moving string
+    if (isMovingItem)
+    {
+        int topItemId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
+        if (topItemId != -1) //  there is a near connectable item
+        {
+            int topItemIndex = foundItemIndexById(topItemId);
+
+            int totalHeight = 0;
+            for (int i : movingStringIndesis)
+            {
+                // Draw draged item centre on mouse pointer
+                SDL_Rect dragedItemRect = {
+                    WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX,
+                    WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight,
+                    blocksLibrary[i].width,
+                    blocksLibrary[i].height,
+                };
+
+                totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+
+                // Fill item background
+                SDL_SetRenderDrawColor(renderer, color_softGray);
+                SDL_RenderFillRect(renderer, &dragedItemRect);
+            }
+        }
+    }
+
     return;
 }
 
