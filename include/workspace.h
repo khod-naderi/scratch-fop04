@@ -26,6 +26,7 @@ struct CodeBlock
 extern std::vector<CodeBlock> activeCodeBlocks;
 
 void controlWorkspaceClickUp(const int mouseX, const int mouseY);
+void controlWorkspaceClickDown(const int mouseX, const int mouseY);
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 int workspaceScreenInit(SDL_Renderer *renderer, TTF_Font *font);
 

@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
+                    controlWorkspaceClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEBUTTONUP)

@@ -107,6 +107,20 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
     return;
 }
 
+/*
+--------------------------------------------
+This function is for controling mouse button down on WorkSpace
+--------------------------------------------
+- drag & drop
+- move items
+*/
+void controlWorkspaceClickDown(const int mouseX, const int mouseY)
+{
+    // check if signal is about workspace
+    if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
+        return;
+}
+
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
     for (CodeBlock item : activeCodeBlocks)
