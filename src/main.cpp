@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
                     controlBlockColumnClickUp(mouseX, mouseY);
+                    controlWorkspaceClickUp(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEWHEEL)
