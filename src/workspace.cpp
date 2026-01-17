@@ -32,6 +32,9 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 {
     for (CodeBlock item : activeCodeBlocks)
     {
+        if (item.bottomId != -1)
+            continue;
+
         const int blc_x = item.posX;
         const int blc_y = item.posY + blocksLibrary[item.blockMaster].height;
         if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
@@ -94,6 +97,8 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
             int topItemIndex = foundItemIndexById(newItem.topId);
             newItem.posX = activeCodeBlocks[topItemIndex].posX;
             newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height;
+
+            activeCodeBlocks[topItemIndex].bottomId = newItem.id;
         }
 
         activeCodeBlocks.push_back(newItem);
