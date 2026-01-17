@@ -24,7 +24,7 @@ const SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEF
 /*
     This function render text
 */
-SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color)
+SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color)
 {
     SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
     if (!surface)
@@ -37,7 +37,7 @@ SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text
 /*
     This function will check that a point is inside a rectangle or not
 */
-bool isPointInRect(int x, int y, SDL_Rect rect)
+bool isPointInRect(int x, int y, const SDL_Rect &rect)
 {
     return (x >= rect.x) && (x <= (rect.x + rect.w)) && (y >= rect.y) && (y <= (rect.y + rect.h));
 }
