@@ -149,7 +149,7 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             visibleBlockCount++;
 
             // Background
-            if (isPointInRect(mouseX, mouseY, itemRect))
+            if (!isBLockDraged && isPointInRect(mouseX, mouseY, itemRect))
             {
                 SDL_SetRenderDrawColor(renderer, colorDim(categories[blocksLibrary[i].categoryId].color));
             }
