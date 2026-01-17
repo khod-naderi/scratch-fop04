@@ -176,6 +176,37 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
         }
     }
     blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[BLOCKS_COUNT - 1].height);
+
+    // Draw draged block
+    if (isBLockDraged)
+    {
+        // Draw draged item centre on mouse pointer
+        SDL_Rect dragedItemRect = {
+            mouseX - blocksLibrary[dragedBlockIndex].width / 2,
+            mouseY - blocksLibrary[dragedBlockIndex].height / 2,
+            blocksLibrary[dragedBlockIndex].width,
+            blocksLibrary[dragedBlockIndex].height,
+        };
+
+        // Fill item background
+        SDL_SetRenderDrawColor(renderer, categories[blocksLibrary[dragedBlockIndex].categoryId].color);
+        SDL_RenderFillRect(renderer, &dragedItemRect);
+
+        // item border
+        SDL_SetRenderDrawColor(renderer, color_black);
+        SDL_RenderDrawRect(renderer, &dragedItemRect);
+
+        // item text
+        int tw, th;
+        SDL_QueryTexture(blocksLibrary[dragedBlockIndex].textrue, NULL, NULL, &tw, &th);
+        SDL_Rect textRect = {
+            dragedItemRect.x + (dragedItemRect.w - tw) / 2,
+            dragedItemRect.y + (dragedItemRect.h - th) / 2,
+            tw,
+            th,
+        };
+        SDL_RenderCopy(renderer, blocksLibrary[dragedBlockIndex].textrue, NULL, &textRect);
+    }
 }
 
 void controlBlockColumnMouseScroll(const int mouseX, const int mouseY, const Sint32 scrollY)
