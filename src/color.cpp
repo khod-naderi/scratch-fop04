@@ -4,7 +4,8 @@
 // Define color constants
 const SDL_Color color_white = {255, 255, 255, 255};
 const SDL_Color color_blue = {0, 0, 255, 255};
-const SDL_Color color_black = {0, 0, 0, 0};
+const SDL_Color color_black = {0, 0, 0, 255};
+const SDL_Color color_softGray = {192, 192, 192, 255};
 const SDL_Color color_menubarBackground = {55, 100, 255, 255};
 const SDL_Color color_hoveredMenuButton = {50, 50, 200, 255};
 const SDL_Color color_hoveredMenuOption = {200, 200, 200, 255};

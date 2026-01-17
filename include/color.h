@@ -16,6 +16,7 @@ inline int SDL_SetRenderDrawColor(SDL_Renderer *renderer, SDL_Color color)
 extern const SDL_Color color_white;
 extern const SDL_Color color_blue;
 extern const SDL_Color color_black;
+extern const SDL_Color color_softGray;
 
 extern const SDL_Color color_menubarBackground;
 extern const SDL_Color color_hoveredMenuButton;

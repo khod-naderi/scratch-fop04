@@ -140,6 +140,29 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         SDL_RenderCopy(renderer, blocksLibrary[item.blockMaster].textrue, NULL, &textRect);
     }
 
+    // Draw shadow for connecting draged item
+    if (isBLockDraged)
+    {
+        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].width / 2 - WORKSPACE_COLUMN.x;
+        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].height / 2 - WORKSPACE_COLUMN.y;
+
+        int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
+        if (nearItemIndex != -1) // there is a near connectable item
+        {
+            // Draw draged item centre on mouse pointer
+            SDL_Rect dragedItemRect = {
+                WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX,
+                WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height,
+                blocksLibrary[dragedBlockIndex].width,
+                blocksLibrary[dragedBlockIndex].height,
+            };
+
+            // Fill item background
+            SDL_SetRenderDrawColor(renderer, color_softGray);
+            SDL_RenderFillRect(renderer, &dragedItemRect);
+        }
+    }
+
     return;
 }
 
