@@ -103,6 +103,13 @@ int main(int argc, char *argv[])
                     controlBlockColumnClickDown(mouseX, mouseY);
                 }
             }
+            else if (eventSDL.type == SDL_MOUSEBUTTONUP)
+            {
+                if (eventSDL.button.button == SDL_BUTTON_LEFT)
+                {
+                    controlBlockColumnClickUp(mouseX, mouseY);
+                }
+            }
             else if (eventSDL.type == SDL_MOUSEWHEEL)
             {
                 int direction = -1;

@@ -12,7 +12,20 @@ And Ui part of Blocks list
 #include <iostream>
 #include <vector>
 
+/*
+--------------------------------
+ Scroll properties
+-------------------------------
+*/
 int scrollBlockColumnIndex = 0;
+
+/*
+--------------------------------
+ Drag & Drop properties
+-------------------------------
+*/
+bool isBLockDraged = false;
+int dragedBlockIndex;
 
 void CMD_Move10StepForward()
 {
@@ -215,5 +228,28 @@ void controlBlockColumnClickDown(const int mouseX, const int mouseY)
     if (selectBlockIndex == -1) // None of blocks selected
         return;
 
-    std::cout << blocksLibrary[selectBlockIndex].label << std::endl;
+    // std::cout << blocksLibrary[selectBlockIndex].label << std::endl;
+
+    // now an item is selected so we mentain it's drag routin
+    dragedBlockIndex = selectBlockIndex;
+    isBLockDraged = true;
+}
+
+/*
+--------------------------------------------
+This function is for controling mouse button up on BLock columne
+--------------------------------------------
+- drag & drop
+*/
+void controlBlockColumnClickUp(const int mouseX, const int mouseY)
+{
+    // check if signal is about block columne
+    if (!isPointInRect(mouseX, mouseY, BLOCKS_COLUMN))
+        return;
+
+    // Cancel Drag process
+    if (isBLockDraged)
+    {
+        isBLockDraged = false;
+    }
 }
