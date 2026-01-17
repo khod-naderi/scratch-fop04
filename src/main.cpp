@@ -9,6 +9,7 @@
 #include "ui.h"
 #include "canvas.h"
 #include "spritebox.h"
+#include "workspace.h"
 
 int main(int argc, char *argv[])
 {
@@ -63,6 +64,9 @@ int main(int argc, char *argv[])
     if (errcode != 0)
         return errcode;
     errcode = sprintBoxInit(renderer, font);
+    if (errcode != 0)
+        return errcode;
+    errcode = workspaceScreenInit(renderer, font);
     if (errcode != 0)
         return errcode;
 
@@ -135,12 +139,13 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, color_white);
         SDL_RenderClear(renderer);
 
-        // Draw Menu Bar
+        // Draw each part of screen
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
         drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
         drawCanvasScreen(renderer, font, mouseX, mouseY);
         drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
+        drawWorkspaceScreen(renderer, font, mouseX, mouseY);
 
         // show next frame
         SDL_RenderPresent(renderer);
