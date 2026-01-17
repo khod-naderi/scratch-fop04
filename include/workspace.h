@@ -21,6 +21,8 @@ struct CodeBlock
     int bottomId = -1; // bottom block id, -1 if not connected
 };
 
+#define CONNECTION_MINIMUM_DISTANCE 15
+
 extern std::vector<CodeBlock> activeCodeBlocks;
 
 void controlWorkspaceClickUp(const int mouseX, const int mouseY);

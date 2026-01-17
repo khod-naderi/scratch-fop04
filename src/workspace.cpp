@@ -10,9 +10,37 @@ This CPP file is for managing code view named workspace
 #include "color.h"
 #include "ui.h"
 #include "block.h"
+#include <cmath>
 
 std::vector<CodeBlock> activeCodeBlocks;
 int lastId = 0;
+
+/*
+-------------------------------
+This function check if any other item that does not have bottom connection is near the top this item.
+-------------------------------
+@input:
+TL: top left
+TL_X: x position of top left corner of this item (related to workspace cordinate).
+TL_Y: y position of top left corner of this item (related to workspace cordinate).
+@output:
+if yes, it's will return Id of that item,
+if not, it's will return -1
+*/
+int isItemNearTopToConnect(const int TL_X, const int TL_Y)
+{
+    for (CodeBlock item : activeCodeBlocks)
+    {
+        const int blc_x = item.posX;
+        const int blc_y = item.posY + blocksLibrary[item.blockMaster].height;
+        if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
+        {
+            return item.id;
+        }
+    }
+
+    return -1;
+}
 
 /*
 --------------------------------------------
