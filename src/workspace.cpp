@@ -11,6 +11,7 @@ This CPP file is for managing code view named workspace
 #include "ui.h"
 #include "block.h"
 #include <cmath>
+#include <iostream>
 
 std::vector<CodeBlock> activeCodeBlocks;
 int lastId = 0;
@@ -37,6 +38,23 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
         {
             return item.id;
         }
+    }
+
+    return -1;
+}
+
+/*
+-----------------------
+This function will search for item with specific id
+-----------------------
+return -1 if not found
+*/
+int foundItemIndexById(int id)
+{
+    for (int i = 0; i < activeCodeBlocks.size(); i++)
+    {
+        if (activeCodeBlocks[i].id == id)
+            return i;
     }
 
     return -1;
@@ -70,7 +88,13 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         newItem.blockMaster = dragedBlockIndex;
         newItem.id = lastId++;
         newItem.bottomId = -1;
-        newItem.topId = -1;
+        newItem.topId = isItemNearTopToConnect(newItem.posX, newItem.posY);
+        if (newItem.topId != -1) // connect Item to it's top item
+        {
+            int topItemIndex = foundItemIndexById(newItem.topId);
+            newItem.posX = activeCodeBlocks[topItemIndex].posX;
+            newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height;
+        }
 
         activeCodeBlocks.push_back(newItem);
     }
