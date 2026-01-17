@@ -47,6 +47,9 @@ extern std::vector<Block> blocksLibrary;
 
 extern int scrollBlockColumnIndex;
 
+extern bool isBLockDraged;
+extern int dragedBlockIndex;
+
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font);
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 void controlBlockColumnClickDown(const int mouseX, const int mouseY);
