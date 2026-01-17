@@ -21,6 +21,12 @@ bool isMovingItem = false;
 int movingTopSelectedItemIndex;
 std::vector<int> movingStringIndesis;
 
+// Scroll workspace properties
+bool isScrollingWorkspace = false;
+int mouseX0, mouseY0;
+int scrollOffsetX = 0;
+int scrollOffsetY = 0;
+
 /*
 -------------------------------
 This function check if any other item that does not have bottom connection is near the top this item.
@@ -81,8 +87,8 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         return;
 
     // relative position to workspace cordinate
-    const int relX = mouseX - WORKSPACE_COLUMN.x;
-    const int relY = mouseY - WORKSPACE_COLUMN.y;
+    const int relX = mouseX - WORKSPACE_COLUMN.x - scrollOffsetX;
+    const int relY = mouseY - WORKSPACE_COLUMN.y - scrollOffsetY;
 
     // Add draged item to screen
     if (isBLockDraged)
@@ -132,6 +138,11 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         movingTopSelectedItemIndex = -1;
     }
 
+    if (isScrollingWorkspace) // Disable Scrolling
+    {
+        isScrollingWorkspace = false;
+    }
+
     return;
 }
 
@@ -148,11 +159,12 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
     if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
         return;
 
+    bool isClickedOnItem = false;
     for (CodeBlock &item : activeCodeBlocks)
     {
         SDL_Rect itemRect = {
-            WORKSPACE_COLUMN.x + item.posX,
-            WORKSPACE_COLUMN.y + item.posY,
+            WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
+            WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
             blocksLibrary[item.blockMaster].width,
             blocksLibrary[item.blockMaster].height,
         };
@@ -160,6 +172,7 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
         if (isPointInRect(mouseX, mouseY, itemRect)) // found grabed item
         {
             isMovingItem = true;
+            isClickedOnItem = true;
             movingTopSelectedItemIndex = foundItemIndexById(item.id);
 
             // disconnect from it's top
@@ -182,6 +195,14 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
             break;
         }
     }
+
+    // Scroll workspace screen
+    if (!isClickedOnItem && !isScrollingWorkspace) // clicked on emtpy space
+    {
+        isScrollingWorkspace = true;
+        mouseX0 = mouseX;
+        mouseY0 = mouseY;
+    }
 }
 
 /*
@@ -201,8 +222,8 @@ void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
     if (isMovingItem)
     {
         // relative position to workspace cordinate
-        const int relX = mouseX - WORKSPACE_COLUMN.x;
-        const int relY = mouseY - WORKSPACE_COLUMN.y;
+        const int relX = mouseX - WORKSPACE_COLUMN.x - scrollOffsetX;
+        const int relY = mouseY - WORKSPACE_COLUMN.y - scrollOffsetY;
 
         int totalHeight = 0;
         for (int i : movingStringIndesis)
@@ -212,6 +233,14 @@ void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
             totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
         }
     }
+
+    if (isScrollingWorkspace)
+    {
+        scrollOffsetX += mouseX - mouseX0;
+        scrollOffsetY += mouseY - mouseY0;
+        mouseX0 = mouseX;
+        mouseY0 = mouseY;
+    }
 }
 
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
@@ -220,16 +249,16 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Draw shadow for connecting draged item
     if (isBLockDraged)
     {
-        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].width / 2 - WORKSPACE_COLUMN.x;
-        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].height / 2 - WORKSPACE_COLUMN.y;
+        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].width / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
+        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].height / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
 
         int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
         if (nearItemIndex != -1) // there is a near connectable item
         {
             // Draw draged item centre on mouse pointer
             SDL_Rect dragedItemRect = {
-                WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX,
-                WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height,
+                WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX + scrollOffsetX,
+                WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height + scrollOffsetY,
                 blocksLibrary[dragedBlockIndex].width,
                 blocksLibrary[dragedBlockIndex].height,
             };
@@ -253,8 +282,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             {
                 // Draw draged item centre on mouse pointer
                 SDL_Rect dragedItemRect = {
-                    WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX,
-                    WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight,
+                    WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX + scrollOffsetX,
+                    WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight + scrollOffsetY,
                     blocksLibrary[activeCodeBlocks[i].blockMaster].width,
                     blocksLibrary[activeCodeBlocks[i].blockMaster].height,
                 };
@@ -271,8 +300,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     for (const CodeBlock &item : activeCodeBlocks)
     {
         SDL_Rect itemRect = {
-            WORKSPACE_COLUMN.x + item.posX,
-            WORKSPACE_COLUMN.y + item.posY,
+            WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
+            WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
             blocksLibrary[item.blockMaster].width,
             blocksLibrary[item.blockMaster].height,
         };
