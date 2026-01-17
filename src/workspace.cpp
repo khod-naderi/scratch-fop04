@@ -16,6 +16,11 @@ This CPP file is for managing code view named workspace
 std::vector<CodeBlock> activeCodeBlocks;
 int lastId = 0;
 
+// moving items properties
+bool isMovingItem = false;
+int movingTopSelectedItemIndex;
+std::vector<int> movingStringIndesis;
+
 /*
 -------------------------------
 This function check if any other item that does not have bottom connection is near the top this item.
@@ -30,7 +35,7 @@ if not, it's will return -1
 */
 int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 {
-    for (CodeBlock item : activeCodeBlocks)
+    for (const CodeBlock &item : activeCodeBlocks)
     {
         if (item.bottomId != -1)
             continue;
@@ -104,6 +109,29 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         activeCodeBlocks.push_back(newItem);
     }
 
+    // fix moving string
+    if (isMovingItem)
+    {
+        activeCodeBlocks[movingTopSelectedItemIndex].topId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
+        if (activeCodeBlocks[movingTopSelectedItemIndex].topId != -1)
+        {
+            int topItemIndex = foundItemIndexById(activeCodeBlocks[movingTopSelectedItemIndex].topId);
+            activeCodeBlocks[topItemIndex].bottomId = activeCodeBlocks[movingTopSelectedItemIndex].id;
+
+            int totalHeight = 0;
+            for (int i : movingStringIndesis)
+            {
+                activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
+                activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight;
+                totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+            }
+        }
+
+        isMovingItem = false;
+        movingStringIndesis.clear();
+        movingTopSelectedItemIndex = -1;
+    }
+
     return;
 }
 
@@ -119,11 +147,76 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
     // check if signal is about workspace
     if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
         return;
+
+    for (CodeBlock &item : activeCodeBlocks)
+    {
+        SDL_Rect itemRect = {
+            WORKSPACE_COLUMN.x + item.posX,
+            WORKSPACE_COLUMN.y + item.posY,
+            blocksLibrary[item.blockMaster].width,
+            blocksLibrary[item.blockMaster].height,
+        };
+
+        if (isPointInRect(mouseX, mouseY, itemRect)) // found grabed item
+        {
+            isMovingItem = true;
+            movingTopSelectedItemIndex = foundItemIndexById(item.id);
+
+            // disconnect from it's top
+            int itemTopIndex = foundItemIndexById(item.topId);
+            if (itemTopIndex != -1)
+                activeCodeBlocks[itemTopIndex].bottomId = -1;
+            item.topId = -1;
+
+            // found moving string
+            movingStringIndesis.clear();
+            movingStringIndesis.push_back(movingTopSelectedItemIndex);
+            for (int i = movingTopSelectedItemIndex;;)
+            {
+                i = foundItemIndexById(activeCodeBlocks[i].bottomId);
+                if (i == -1)
+                    break;
+                movingStringIndesis.push_back(i);
+            }
+
+            break;
+        }
+    }
+}
+
+/*
+--------------------------------------------
+This function is for controling mouse motion on WorkSpace
+--------------------------------------------
+
+- move items
+*/
+void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
+{
+    // check if signal is about workspace
+    if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
+        return;
+
+    // update moving string
+    if (isMovingItem)
+    {
+        // relative position to workspace cordinate
+        const int relX = mouseX - WORKSPACE_COLUMN.x;
+        const int relY = mouseY - WORKSPACE_COLUMN.y;
+
+        int totalHeight = 0;
+        for (int i : movingStringIndesis)
+        {
+            activeCodeBlocks[i].posX = relX - blocksLibrary[dragedBlockIndex].width / 2;
+            activeCodeBlocks[i].posY = relY - blocksLibrary[dragedBlockIndex].height / 2 + totalHeight;
+            totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+        }
+    }
 }
 
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
-    for (CodeBlock item : activeCodeBlocks)
+    for (const CodeBlock &item : activeCodeBlocks)
     {
         SDL_Rect itemRect = {
             WORKSPACE_COLUMN.x + item.posX,

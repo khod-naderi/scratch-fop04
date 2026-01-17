@@ -29,5 +29,6 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY);
 void controlWorkspaceClickDown(const int mouseX, const int mouseY);
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 int workspaceScreenInit(SDL_Renderer *renderer, TTF_Font *font);
+void controlWorkspaceMouseMotion(const int mouseX, const int mouseY);
 
 #endif

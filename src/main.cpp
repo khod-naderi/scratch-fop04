@@ -98,6 +98,10 @@ int main(int argc, char *argv[])
             {
                 running = SDL_FALSE;
             }
+            else if (eventSDL.type == SDL_MOUSEMOTION)
+            {
+                controlWorkspaceMouseMotion(mouseX, mouseY);
+            }
             else if (eventSDL.type == SDL_MOUSEBUTTONDOWN)
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
