@@ -12,6 +12,7 @@ This CPP file is for managing code view named workspace
 #include "block.h"
 
 std::vector<CodeBlock> activeCodeBlocks;
+int lastId = 0;
 
 /*
 --------------------------------------------
@@ -21,6 +22,31 @@ This function is for controling mouse button up on WorkSpace
 */
 void controlWorkspaceClickUp(const int mouseX, const int mouseY)
 {
+    // check if signal is about workspace
+    if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
+        return;
+
+    // relative position to workspace cordinate
+    const int relX = mouseX - WORKSPACE_COLUMN.x;
+    const int relY = mouseY - WORKSPACE_COLUMN.y;
+
+    // Add draged item to screen
+    if (isBLockDraged)
+    {
+        isBLockDraged = false;
+
+        // Create new item
+        CodeBlock newItem;
+        newItem.posX = relX - blocksLibrary[dragedBlockIndex].width / 2;
+        newItem.posY = relY - blocksLibrary[dragedBlockIndex].height / 2;
+        newItem.blockMaster = dragedBlockIndex;
+        newItem.id = lastId++;
+        newItem.bottomId = -1;
+        newItem.topId = -1;
+
+        activeCodeBlocks.push_back(newItem);
+    }
+
     return;
 }
 
@@ -29,8 +55,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     for (CodeBlock item : activeCodeBlocks)
     {
         SDL_Rect itemRect = {
-            item.posX,
-            item.posY,
+            WORKSPACE_COLUMN.x + item.posX,
+            WORKSPACE_COLUMN.y + item.posY,
             blocksLibrary[item.blockMaster].width,
             blocksLibrary[item.blockMaster].height,
         };
