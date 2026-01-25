@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
+                    controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
@@ -155,11 +156,11 @@ int main(int argc, char *argv[])
         drawMenubar(renderer, font, mouseX, mouseY);
         if (isOnLoadScreen)
         {
-            drawLoadScreen();
+            drawLoadScreen(renderer, font, mouseX, mouseY);
         }
         else if (isOnSaveScreen)
         {
-            drawSaveScreen();
+            drawSaveScreen(renderer, font, mouseX, mouseY);
         }
 
         // show next frame

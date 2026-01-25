@@ -20,12 +20,14 @@ This header file is for handling UI component
 
 #define SCROLL_Y_SENSIVITY 5
 
+extern const SDL_Rect SCREEN;
 extern const SDL_Rect MENUBAR_ROW;
 extern const SDL_Rect CATEGORY_COLUMN;
 extern const SDL_Rect BLOCKS_COLUMN;
 extern const SDL_Rect WORKSPACE_COLUMN;
 extern const SDL_Rect CANVAS_BOX;
 extern const SDL_Rect SPRITE_BOX;
+extern const SDL_Rect SAVELOAD_BOX;
 
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color);
 SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath);
