@@ -10,6 +10,7 @@
 #include "canvas.h"
 #include "spritebox.h"
 #include "workspace.h"
+#include "saveload.h"
 
 int main(int argc, char *argv[])
 {
@@ -152,6 +153,14 @@ int main(int argc, char *argv[])
         drawCanvasScreen(renderer, font, mouseX, mouseY);
         drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
+        if (isOnLoadScreen)
+        {
+            drawLoadScreen();
+        }
+        else if (isOnSaveScreen)
+        {
+            drawSaveScreen();
+        }
 
         // show next frame
         SDL_RenderPresent(renderer);

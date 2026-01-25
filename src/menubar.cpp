@@ -6,8 +6,19 @@
 #include "color.h"
 #include "generaldef.h"
 #include <iostream>
+#include "saveload.h"
 
 // Define menu items
+enum fileMenuBtn
+{
+    MN_NEW_PROJECT,
+    MN_LOAD_PROJECT,
+    MN_SAVE_PROJECT,
+};
+enum editMenuBtn
+{
+    MN_HELP,
+};
 const char *fileMenuItems[] = {"New Project", "Load Project", "Save Project"};
 const int fileMenuItemsCount = 3;
 const char *editMenuItems[] = {"Help"};
@@ -261,10 +272,20 @@ void controlMenubarClickDown(const int mouseX, const int mouseY)
             int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
             if (itemIndex >= 0 && itemIndex < fileMenuItemsCount)
             {
-#ifdef DEBUG_MODE
-                std::cout << "Clicked: " << fileMenuItems[itemIndex] << std::endl;
-#endif
-
+                switch (itemIndex)
+                {
+                case MN_NEW_PROJECT:
+                    newProject();
+                    break;
+                case MN_SAVE_PROJECT:
+                    isOnSaveScreen = true;
+                    break;
+                case MN_LOAD_PROJECT:
+                    isOnLoadScreen = true;
+                    break;
+                default:
+                    break;
+                }
                 menuState.isfileMenuOpen = false;
             }
         }
@@ -283,9 +304,14 @@ void controlMenubarClickDown(const int mouseX, const int mouseY)
             int itemIndex = (mouseY - MENUBAR_HEIGHT) / MENU_DROPDOX_ITEM_HEIGHT;
             if (itemIndex >= 0 && itemIndex < editMenuItemsCount)
             {
-#ifdef DEBUG_MODE
-                std::cout << "Clicked: " << editMenuItems[itemIndex] << std::endl;
-#endif
+                switch (itemIndex)
+                {
+                case MN_HELP:
+                    break;
+
+                default:
+                    break;
+                }
                 menuState.iseditMenuOpen = false;
             }
         }
