@@ -43,7 +43,7 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 {
     for (const CodeBlock &item : activeCodeBlocks)
     {
-        if (item.bottomId != -1)
+        if (item.bottomId != -1 || !blocksLibrary[item.blockMaster].canHaveBottomConnection)
             continue;
 
         const int blc_x = item.posX;
@@ -102,14 +102,17 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         newItem.blockMaster = dragedBlockIndex;
         newItem.id = lastId++;
         newItem.bottomId = -1;
-        newItem.topId = isItemNearTopToConnect(newItem.posX, newItem.posY);
-        if (newItem.topId != -1) // connect Item to it's top item
+        if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
         {
-            int topItemIndex = foundItemIndexById(newItem.topId);
-            newItem.posX = activeCodeBlocks[topItemIndex].posX;
-            newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height;
+            newItem.topId = isItemNearTopToConnect(newItem.posX, newItem.posY);
+            if (newItem.topId != -1) // connect Item to it's top item
+            {
+                int topItemIndex = foundItemIndexById(newItem.topId);
+                newItem.posX = activeCodeBlocks[topItemIndex].posX;
+                newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height;
 
-            activeCodeBlocks[topItemIndex].bottomId = newItem.id;
+                activeCodeBlocks[topItemIndex].bottomId = newItem.id;
+            }
         }
 
         activeCodeBlocks.push_back(newItem);
@@ -118,18 +121,21 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
     // fix moving string
     if (isMovingItem)
     {
-        activeCodeBlocks[movingTopSelectedItemIndex].topId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
-        if (activeCodeBlocks[movingTopSelectedItemIndex].topId != -1)
+        if (blocksLibrary[activeCodeBlocks[movingTopSelectedItemIndex].blockMaster].canHaveTopConnection)
         {
-            int topItemIndex = foundItemIndexById(activeCodeBlocks[movingTopSelectedItemIndex].topId);
-            activeCodeBlocks[topItemIndex].bottomId = activeCodeBlocks[movingTopSelectedItemIndex].id;
-
-            int totalHeight = 0;
-            for (int i : movingStringIndesis)
+            activeCodeBlocks[movingTopSelectedItemIndex].topId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
+            if (activeCodeBlocks[movingTopSelectedItemIndex].topId != -1)
             {
-                activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
-                activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight;
-                totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+                int topItemIndex = foundItemIndexById(activeCodeBlocks[movingTopSelectedItemIndex].topId);
+                activeCodeBlocks[topItemIndex].bottomId = activeCodeBlocks[movingTopSelectedItemIndex].id;
+
+                int totalHeight = 0;
+                for (int i : movingStringIndesis)
+                {
+                    activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
+                    activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight;
+                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+                }
             }
         }
 
@@ -252,47 +258,53 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].width / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
         const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].height / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
 
-        int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
-        if (nearItemIndex != -1) // there is a near connectable item
+        if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
         {
-            // Draw draged item centre on mouse pointer
-            SDL_Rect dragedItemRect = {
-                WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX + scrollOffsetX,
-                WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height + scrollOffsetY,
-                blocksLibrary[dragedBlockIndex].width,
-                blocksLibrary[dragedBlockIndex].height,
-            };
+            int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
+            if (nearItemIndex != -1) // there is a near connectable item
+            {
+                // Draw draged item centre on mouse pointer
+                SDL_Rect dragedItemRect = {
+                    WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX + scrollOffsetX,
+                    WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height + scrollOffsetY,
+                    blocksLibrary[dragedBlockIndex].width,
+                    blocksLibrary[dragedBlockIndex].height,
+                };
 
-            // Fill item background
-            SDL_SetRenderDrawColor(renderer, color_softGray);
-            SDL_RenderFillRect(renderer, &dragedItemRect);
+                // Fill item background
+                SDL_SetRenderDrawColor(renderer, color_softGray);
+                SDL_RenderFillRect(renderer, &dragedItemRect);
+            }
         }
     }
 
     // Draw shadow for connecting moving string
     if (isMovingItem)
     {
-        int topItemId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
-        if (topItemId != -1) //  there is a near connectable item
+        if (blocksLibrary[activeCodeBlocks[movingTopSelectedItemIndex].blockMaster].canHaveTopConnection)
         {
-            int topItemIndex = foundItemIndexById(topItemId);
-
-            int totalHeight = 0;
-            for (int i : movingStringIndesis)
+            int topItemId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
+            if (topItemId != -1) //  there is a near connectable item
             {
-                // Draw draged item centre on mouse pointer
-                SDL_Rect dragedItemRect = {
-                    WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX + scrollOffsetX,
-                    WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight + scrollOffsetY,
-                    blocksLibrary[activeCodeBlocks[i].blockMaster].width,
-                    blocksLibrary[activeCodeBlocks[i].blockMaster].height,
-                };
+                int topItemIndex = foundItemIndexById(topItemId);
 
-                totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+                int totalHeight = 0;
+                for (int i : movingStringIndesis)
+                {
+                    // Draw draged item centre on mouse pointer
+                    SDL_Rect dragedItemRect = {
+                        WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX + scrollOffsetX,
+                        WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight + scrollOffsetY,
+                        blocksLibrary[activeCodeBlocks[i].blockMaster].width,
+                        blocksLibrary[activeCodeBlocks[i].blockMaster].height,
+                    };
 
-                // Fill item background
-                SDL_SetRenderDrawColor(renderer, color_softGray);
-                SDL_RenderFillRect(renderer, &dragedItemRect);
+                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+
+                    // Fill item background
+                    SDL_SetRenderDrawColor(renderer, color_softGray);
+                    SDL_RenderFillRect(renderer, &dragedItemRect);
+                }
             }
         }
     }

@@ -32,12 +32,16 @@ struct Block
     int width, height;
     SDL_Texture *textrue;
 
-    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type, void (*command)())
-        : label(f_label), categoryId(f_categoryId), type(f_type), command(command)
+    // for connection in workspace
+    const bool canHaveTopConnection;
+    const bool canHaveBottomConnection;
+
+    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection, void (*command)())
+        : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection), command(command)
     {
     }
-    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type)
-        : label(f_label), categoryId(f_categoryId), type(f_type)
+    Block(const char *f_label, const CATEGORY_ID f_categoryId, const block_t f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection)
+        : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection)
     {
     }
 };
