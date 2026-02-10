@@ -28,7 +28,8 @@ if(WIN32)
         SDL2_image::SDL2_image
         SDL2_ttf::SDL2_ttf
     )
-else()
+elseif(APPLE)
+    # macOS configuration
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL2 REQUIRED sdl2)
     pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
@@ -39,6 +40,47 @@ else()
         ${SDL2_IMAGE_INCLUDE_DIRS}
         ${SDL2_TTF_INCLUDE_DIRS}
     )
+
+    # Add library directories for macOS (important for Homebrew)
+    target_link_directories(scratch PRIVATE
+        ${SDL2_LIBRARY_DIRS}
+        ${SDL2_IMAGE_LIBRARY_DIRS}
+        ${SDL2_TTF_LIBRARY_DIRS}
+    )
+
+    target_link_libraries(scratch PRIVATE 
+        ${SDL2_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
+    )
+
+    # macOS frameworks that SDL2 depends on
+    target_link_libraries(scratch PRIVATE
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+        "-framework CoreAudio"
+        "-framework AudioToolbox"
+    )
+else()
+    # Linux configuration
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SDL2 REQUIRED sdl2)
+    pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
+    pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+
+    target_include_directories(scratch PRIVATE 
+        ${SDL2_INCLUDE_DIRS}
+        ${SDL2_IMAGE_INCLUDE_DIRS}
+        ${SDL2_TTF_INCLUDE_DIRS}
+    )
+
+    target_link_directories(scratch PRIVATE
+        ${SDL2_LIBRARY_DIRS}
+        ${SDL2_IMAGE_LIBRARY_DIRS}
+        ${SDL2_TTF_LIBRARY_DIRS}
+    )
+
     target_link_libraries(scratch PRIVATE 
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
