@@ -8,8 +8,35 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.h")
 
-# Create executable
-add_executable(scratch ${SOURCES} ${HEADERS})
+# Platform-specific icon and executable setup
+if(WIN32)
+    # Windows: Add resource file for icon
+    set(APP_ICON_RESOURCE "${CMAKE_SOURCE_DIR}/resources/app.rc")
+    add_executable(scratch WIN32 ${SOURCES} ${HEADERS} ${APP_ICON_RESOURCE})
+
+elseif(APPLE)
+    # macOS: Create app bundle with icon
+    set(MACOSX_BUNDLE_ICON_FILE icon.icns)
+    set(APP_ICON_MACOS "${CMAKE_SOURCE_DIR}/assets/icons/icon.icns")
+    set_source_files_properties(${APP_ICON_MACOS} PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+
+    add_executable(scratch MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${APP_ICON_MACOS})
+
+    set_target_properties(scratch PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_BUNDLE_NAME "Scratch"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_EXECUTABLE_NAME "scratch"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/resources/Info.plist.in"
+    )
+
+else()
+    # Linux: Regular executable (icons handled by .desktop file)
+    add_executable(scratch ${SOURCES} ${HEADERS})
+endif()
 
 # Include directories
 target_include_directories(scratch PRIVATE 
@@ -41,7 +68,6 @@ elseif(APPLE)
         ${SDL2_TTF_INCLUDE_DIRS}
     )
 
-    # Add library directories for macOS (important for Homebrew)
     target_link_directories(scratch PRIVATE
         ${SDL2_LIBRARY_DIRS}
         ${SDL2_IMAGE_LIBRARY_DIRS}
@@ -54,7 +80,6 @@ elseif(APPLE)
         ${SDL2_TTF_LIBRARIES}
     )
 
-    # macOS frameworks that SDL2 depends on
     target_link_libraries(scratch PRIVATE
         "-framework Cocoa"
         "-framework IOKit"
@@ -90,6 +115,22 @@ endif()
 
 # Copy assets to build directory
 if(EXISTS ${CMAKE_SOURCE_DIR}/assets)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets 
-         DESTINATION ${CMAKE_BINARY_DIR})
+    if(APPLE)
+        # For macOS bundle, copy to Resources folder
+        file(COPY ${CMAKE_SOURCE_DIR}/assets 
+             DESTINATION ${CMAKE_BINARY_DIR}/scratch.app/Contents/Resources)
+    else()
+        file(COPY ${CMAKE_SOURCE_DIR}/assets 
+             DESTINATION ${CMAKE_BINARY_DIR})
+    endif()
+endif()
+
+# Linux: Install .desktop file and icon (optional, for system installation)
+if(UNIX AND NOT APPLE)
+    install(TARGETS scratch DESTINATION bin)
+    install(FILES ${CMAKE_SOURCE_DIR}/assets/icons/icon.png
+            DESTINATION share/icons/hicolor/256x256/apps
+            RENAME scratch.png)
+    install(FILES ${CMAKE_SOURCE_DIR}/resources/scratch.desktop
+            DESTINATION share/applications)
 endif()
