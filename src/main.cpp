@@ -71,6 +71,22 @@ int main(int argc, char *argv[])
     if (errcode != 0)
         return errcode;
 
+    /*
+    -------------------------------------
+    Set window icon
+    -------------------------------------
+    */
+    SDL_Surface *appIconSurface = IMG_Load("assets/icons/icon.png");
+    if (appIconSurface)
+    {
+        SDL_SetWindowIcon(window, appIconSurface);
+        SDL_FreeSurface(appIconSurface);
+    }
+    else
+    {
+        std::cout << "[Warning] window app icon load error: " << SDL_GetError() << std::endl;
+    }
+
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
     SDL_Event eventSDL;
