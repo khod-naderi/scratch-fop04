@@ -13,12 +13,16 @@ This header file is for handling block category column
 
 extern int selectedCategoryId;
 
-enum CATEGORY_ID
+enum CategoryId
 {
     CATEGORY_EVENT,
     CATEGORY_CONTROL,
     CATEGORY_MOTION,
     CATEGORY_SOUND,
+    CATEGORY_LOOKS,
+    CATEGORY_CONTROL,
+    CATEGORY_OPERATOR,
+    CATEGORY_VARIABLES,
 };
 
 struct Category
