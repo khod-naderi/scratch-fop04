@@ -71,6 +71,20 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Draw border of Canvas
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &SPRITE_BOX);
+
+    // Top bar of Sprite box 
+    SDL_Rect tobBar = { SPRITE_BOX.x, SPRITE_BOX.y, SPRITE_BOX.w, 100 };
+    SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
+    SDL_RenderFillRect(renderer, &tobBar);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &tobBar);
+
+    // Sprite Area
+    SDL_Rect spriteArea = { SPRITE_BOX.x, tobBar.y + tobBar.h, SPRITE_BOX.w, SPRITE_BOX.h - tobBar.h };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &spriteArea);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &spriteArea);
 }
 
 /*
