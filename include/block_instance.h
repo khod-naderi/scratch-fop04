@@ -43,4 +43,7 @@ struct BlockInstance
     int cachedWidth, cachedHeight;
 };
 
+void blockInstanceConstruct(BlockInstance &inst);
+void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int instanceId, int posX, int posY);
+
 #endif
