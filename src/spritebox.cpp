@@ -110,6 +110,9 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         // if hovering 
         bool ishovered = ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
                            mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h);
+
+        // if selected
+        bool isSelected = ( SelectedSpriteID == sprite.id );                   
         
         // background color 
         SDL_SetRenderDrawColor( renderer , 230, 230, 230, 255);
@@ -125,18 +128,35 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             SDL_RenderFillRect(renderer, &thumbRect);
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
         }
+
         // Draw border
         SDL_SetRenderDrawColor(renderer, color_black);
         SDL_RenderDrawRect(renderer, &thumbRect);
 
-        // hovering border
+        // hovering border & selected border
         if (ishovered) {
-            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // blue
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // blue = for hovered sprite
+            SDL_RenderDrawRect(renderer, &thumbRect);
         } 
+        else if ( isSelected ) {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0 , 255); // color = red for selected sprite
+
+            // Drawin a thick border for selected sprite
+            SDL_Rect border1 = thumbRect;
+            SDL_RenderDrawRect(renderer, &border1);
+            SDL_Rect border2 = { thumbRect.x - 1, thumbRect.y - 1, thumbRect.w + 2, thumbRect.h + 2 };
+            SDL_RenderDrawRect(renderer, &border2);
+            SDL_Rect border3 = { thumbRect.x - 2, thumbRect.y - 2, thumbRect.w + 4, thumbRect.h + 4 };
+            SDL_RenderDrawRect(renderer, &border3);
+            SDL_Rect border4 = { thumbRect.x - 3, thumbRect.y - 3, thumbRect.w + 6, thumbRect.h + 6 };
+            SDL_RenderDrawRect(renderer, &border4);
+            SDL_Rect border5 = { thumbRect.x - 4, thumbRect.y - 4, thumbRect.w + 8, thumbRect.h + 8 };
+            SDL_RenderDrawRect(renderer, &border5); 
+        }
         else {
             SDL_SetRenderDrawColor(renderer, color_black);
+            SDL_RenderDrawRect(renderer, &thumbRect);
         }
-        SDL_RenderDrawRect(renderer, &thumbRect);
 
         // drawing sprite name 
         SDL_Color textColor = color_black;
@@ -152,6 +172,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         SDL_FreeSurface(textSurface);
         SDL_DestroyTexture(textTexture);
+
     }
 }
 
