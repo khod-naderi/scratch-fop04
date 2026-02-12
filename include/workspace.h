@@ -35,4 +35,10 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 int workspaceScreenInit(SDL_Renderer *renderer, TTF_Font *font);
 void controlWorkspaceMouseMotion(const int mouseX, const int mouseY);
 
+BlockInstance *findBlockInstanceById(int id);
+int createBlockInstanceInWorkspace(int definitionId, int posX, int posY);
+void attachBlocksSequentially(int topId, int bottomId);
+void detachBlockFromWorkspace(int id);
+void removeBlockFromWorkspace(int id);
+
 #endif

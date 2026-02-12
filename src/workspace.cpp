@@ -171,26 +171,39 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         activeCodeBlocks.push_back(newItem);
     }
 
-    // fix moving string
+    // fix moving string - handle both new and legacy systems
     if (isMovingItem)
     {
-        if (blocksLibrary[activeCodeBlocks[movingTopSelectedItemIndex].blockMaster].canHaveTopConnection)
+        // Handle legacy CodeBlock system
+        if (movingTopSelectedItemIndex != -1 && movingTopSelectedItemIndex < activeCodeBlocks.size())
         {
-            activeCodeBlocks[movingTopSelectedItemIndex].topId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
-            if (activeCodeBlocks[movingTopSelectedItemIndex].topId != -1)
+            if (blocksLibrary[activeCodeBlocks[movingTopSelectedItemIndex].blockMaster].canHaveTopConnection)
             {
-                int topItemIndex = foundItemIndexById(activeCodeBlocks[movingTopSelectedItemIndex].topId);
-                activeCodeBlocks[topItemIndex].bottomId = activeCodeBlocks[movingTopSelectedItemIndex].id;
-
-                int totalHeight = 0;
-                for (int i : movingStringIndesis)
+                activeCodeBlocks[movingTopSelectedItemIndex].topId = isItemNearTopToConnect(activeCodeBlocks[movingTopSelectedItemIndex].posX, activeCodeBlocks[movingTopSelectedItemIndex].posY);
+                if (activeCodeBlocks[movingTopSelectedItemIndex].topId != -1)
                 {
-                    activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
-                    activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight + totalHeight;
-                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
+                    int topItemIndex = foundItemIndexById(activeCodeBlocks[movingTopSelectedItemIndex].topId);
+                    if (topItemIndex != -1)
+                    {
+                        activeCodeBlocks[topItemIndex].bottomId = activeCodeBlocks[movingTopSelectedItemIndex].id;
+
+                        int totalHeight = 0;
+                        for (int i : movingStringIndesis)
+                        {
+                            if (i < activeCodeBlocks.size())
+                            {
+                                activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
+                                activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight + totalHeight;
+                                totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        // TODO: Handle BlockInstance system moving and reconnection
+        // For now, BlockInstances are detached when moved and need manual reconnection
 
         isMovingItem = false;
         movingStringIndesis.clear();
@@ -487,4 +500,24 @@ int workspaceScreenInit(SDL_Renderer *renderer, TTF_Font *font)
     // Initialize the new CodeSpace system
     codespaceInit(workspaceCodeSpace);
     return 0;
+}
+
+int createBlockInstanceInWorkspace(int definitionId, int posX, int posY)
+{
+    return codespaceCreateInstance(workspaceCodeSpace, definitionId, posX, posY);
+}
+
+void attachBlocksSequentially(int topId, int bottomId)
+{
+    codespaceAttachNext(workspaceCodeSpace, topId, bottomId);
+}
+
+void detachBlockFromWorkspace(int id)
+{
+    codespaceDetach(workspaceCodeSpace, id);
+}
+
+void removeBlockFromWorkspace(int id)
+{
+    codespaceRemoveInstance(workspaceCodeSpace, id);
 }
