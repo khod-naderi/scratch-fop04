@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
-                    controlBlockColumnClickDown(mouseX, mouseY);
+                    // controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
                 }
             }
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
-                    controlBlockColumnClickUp(mouseX, mouseY);
+                    // controlBlockColumnClickUp(mouseX, mouseY);
                     controlWorkspaceClickUp(mouseX, mouseY);
                 }
             }
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
         drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
         drawCanvasScreen(renderer, font, mouseX, mouseY);
-        drawBlockColumn(renderer, font, mouseX, mouseY);
+        // drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
         if (isOnLoadScreen)
         {

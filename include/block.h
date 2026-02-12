@@ -4,6 +4,7 @@
 #include <SDL2/SDL_ttf.h>
 #include "category.h"
 #include <vector>
+
 #include "value.h"
 
 /*
@@ -69,8 +70,8 @@ struct Block
 
     // Old method
     // // void (*command)();
-    int width, height;
-    SDL_Texture *textrue;
+    // int width, height;
+    // SDL_Texture *textrue;
 
     // shape and connecting
     const bool canHaveTopConnection;
@@ -83,18 +84,26 @@ struct Block
     // base rendering dimension
     int baseWidth, baseHeight;
 
-    Block(const char *f_label, const CategoryId f_categoryId, const BlockType f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection, BlockExecuteFunc command)
-        : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection), execute(command)
-    {
-    }
-    Block(const char *f_label, const CategoryId f_categoryId, const BlockType f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection)
-        : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection)
-    {
-    }
+    // Block(const char *f_label, const CategoryId f_categoryId, const BlockType f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection, BlockExecuteFunc command)
+    //     : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection), execute(command)
+    // {
+    // }
+    // Block(const char *f_label, const CategoryId f_categoryId, const BlockType f_type, const bool f_canHaveTopConnection, const bool f_canHaveBottomConnection)
+    //     : label(f_label), categoryId(f_categoryId), type(f_type), canHaveTopConnection(f_canHaveTopConnection), canHaveBottomConnection(f_canHaveBottomConnection)
+    // {
+    // }
+    // Block(int id_f, const char *lbl, CategoryId cgi, BlockType bt, SlotDefinition sld[], int slc, ValueType ovt, bool chtc, bool chbc, int bc, BlockExecuteFunc exec, int w, int h)
+    //     : id(id_f), label(lbl), categoryId(cgi), type(bt), outputType(ovt), slotCount(slc), canHaveTopConnection(chtc), canHaveBottomConnection(chbc), execute(exec), baseWidth(w), baseHeight(h)
+    // {
+    //     for (int i = 0; i < slc; i++)
+    //     {
+    //         slots[i] = sld[i];
+    //     }
+    // }
 };
 
-extern std::vector<Block> blocksLibrary;
-#define BLOCKS_COUNT (blocksLibrary.size())
+// extern std::vector<Block> blocksLibrary;
+// #define BLOCKS_COUNT (blocksLibrary.size())
 
 extern int scrollBlockColumnIndex;
 
