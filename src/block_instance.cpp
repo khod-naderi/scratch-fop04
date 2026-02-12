@@ -1,4 +1,5 @@
 #include "block_instance.h"
+#include "blocks_library.h"
 
 /*
 -------------------------------

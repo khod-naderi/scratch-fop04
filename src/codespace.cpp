@@ -1,6 +1,7 @@
 #include "codespace.h"
 #include "block_instance.h"
 #include "block.h"
+#include "blocks_library.h"
 /*
 To initialize an empty codespace
 */
