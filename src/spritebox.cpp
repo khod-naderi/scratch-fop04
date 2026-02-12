@@ -19,6 +19,121 @@ int SelectedSpriteID = -1;
 
 /*
 -------------------------------------------------
+This function is for adding and initializeing top bar of sprite box
+this function will run only one time.
+-------------------------------------------------
+*/
+
+void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar) {
+    SDL_Color textColor = color_black;
+
+    // 1. drawing "Sprite Label" text on top bar
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, "Sprite: ", textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+    int labelX = topBar.x + 20; 
+    int labelY = topBar.y + 20;
+
+    SDL_Rect labelRect = {labelX, labelY, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &labelRect);
+
+    // drawing a white rectangle for showing selected sprite name
+    SDL_Rect nameBox = { labelRect.x + labelRect.w , labelRect.y - 5, 130, 30 };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &nameBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &nameBox);
+
+    // 2. drawing X position 
+    int xLabelX = labelX + textSurface->w + 10 + 150 + 20;
+    int xLabelY = labelY;
+
+    SDL_Surface* xLabelSurface = TTF_RenderText_Solid(font, "x ", textColor);
+    SDL_Texture* xLabelTexture = SDL_CreateTextureFromSurface(renderer, xLabelSurface);
+    SDL_Rect xLabelRect = {xLabelX, xLabelY, xLabelSurface->w, xLabelSurface->h};
+    SDL_RenderCopy(renderer, xLabelTexture, nullptr, &xLabelRect);
+
+    // X box
+    SDL_Rect xBox = { xLabelRect.x + xLabelRect.w + 10 , xLabelRect.y - 6, 50, 30 };
+    SDL_SetRenderDrawColor ( renderer, color_white);
+    SDL_RenderFillRect(renderer, &xBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &xBox);
+
+    // 3. drawing Y position
+    int yLabelX = xBox.x + xBox.w + 20;
+    int yLabelY = labelY;
+    SDL_Surface* yLabelSurface = TTF_RenderText_Solid(font, "y ", textColor);
+    SDL_Texture* yLabelTexture = SDL_CreateTextureFromSurface(renderer, yLabelSurface);
+    SDL_Rect yLabelRect = {yLabelX, yLabelY, yLabelSurface->w, yLabelSurface->h};
+    SDL_RenderCopy(renderer, yLabelTexture, nullptr, &yLabelRect);
+    
+    // Y box 
+    SDL_Rect yBox = { yLabelRect.x + yLabelRect.w + 10 , yLabelRect.y - 6, 50, 30 };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &yBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &yBox);
+
+    // 4. visibility box 
+    int showLabelX = topBar.x + 20;
+    int showLabelY = labelY + 50;
+
+    SDL_Surface* showLabelSurface = TTF_RenderText_Solid(font, "Visibility", textColor);
+    SDL_Texture* showLabelTexture = SDL_CreateTextureFromSurface(renderer, showLabelSurface);
+    SDL_Rect showLabelRect = {showLabelX, showLabelY, showLabelSurface->w, showLabelSurface->h};
+    SDL_RenderCopy(renderer, showLabelTexture, nullptr, &showLabelRect);
+
+    // visibility box
+    SDL_Rect showBox = { showLabelX + showLabelRect.w + 10 , showLabelRect.y - 6, 50, 30 };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &showBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &showBox);
+
+    // 5. size box ( scale)
+
+    int sizeLabelX = showLabelX + showBox.w + 30 + 50 + 30;
+    int sizeLabelY = showLabelY;
+    SDL_Surface* sizeLabelSurface = TTF_RenderText_Solid(font, "Size", textColor);
+    SDL_Texture* sizeLabelTexture = SDL_CreateTextureFromSurface(renderer, sizeLabelSurface);
+    SDL_Rect sizeLabelRect = {sizeLabelX, sizeLabelY, sizeLabelSurface->w, sizeLabelSurface->h};
+    SDL_RenderCopy(renderer, sizeLabelTexture, nullptr, &sizeLabelRect);
+
+    // size box
+    SDL_Rect sizeBox = { sizeLabelRect.x + sizeLabelRect.w + 10 , sizeLabelRect.y - 6, 60, 30 };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &sizeBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &sizeBox);
+
+    // 6. rotation box
+    int rotationLabelX = sizeLabelX + sizeBox.w + 30 + 50 + 10;
+    int rotationLabelY = sizeLabelY;
+
+    SDL_Surface* rotationLabelSurface = TTF_RenderText_Solid(font, "Rotation", textColor);
+    SDL_Texture* rotationLabelTexture = SDL_CreateTextureFromSurface(renderer, rotationLabelSurface);
+    SDL_Rect rotationLabelRect = {rotationLabelX, rotationLabelY, rotationLabelSurface->w, rotationLabelSurface->h};
+    SDL_RenderCopy(renderer, rotationLabelTexture, nullptr, &rotationLabelRect);
+
+    // rotation box 
+    SDL_Rect rotationBox = { rotationLabelRect.x + rotationLabelRect.w + 10 , rotationLabelRect.y - 6, 60, 30 };
+    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_RenderFillRect(renderer, &rotationBox);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &rotationBox);
+
+    // end
+    SDL_FreeSurface(textSurface);
+    SDL_FreeSurface(xLabelSurface);
+    SDL_FreeSurface(yLabelSurface);
+    SDL_DestroyTexture(textTexture);
+    SDL_DestroyTexture(xLabelTexture);
+    SDL_DestroyTexture(yLabelTexture);
+}
+
+/*
+-------------------------------------------------
 This function is for adding and initializeing a sprint to screen
 this function will run only one time.
 -------------------------------------------------
@@ -77,18 +192,21 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     SDL_RenderDrawRect(renderer, &SPRITE_BOX);
 
     // Top bar of Sprite box 
-    SDL_Rect tobBar = { SPRITE_BOX.x, SPRITE_BOX.y, SPRITE_BOX.w, 100 };
+    SDL_Rect topBar = { SPRITE_BOX.x, SPRITE_BOX.y, SPRITE_BOX.w, 100 };
     SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
-    SDL_RenderFillRect(renderer, &tobBar);
+    SDL_RenderFillRect(renderer, &topBar);
     SDL_SetRenderDrawColor(renderer, color_black);
-    SDL_RenderDrawRect(renderer, &tobBar);
+    SDL_RenderDrawRect(renderer, &topBar);
 
     // Sprite Area
-    SDL_Rect spriteArea = { SPRITE_BOX.x, tobBar.y + tobBar.h, SPRITE_BOX.w, SPRITE_BOX.h - tobBar.h };
+    SDL_Rect spriteArea = { SPRITE_BOX.x, topBar.y + topBar.h, SPRITE_BOX.w, SPRITE_BOX.h - topBar.h };
     SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
     SDL_RenderFillRect(renderer, &spriteArea);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &spriteArea);
+
+    // Draw top bar of sprite box
+    DrawTopBarOfSpriteBox(renderer, font, topBar);
 
     // Sprtie thumbnails
     const int thumbnailSize = 70;
@@ -122,7 +240,22 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         SDL_RenderCopy (renderer, sprite.nowCustome, nullptr, &thumbRect);
 
         // hovering effect
-        if (ishovered) {
+        if ( isSelected ) {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0 , 255); // color = red for selected sprite
+
+            // Drawin a thick border for selected sprite
+            SDL_Rect border1 = thumbRect;
+            SDL_RenderDrawRect(renderer, &border1);
+            SDL_Rect border2 = { thumbRect.x - 1, thumbRect.y - 1, thumbRect.w + 2, thumbRect.h + 2 };
+            SDL_RenderDrawRect(renderer, &border2);
+            SDL_Rect border3 = { thumbRect.x - 2, thumbRect.y - 2, thumbRect.w + 4, thumbRect.h + 4 };
+            SDL_RenderDrawRect(renderer, &border3);
+            SDL_Rect border4 = { thumbRect.x - 3, thumbRect.y - 3, thumbRect.w + 6, thumbRect.h + 6 };
+            SDL_RenderDrawRect(renderer, &border4);
+            SDL_Rect border5 = { thumbRect.x - 4, thumbRect.y - 4, thumbRect.w + 8, thumbRect.h + 8 };
+            SDL_RenderDrawRect(renderer, &border5); 
+        }
+        else if (ishovered) {
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
             SDL_SetRenderDrawColor(renderer, 100, 150, 255, 80); // blue with some transparency
             SDL_RenderFillRect(renderer, &thumbRect);
@@ -138,21 +271,6 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // blue = for hovered sprite
             SDL_RenderDrawRect(renderer, &thumbRect);
         } 
-        else if ( isSelected ) {
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0 , 255); // color = red for selected sprite
-
-            // Drawin a thick border for selected sprite
-            SDL_Rect border1 = thumbRect;
-            SDL_RenderDrawRect(renderer, &border1);
-            SDL_Rect border2 = { thumbRect.x - 1, thumbRect.y - 1, thumbRect.w + 2, thumbRect.h + 2 };
-            SDL_RenderDrawRect(renderer, &border2);
-            SDL_Rect border3 = { thumbRect.x - 2, thumbRect.y - 2, thumbRect.w + 4, thumbRect.h + 4 };
-            SDL_RenderDrawRect(renderer, &border3);
-            SDL_Rect border4 = { thumbRect.x - 3, thumbRect.y - 3, thumbRect.w + 6, thumbRect.h + 6 };
-            SDL_RenderDrawRect(renderer, &border4);
-            SDL_Rect border5 = { thumbRect.x - 4, thumbRect.y - 4, thumbRect.w + 8, thumbRect.h + 8 };
-            SDL_RenderDrawRect(renderer, &border5); 
-        }
         else {
             SDL_SetRenderDrawColor(renderer, color_black);
             SDL_RenderDrawRect(renderer, &thumbRect);

@@ -24,6 +24,8 @@ struct SprintBody
     // unsigned int selectedCustome = 0;
     // int customeCount;
     double angleRotation; // rotation of the sprint. ROTATION IS CLOCKWISE
+    int scale = 100;        // scale of the sprint in percentage. 100 means original size.
+    bool isVisible = true; // if fale, not available on canvas, there will be an option on top bar to handle visibility.
 };
 extern int SelectedSpriteID; // this variable will save selected sprite in sprite box
 
@@ -35,4 +37,5 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font);
 int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgPath);
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 void SpriteBoxClick(const int mouseX, const int mouseY);
+void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar);
 #endif
