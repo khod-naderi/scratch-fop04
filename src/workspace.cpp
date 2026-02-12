@@ -325,19 +325,45 @@ void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
     if (!isPointInRect(mouseX, mouseY, WORKSPACE_COLUMN))
         return;
 
-    // update moving string
+    // update moving string - handle both systems
     if (isMovingItem)
     {
-        // relative position to workspace cordinate
+        // relative position to workspace coordinate
         const int relX = mouseX - WORKSPACE_COLUMN.x - scrollOffsetX;
         const int relY = mouseY - WORKSPACE_COLUMN.y - scrollOffsetY;
 
-        int totalHeight = 0;
-        for (int i : movingStringIndesis)
+        // Handle legacy CodeBlock system
+        if (!movingStringIndesis.empty())
         {
-            activeCodeBlocks[i].posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
-            activeCodeBlocks[i].posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2 + totalHeight;
-            totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
+            int totalHeight = 0;
+            for (int i : movingStringIndesis)
+            {
+                if (i < activeCodeBlocks.size())
+                {
+                    activeCodeBlocks[i].posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
+                    activeCodeBlocks[i].posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2 + totalHeight;
+                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
+                }
+            }
+        }
+
+        // Handle BlockInstance system - update position of moved blocks
+        for (int i = 0; i < MAX_INSTANCES; i++)
+        {
+            if (!workspaceCodeSpace.instanceUsed[i])
+                continue;
+
+            BlockInstance *inst = &workspaceCodeSpace.instances[i];
+
+            // Check if this instance is being moved (has no parent)
+            if (inst->parentId == -1)
+            {
+                Block def = blocksLibrary[inst->defenitionId];
+                // Update position for root blocks that might be moving
+                inst->posX = relX - def.baseWidth / 2;
+                inst->posY = relY - def.baseHeight / 2;
+                break; // Only move one block for now (I do not know what should do next, It is so confusing !!!!)
+            }
         }
     }
 
