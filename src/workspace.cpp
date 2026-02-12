@@ -48,8 +48,8 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
             continue;
 
         const int blc_x = item.posX;
-        // const int blc_y = item.posY + blocksLibrary[item.blockMaster].height;
-        // if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
+        const int blc_y = item.posY + blocksLibrary[item.blockMaster].baseHeight;
+        if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
         {
             return item.id;
         }
@@ -98,8 +98,8 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
 
         // Create new item
         CodeBlock newItem;
-        // newItem.posX = relX - blocksLibrary[dragedBlockIndex].width / 2;
-        // newItem.posY = relY - blocksLibrary[dragedBlockIndex].height / 2;
+        newItem.posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
+        newItem.posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2;
         newItem.blockMaster = dragedBlockIndex;
         newItem.id = lastId++;
         newItem.bottomId = -1;
@@ -110,7 +110,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
             {
                 int topItemIndex = foundItemIndexById(newItem.topId);
                 newItem.posX = activeCodeBlocks[topItemIndex].posX;
-                // newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height;
+                newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight;
 
                 activeCodeBlocks[topItemIndex].bottomId = newItem.id;
             }
@@ -134,8 +134,8 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                 for (int i : movingStringIndesis)
                 {
                     activeCodeBlocks[i].posX = activeCodeBlocks[topItemIndex].posX;
-                    // activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight;
-                    // totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+                    activeCodeBlocks[i].posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight + totalHeight;
+                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
                 }
             }
         }
@@ -172,8 +172,8 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
         SDL_Rect itemRect = {
             WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
             WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
-            // blocksLibrary[item.blockMaster].width,
-            // blocksLibrary[item.blockMaster].height,
+            blocksLibrary[item.blockMaster].baseWidth,
+            blocksLibrary[item.blockMaster].baseHeight,
         };
 
         if (isPointInRect(mouseX, mouseY, itemRect)) // found grabed item
@@ -233,12 +233,12 @@ void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
         const int relY = mouseY - WORKSPACE_COLUMN.y - scrollOffsetY;
 
         int totalHeight = 0;
-        // for (int i : movingStringIndesis)
-        // {
-        //     activeCodeBlocks[i].posX = relX - blocksLibrary[dragedBlockIndex].width / 2;
-        //     activeCodeBlocks[i].posY = relY - blocksLibrary[dragedBlockIndex].height / 2 + totalHeight;
-        //     totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
-        // }
+        for (int i : movingStringIndesis)
+        {
+            activeCodeBlocks[i].posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
+            activeCodeBlocks[i].posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2 + totalHeight;
+            totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
+        }
     }
 
     if (isScrollingWorkspace)
@@ -256,26 +256,26 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Draw shadow for connecting draged item
     if (isBLockDraged)
     {
-        // const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].width / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
-        // const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].height / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
+        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].baseWidth / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
+        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].baseHeight / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
 
         if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
         {
-            // int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
-            // if (nearItemIndex != -1) // there is a near connectable item
-            // {
-            // Draw draged item centre on mouse pointer
-            // SDL_Rect dragedItemRect = {
-            //     WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX + scrollOffsetX,
-            //     WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].height + scrollOffsetY,
-            //     blocksLibrary[dragedBlockIndex].width,
-            //     blocksLibrary[dragedBlockIndex].height,
-            // };
+            int nearItemIndex = foundItemIndexById(isItemNearTopToConnect(TL_X, TL_Y));
+            if (nearItemIndex != -1) // there is a near connectable item
+            {
+                // Draw draged item centre on mouse pointer
+                SDL_Rect dragedItemRect = {
+                    WORKSPACE_COLUMN.x + activeCodeBlocks[nearItemIndex].posX + scrollOffsetX,
+                    WORKSPACE_COLUMN.y + activeCodeBlocks[nearItemIndex].posY + blocksLibrary[activeCodeBlocks[nearItemIndex].blockMaster].baseHeight + scrollOffsetY,
+                    blocksLibrary[dragedBlockIndex].baseWidth,
+                    blocksLibrary[dragedBlockIndex].baseHeight,
+                };
 
-            // Fill item background
-            // SDL_SetRenderDrawColor(renderer, color_softGray);
-            // SDL_RenderFillRect(renderer, &dragedItemRect);
-            // }
+                // Fill item background
+                SDL_SetRenderDrawColor(renderer, color_softGray);
+                SDL_RenderFillRect(renderer, &dragedItemRect);
+            }
         }
     }
 
@@ -295,12 +295,12 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                     // Draw draged item centre on mouse pointer
                     SDL_Rect dragedItemRect = {
                         WORKSPACE_COLUMN.x + activeCodeBlocks[topItemIndex].posX + scrollOffsetX,
-                        // WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].height + totalHeight + scrollOffsetY,
-                        // blocksLibrary[activeCodeBlocks[i].blockMaster].width,
-                        // blocksLibrary[activeCodeBlocks[i].blockMaster].height,
+                        WORKSPACE_COLUMN.y + activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight + totalHeight + scrollOffsetY,
+                        blocksLibrary[activeCodeBlocks[i].blockMaster].baseWidth,
+                        blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight,
                     };
 
-                    // totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].height;
+                    totalHeight += blocksLibrary[activeCodeBlocks[i].blockMaster].baseHeight;
 
                     // Fill item background
                     SDL_SetRenderDrawColor(renderer, color_softGray);
@@ -315,8 +315,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         SDL_Rect itemRect = {
             WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
             WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
-            // blocksLibrary[item.blockMaster].width,
-            // blocksLibrary[item.blockMaster].height,
+            blocksLibrary[item.blockMaster].baseWidth,
+            blocksLibrary[item.blockMaster].baseHeight,
         };
 
         // item background
@@ -336,14 +336,15 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         // item text
         int tw, th;
-        // SDL_QueryTexture(blocksLibrary[item.blockMaster].textrue, NULL, NULL, &tw, &th);
+        SDL_Texture *texture = renderText(renderer, font, blocksLibrary[item.blockMaster].label, color_white);
+        SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
         SDL_Rect textRect = {
             itemRect.x + (itemRect.w - tw) / 2,
             itemRect.y + (itemRect.h - th) / 2,
             tw,
             th,
         };
-        // SDL_RenderCopy(renderer, blocksLibrary[item.blockMaster].textrue, NULL, &textRect);
+        SDL_RenderCopy(renderer, texture, NULL, &textRect);
     }
 
     return;
