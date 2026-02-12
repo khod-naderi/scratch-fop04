@@ -15,7 +15,7 @@ void codespaceInit(CodeSpace &cs)
     }
 }
 
-int findSlotById(CodeSpace &cs, int id)
+int findInstanceById(CodeSpace &cs, int id)
 {
     for (int i = 0; i < MAX_INSTANCES; i++)
     {
@@ -28,7 +28,7 @@ int findSlotById(CodeSpace &cs, int id)
 
 BlockInstance *codespaceGetInstance(CodeSpace &cs, int id)
 {
-    int slot = findSlotById(cs, id);
+    int slot = findInstanceById(cs, id);
     if (slot == -1)
         return NULL;
     return &cs.instances[slot];
@@ -147,7 +147,7 @@ void codespaceDetach(CodeSpace &cs, int id)
 void codespaceRemoveInstance(CodeSpace &cs, int id)
 {
     codespaceDetach(cs, id);
-    int slot = findSlotById(cs, id);
+    int slot = findInstanceById(cs, id);
     if (slot != -1)
     {
         cs.instanceUsed[slot] = false;
