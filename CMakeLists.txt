@@ -48,6 +48,7 @@ if(WIN32)
     find_package(SDL2 CONFIG REQUIRED)
     find_package(SDL2_image CONFIG REQUIRED)
     find_package(SDL2_ttf CONFIG REQUIRED)
+    find_package(SDL2_gfx CONFIG QUIET)
 
     target_link_libraries(scratch PRIVATE 
         SDL2::SDL2 
@@ -55,29 +56,48 @@ if(WIN32)
         SDL2_image::SDL2_image
         SDL2_ttf::SDL2_ttf
     )
+
+    if(SDL2_gfx_FOUND)
+        target_link_libraries(scratch PRIVATE SDL2_gfx::SDL2_gfx)
+    else()
+        # Fallback: try finding it manually via pkg-config or find_library
+        find_library(SDL2_GFX_LIBRARY NAMES SDL2_gfx)
+        find_path(SDL2_GFX_INCLUDE_DIR NAMES SDL2/SDL2_gfxPrimitives.h)
+        if(SDL2_GFX_LIBRARY AND SDL2_GFX_INCLUDE_DIR)
+            target_include_directories(scratch PRIVATE ${SDL2_GFX_INCLUDE_DIR})
+            target_link_libraries(scratch PRIVATE ${SDL2_GFX_LIBRARY})
+        else()
+            message(FATAL_ERROR "SDL2_gfx not found. Install it or provide its path.")
+        endif()
+    endif()
+
 elseif(APPLE)
     # macOS configuration
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL2 REQUIRED sdl2)
     pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
     pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+    pkg_check_modules(SDL2_GFX REQUIRED SDL2_gfx)
 
     target_include_directories(scratch PRIVATE 
         ${SDL2_INCLUDE_DIRS}
         ${SDL2_IMAGE_INCLUDE_DIRS}
         ${SDL2_TTF_INCLUDE_DIRS}
+        ${SDL2_GFX_INCLUDE_DIRS}
     )
 
     target_link_directories(scratch PRIVATE
         ${SDL2_LIBRARY_DIRS}
         ${SDL2_IMAGE_LIBRARY_DIRS}
         ${SDL2_TTF_LIBRARY_DIRS}
+        ${SDL2_GFX_LIBRARY_DIRS}
     )
 
     target_link_libraries(scratch PRIVATE 
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
         ${SDL2_TTF_LIBRARIES}
+        ${SDL2_GFX_LIBRARIES}
     )
 
     target_link_libraries(scratch PRIVATE
@@ -93,23 +113,27 @@ else()
     pkg_check_modules(SDL2 REQUIRED sdl2)
     pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
     pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+    pkg_check_modules(SDL2_GFX REQUIRED SDL2_gfx)
 
     target_include_directories(scratch PRIVATE 
         ${SDL2_INCLUDE_DIRS}
         ${SDL2_IMAGE_INCLUDE_DIRS}
         ${SDL2_TTF_INCLUDE_DIRS}
+        ${SDL2_GFX_INCLUDE_DIRS}
     )
 
     target_link_directories(scratch PRIVATE
         ${SDL2_LIBRARY_DIRS}
         ${SDL2_IMAGE_LIBRARY_DIRS}
         ${SDL2_TTF_LIBRARY_DIRS}
+        ${SDL2_GFX_LIBRARY_DIRS}
     )
 
     target_link_libraries(scratch PRIVATE 
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
         ${SDL2_TTF_LIBRARIES}
+        ${SDL2_GFX_LIBRARIES}
     )
 endif()
 
