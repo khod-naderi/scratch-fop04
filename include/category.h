@@ -29,10 +29,10 @@ struct Category
     const char *name;
     SDL_Color color;
 
+    SDL_Texture *texture;
+
     Category(const char *f_name, SDL_Color f_color);
 };
-
-extern SDL_Texture *categoriesText[];
 
 // all categories will be here
 extern std::vector<Category> categories;

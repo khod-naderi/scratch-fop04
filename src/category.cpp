@@ -18,11 +18,12 @@ std::vector<Category> categories = {
     Category("Control", colort_controlBlocks),
     Category("Motion", colort_motionBlocks),
     Category("Sound", colort_soundBlocks),
+    Category("Looks", colort_soundBlocks),
+    Category("Operator", colort_soundBlocks),
+    Category("Variables", colort_soundBlocks),
 };
 
 int selectedCategoryId = 0;
-
-SDL_Texture *categoriesText[4]; // TODO [BUG] : Use dynamic allocation.
 
 SDL_Texture *addExtentionBtnText;
 
@@ -30,7 +31,7 @@ SDL_Texture *addExtentionBtnText;
 int categoryColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 {
     for (int i = 0; i < CATEGORIES_COUNT; i++)
-        categoriesText[i] = renderText(renderer, font, categories[i].name, color_white);
+        categories[i].texture = renderText(renderer, font, categories[i].name, color_white);
 
     addExtentionBtnText = renderText(renderer, font, "Add Extra", color_white);
     return 0;
@@ -70,14 +71,14 @@ void drawCatagoryColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX
 
         // text
         int tw, th;
-        SDL_QueryTexture(categoriesText[i], NULL, NULL, &tw, &th);
+        SDL_QueryTexture(categories[i].texture, NULL, NULL, &tw, &th);
         SDL_Rect textRect = {
             itemRect.x + (itemRect.w - tw) / 2,
             itemRect.y + (itemRect.h - th) / 2,
             tw,
             th,
         };
-        SDL_RenderCopy(renderer, categoriesText[i], NULL, &textRect);
+        SDL_RenderCopy(renderer, categories[i].texture, NULL, &textRect);
     }
 
     /*
