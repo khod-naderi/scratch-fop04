@@ -219,39 +219,74 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
         return;
 
     bool isClickedOnItem = false;
-    for (CodeBlock &item : activeCodeBlocks)
+
+    // Check BlockInstances first (new system)
+    for (int i = 0; i < MAX_INSTANCES && !isClickedOnItem; i++)
     {
+        if (!workspaceCodeSpace.instanceUsed[i])
+            continue;
+
+        BlockInstance inst = workspaceCodeSpace.instances[i];
+        Block def = blocksLibrary[inst.defenitionId];
+
         SDL_Rect itemRect = {
-            WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
-            WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
-            blocksLibrary[item.blockMaster].baseWidth,
-            blocksLibrary[item.blockMaster].baseHeight,
+            WORKSPACE_COLUMN.x + inst.posX + scrollOffsetX,
+            WORKSPACE_COLUMN.y + inst.posY + scrollOffsetY,
+            def.baseWidth,
+            def.baseHeight,
         };
 
-        if (isPointInRect(mouseX, mouseY, itemRect)) // found grabed item
+        if (isPointInRect(mouseX, mouseY, itemRect)) // found grabbed item
         {
             isMovingItem = true;
             isClickedOnItem = true;
-            movingTopSelectedItemIndex = foundItemIndexById(item.id);
 
-            // disconnect from it's top
-            int itemTopIndex = foundItemIndexById(item.topId);
-            if (itemTopIndex != -1)
-                activeCodeBlocks[itemTopIndex].bottomId = -1;
-            item.topId = -1;
+            // Detach from parent connections
+            codespaceDetach(workspaceCodeSpace, inst.instanceId);
 
-            // found moving string
-            movingStringIndesis.clear();
-            movingStringIndesis.push_back(movingTopSelectedItemIndex);
-            for (int i = movingTopSelectedItemIndex;;)
-            {
-                i = foundItemIndexById(activeCodeBlocks[i].bottomId);
-                if (i == -1)
-                    break;
-                movingStringIndesis.push_back(i);
-            }
+            // TODO: Implement full chain moving for BlockInstance system
 
             break;
+        }
+    }
+
+    // Check legacy CodeBlocks if no BlockInstance was clicked
+    if (!isClickedOnItem)
+    {
+        for (CodeBlock &item : activeCodeBlocks)
+        {
+            SDL_Rect itemRect = {
+                WORKSPACE_COLUMN.x + item.posX + scrollOffsetX,
+                WORKSPACE_COLUMN.y + item.posY + scrollOffsetY,
+                blocksLibrary[item.blockMaster].baseWidth,
+                blocksLibrary[item.blockMaster].baseHeight,
+            };
+
+            if (isPointInRect(mouseX, mouseY, itemRect)) // found grabbed item
+            {
+                isMovingItem = true;
+                isClickedOnItem = true;
+                movingTopSelectedItemIndex = foundItemIndexById(item.id);
+
+                // disconnect from it's top
+                int itemTopIndex = foundItemIndexById(item.topId);
+                if (itemTopIndex != -1)
+                    activeCodeBlocks[itemTopIndex].bottomId = -1;
+                item.topId = -1;
+
+                // found moving string
+                movingStringIndesis.clear();
+                movingStringIndesis.push_back(movingTopSelectedItemIndex);
+                for (int i = movingTopSelectedItemIndex;;)
+                {
+                    i = foundItemIndexById(activeCodeBlocks[i].bottomId);
+                    if (i == -1)
+                        break;
+                    movingStringIndesis.push_back(i);
+                }
+
+                break;
+            }
         }
     }
 
@@ -362,6 +397,51 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         }
     }
 
+    // Draw BlockInstances from new system
+    for (int i = 0; i < MAX_INSTANCES; i++)
+    {
+        if (!workspaceCodeSpace.instanceUsed[i])
+            continue;
+
+        BlockInstance inst = workspaceCodeSpace.instances[i];
+        Block def = blocksLibrary[inst.defenitionId];
+
+        SDL_Rect itemRect = {
+            WORKSPACE_COLUMN.x + inst.posX + scrollOffsetX,
+            WORKSPACE_COLUMN.y + inst.posY + scrollOffsetY,
+            def.baseWidth,
+            def.baseHeight,
+        };
+
+        // item background
+        if (!isBLockDraged && isPointInRect(mouseX, mouseY, itemRect))
+        {
+            SDL_SetRenderDrawColor(renderer, colorDim(categories[def.categoryId].color));
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, categories[def.categoryId].color);
+        }
+        SDL_RenderFillRect(renderer, &itemRect);
+
+        // item border
+        SDL_SetRenderDrawColor(renderer, color_black);
+        SDL_RenderDrawRect(renderer, &itemRect);
+
+        // item text
+        int tw, th;
+        SDL_Texture *texture = renderText(renderer, font, def.label, color_white);
+        SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
+        SDL_Rect textRect = {
+            itemRect.x + (itemRect.w - tw) / 2,
+            itemRect.y + (itemRect.h - th) / 2,
+            tw,
+            th,
+        };
+        SDL_RenderCopy(renderer, texture, NULL, &textRect);
+    }
+
+    // Draw legacy CodeBlocks for compatibility
     for (const CodeBlock &item : activeCodeBlocks)
     {
         SDL_Rect itemRect = {
