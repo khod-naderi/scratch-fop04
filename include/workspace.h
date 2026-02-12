@@ -8,10 +8,13 @@ This header file is for managing code view named workspace
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include "codespace.h"
+#include "block_instance.h"
 
 #ifndef WORKSPACE_HEADERS
 #define WORKSPACE_HEADERS
 
+// Legacy CodeBlock struct
 struct CodeBlock
 {
     int id;            // identifier
@@ -23,7 +26,8 @@ struct CodeBlock
 
 #define CONNECTION_MINIMUM_DISTANCE 15
 
-extern std::vector<CodeBlock> activeCodeBlocks;
+extern CodeSpace workspaceCodeSpace;
+extern std::vector<CodeBlock> activeCodeBlocks; // Legacy
 
 void controlWorkspaceClickUp(const int mouseX, const int mouseY);
 void controlWorkspaceClickDown(const int mouseX, const int mouseY);

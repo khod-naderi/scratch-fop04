@@ -11,11 +11,17 @@ This CPP file is for managing code view named workspace
 #include "blocks_library.h"
 #include "ui.h"
 #include "block.h"
+#include "codespace.h"
+#include "block_instance.h"
 #include <cmath>
 #include <iostream>
 
+// Legacy system
 std::vector<CodeBlock> activeCodeBlocks;
 int lastId = 0;
+
+// New system
+CodeSpace workspaceCodeSpace;
 
 // moving items properties
 bool isMovingItem = false;
@@ -42,6 +48,28 @@ if not, it's will return -1
 */
 int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 {
+    // Check in new CodeSpace system
+    for (int i = 0; i < MAX_INSTANCES; i++)
+    {
+        if (!workspaceCodeSpace.instanceUsed[i])
+            continue;
+
+        BlockInstance inst = workspaceCodeSpace.instances[i];
+        Block def = blocksLibrary[inst.defenitionId];
+
+        // Skip if this block already have a next connection or can't have bottom connection
+        if (inst.nextId != -1 || !def.canHaveBottomConnection)
+            continue;
+
+        const int blc_x = inst.posX;
+        const int blc_y = inst.posY + def.baseHeight;
+        if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
+        {
+            return inst.instanceId;
+        }
+    }
+
+    // Fallback to legacy system for compatibility
     for (const CodeBlock &item : activeCodeBlocks)
     {
         if (item.bottomId != -1 || !blocksLibrary[item.blockMaster].canHaveBottomConnection)
@@ -352,5 +380,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
 int workspaceScreenInit(SDL_Renderer *renderer, TTF_Font *font)
 {
+    // Initialize the new CodeSpace system
+    codespaceInit(workspaceCodeSpace);
     return 0;
 }
