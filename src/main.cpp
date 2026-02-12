@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
+                    SpriteBoxClick(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
                 }

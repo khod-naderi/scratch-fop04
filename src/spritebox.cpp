@@ -14,6 +14,9 @@ This header file is for managing custome and backgorund setting area named sprit
 #include <iostream>
 #include "canvas.h"
 
+// selected sprite id in sprite box
+int SelectedSpriteID = -1;
+
 /*
 -------------------------------------------------
 This function is for adding and initializeing a sprint to screen
@@ -82,7 +85,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
     // Sprite Area
     SDL_Rect spriteArea = { SPRITE_BOX.x, tobBar.y + tobBar.h, SPRITE_BOX.w, SPRITE_BOX.h - tobBar.h };
-    SDL_SetRenderDrawColor(renderer, 200, 220, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
     SDL_RenderFillRect(renderer, &spriteArea);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &spriteArea);
@@ -103,44 +106,52 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         // Draw thumbnail
         SDL_Rect thumbRect = {thumbnailX , thumbnailY, thumbnailSize, thumbnailSize};
+
+        // if hovering 
+        bool ishovered = ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+                           mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h);
+        
+        // background color 
+        SDL_SetRenderDrawColor( renderer , 230, 230, 230, 255);
+        SDL_RenderFillRect(renderer, &thumbRect);                     
+
+        // image of thumbnail
         SDL_RenderCopy (renderer, sprite.nowCustome, nullptr, &thumbRect);
 
+        // hovering effect
+        if (ishovered) {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 80); // blue with some transparency
+            SDL_RenderFillRect(renderer, &thumbRect);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        }
         // Draw border
         SDL_SetRenderDrawColor(renderer, color_black);
         SDL_RenderDrawRect(renderer, &thumbRect);
-    }
 
-
-    // Hover effect on thumbnails
-    for ( int i = 0; i < aliveSprints.size(); i++ ){
-        SprintBody &sprite = aliveSprints[i];
-
-        int thumbnailX = StartX + i * ( thumbnailSize + spacing ); 
-        int thumbnailY = StartY;
-
-        SDL_Rect thumbRect = { thumbnailX, thumbnailY, thumbnailSize, thumbnailSize };
-        
-        // check if mouse is hovering over the thumbnail
-        bool isHover = ( mouseX >= thumbRect.x && mouseX <= ( thumbRect.x + thumbRect.w ) &&
-                         mouseY >= thumbRect.y && mouseY <= ( thumbRect.y + thumbRect.h ) );
-        if ( isHover) {
-            SDL_SetRenderDrawColor(renderer, 200, 220, 255, 255); // light blue for hover effect
-        }
-        else {
-            SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
-        }
-        SDL_RenderFillRect(renderer, &thumbRect);
-
-        SDL_RenderCopy(renderer, sprite.nowCustome, nullptr, &thumbRect);
-
-        // Draw border
-        if ( isHover ) {
-            SDL_SetRenderDrawColor(renderer, 100, 100, 255, 255); // blue border for hover effect
-        }
+        // hovering border
+        if (ishovered) {
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // blue
+        } 
         else {
             SDL_SetRenderDrawColor(renderer, color_black);
         }
         SDL_RenderDrawRect(renderer, &thumbRect);
+
+        // drawing sprite name 
+        SDL_Color textColor = color_black;
+        SDL_Surface* textSurface = TTF_RenderText_Blended(font, sprite.name.c_str(), textColor);
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+        // position of text
+        int textX = thumbnailX + thumbnailSize / 2 - textSurface->w / 2;
+        int textY = thumbnailY + thumbnailSize + 5; // 5 pixels below the thumbnail
+        
+        SDL_Rect textRect = {textX, textY, textSurface->w, textSurface->h};
+        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
     }
 }
 
@@ -157,4 +168,38 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
         return errcode;
 
     return 0;
+}
+
+/*
+----------------------------------------------------
+This function is for handling selection on sprite thumbnails 
+----------------------------------------------------
+*/
+
+void SpriteBoxClick(const int mouseX , const int mouseY ) 
+{
+    int thumbnailSize = 70;
+    int spacing = 10;
+
+    SDL_Rect spriteArea = { SPRITE_BOX.x, SPRITE_BOX.y + 100, SPRITE_BOX.w, SPRITE_BOX.h - 100 };
+
+    int startX = spriteArea.x + spacing;
+    int startY = spriteArea.y + spacing;
+
+    // checking each thumbnail 
+    for ( int i = 0; i < aliveSprints.size(); i++ ){
+
+        int thumbnailX = startX + i * (thumbnailSize + spacing);
+        int thumbnailY = startY;
+
+        SDL_Rect thumbRect = {thumbnailX , thumbnailY, thumbnailSize, thumbnailSize};
+
+        // if clicked on this thumbnail 
+        if ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+             mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h) 
+        {
+            SelectedSpriteID = aliveSprints[i].id; // set selected sprite id
+            break; 
+        }
+    } 
 }

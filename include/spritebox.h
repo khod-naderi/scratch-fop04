@@ -25,6 +25,7 @@ struct SprintBody
     // int customeCount;
     double angleRotation; // rotation of the sprint. ROTATION IS CLOCKWISE
 };
+extern int SelectedSpriteID; // this variable will save selected sprite in sprite box
 
 // Sprint image dimenstion
 #define SPRINT_IMG_WITDH 100
@@ -33,4 +34,5 @@ struct SprintBody
 int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font);
 int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgPath);
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
+void SpriteBoxClick(const int mouseX, const int mouseY);
 #endif
