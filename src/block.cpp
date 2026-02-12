@@ -28,45 +28,8 @@ int scrollBlockColumnIndex = 0;
 bool isBLockDraged = false;
 int dragedBlockIndex;
 
-void CMD_Move10StepForward()
-{
-}
-
-void CMD_Move10StepBackward()
-{
-}
-
-void CMD_Rotate10DegreeClockwise()
-{
-}
-
-void CMD_Rotate10DegreeCounterClockwise()
-{
-}
-
-void CMD_Sleep2Second()
-{
-}
-
-// std::vector<Block> blocksLibrary = {
-//     Block("On Keyboard Press 'SPACE'", CATEGORY_EVENT, BLOCK_EVENT, false, true),
-//     Block("Move 10 step forward", CATEGORY_CONTROL, BLOCK_COMMAND, true, true),
-//     Block("Move 10 step backward", CATEGORY_CONTROL, BLOCK_COMMAND, true, true),
-//     Block("Rotate 10 degree clockwise", CATEGORY_CONTROL, BLOCK_COMMAND, true, true),
-//     Block("Rotate 10 degree counter clockwise", CATEGORY_CONTROL, BLOCK_COMMAND, true, true),
-//     Block("Sleep 2 second", CATEGORY_CONTROL, BLOCK_COMMAND, true, true),
-// };
-
 int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 {
-    // Prerender every command texture and bound
-    for (int i = 0; i < BLOCKS_COUNT; i++)
-    {
-        // blocksLibrary[i].textrue = renderText(renderer, font, blocksLibrary[i].label, color_white);
-        // SDL_QueryTexture(blocksLibrary[i].textrue, NULL, NULL, &blocksLibrary[i].width, &blocksLibrary[i].height);
-        // blocksLibrary[i].width += 10;
-        // blocksLibrary[i].height += 5;
-    }
     return 0;
 }
 
@@ -90,10 +53,10 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
             SDL_Rect itemRect = {
                 BLOCKS_COLUMN.x + 5,
                 BLOCKS_COLUMN.y + blocksTotalHeight - scrollBlockColumnIndex,
-                // blocksLibrary[i].width,
-                // blocksLibrary[i].height,
+                blocksLibrary[i].baseWidth,
+                blocksLibrary[i].baseHeight,
             };
-            // blocksTotalHeight += blocksLibrary[i].height + 5;
+            blocksTotalHeight += blocksLibrary[i].baseHeight + 5;
             block_count++;
 
             // skip of not in the scrolled section.
@@ -120,27 +83,28 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
 
             // text
             int tw, th;
-            // SDL_QueryTexture(blocksLibrary[i].textrue, NULL, NULL, &tw, &th);
+            SDL_Texture *texture = renderText(renderer, font, blocksLibrary[i].label, color_white);
+            SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
             SDL_Rect textRect = {
                 itemRect.x + (itemRect.w - tw) / 2,
                 itemRect.y + (itemRect.h - th) / 2,
                 tw,
                 th,
             };
-            // SDL_RenderCopy(renderer, blocksLibrary[i].textrue, NULL, &textRect);
+            SDL_RenderCopy(renderer, texture, NULL, &textRect);
         }
     }
-    // blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[BLOCKS_COUNT - 1].height);
+    blocksScrollLimit = blocksTotalHeight - scrollBlockColumnIndex - (blocksLibrary[BLOCKS_COUNT - 1].baseHeight);
 
     // Draw draged block
     if (isBLockDraged)
     {
         // Draw draged item centre on mouse pointer
         SDL_Rect dragedItemRect = {
-            // mouseX - blocksLibrary[dragedBlockIndex].width / 2,
-            // mouseY - blocksLibrary[dragedBlockIndex].height / 2,
-            // blocksLibrary[dragedBlockIndex].width,
-            // blocksLibrary[dragedBlockIndex].height,
+            mouseX - blocksLibrary[dragedBlockIndex].baseWidth / 2,
+            mouseY - blocksLibrary[dragedBlockIndex].baseHeight / 2,
+            blocksLibrary[dragedBlockIndex].baseWidth,
+            blocksLibrary[dragedBlockIndex].baseHeight,
         };
 
         // Fill item background
@@ -153,14 +117,15 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
 
         // item text
         int tw, th;
-        // SDL_QueryTexture(blocksLibrary[dragedBlockIndex].textrue, NULL, NULL, &tw, &th);
+        SDL_Texture *texture = renderText(renderer, font, blocksLibrary[dragedBlockIndex].label, color_white);
+        SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
         SDL_Rect textRect = {
             dragedItemRect.x + (dragedItemRect.w - tw) / 2,
             dragedItemRect.y + (dragedItemRect.h - th) / 2,
             tw,
             th,
         };
-        // SDL_RenderCopy(renderer, blocksLibrary[dragedBlockIndex].textrue, NULL, &textRect);
+        SDL_RenderCopy(renderer, texture, NULL, &textRect);
     }
 }
 
@@ -201,13 +166,13 @@ void controlBlockColumnClickDown(const int mouseX, const int mouseY)
     {
         if (blocksLibrary[i].categoryId == selectedCategoryId)
         {
-            // if (heightFromOffset >= blocksTotalHeight && heightFromOffset <= (blocksTotalHeight + blocksLibrary[i].height))
+            if (heightFromOffset >= blocksTotalHeight && heightFromOffset <= (blocksTotalHeight + blocksLibrary[i].baseHeight))
             {
                 selectBlockIndex = i;
                 break;
             }
 
-            // blocksTotalHeight += blocksLibrary[i].height + 5;
+            blocksTotalHeight += blocksLibrary[i].baseHeight + 5;
         }
     }
 
