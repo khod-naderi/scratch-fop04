@@ -16,14 +16,13 @@ void logger_log(const std::string &text, LogLevel level)
 
 void render_logger(SDL_Renderer *renderer, TTF_Font *font)
 {
-    // Background
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    /* ---------- Background ---------- */
+    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); // light gray
     SDL_RenderFillRect(renderer, &LOGGER_Box);
 
-    // Border
-    SDL_SetRenderDrawColor(renderer, 60, 30, 230, 255);
-    SDL_RenderDrawRect(renderer, &LOGGER_Box);
-
+    /* ---------- Border ---------- */
+    SDL_SetRenderDrawColor(renderer, 60, 130, 230, 255); // blue border
+    draw_thick_rect(renderer, LOGGER_Box, 2);
     int lineHeight = TTF_FontHeight(font);
     int maxLines = LOGGER_Box.h / lineHeight;
 

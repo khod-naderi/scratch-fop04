@@ -67,3 +67,18 @@ SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
 
     return imgText;
 }
+/*
+this function draws a thick rectangle instead of the default sdl2 rectangle.
+*/
+void draw_thick_rect(SDL_Renderer *renderer, const SDL_Rect &rect, int thickness)
+{
+    SDL_Rect temp = rect;
+    for (int i = 0; i < thickness; ++i)
+    {
+        SDL_RenderDrawRect(renderer, &temp);
+        temp.x++;
+        temp.y++;
+        temp.w -= 2;
+        temp.h -= 2;
+    }
+}
