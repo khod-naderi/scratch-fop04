@@ -3,15 +3,18 @@
 #include "color.h"
 #include <algorithm>
 
-void logger_log(Logger &logger, const std::string &text, LogLevel level)
-{
-    logger.entries.push_back({text, level});
+static std::vector<LogEntry> entries;
+static int scroll_offset = 0;
 
-    if (logger.entries.size() > 300)
-        logger.entries.erase(logger.entries.begin());
+void logger_log(const std::string &text, LogLevel level)
+{
+    entries.push_back({text, level});
+
+    if (entries.size() > 300)
+        entries.erase(entries.begin());
 }
 
-void render_logger(SDL_Renderer *renderer, TTF_Font *font, const Logger &logger)
+void render_logger(SDL_Renderer *renderer, TTF_Font *font)
 {
     // Background
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -26,23 +29,23 @@ void render_logger(SDL_Renderer *renderer, TTF_Font *font, const Logger &logger)
 
     int start = std::max(
         0,
-        (int)logger.entries.size() - maxLines - logger.scroll_offset);
+        (int)entries.size() - maxLines - scroll_offset);
 
     int y = LOGGER_Box.y + 5;
 
-    for (int i = start; i < logger.entries.size() && y < LOGGER_Box.y + LOGGER_Box.h; i++)
+    for (int i = start; i < entries.size() && y < LOGGER_Box.y + LOGGER_Box.h; i++)
     {
-
         SDL_Color color;
-        switch (logger.entries[i].level)
+
+        switch (entries[i].level)
         {
-        case LogLevel::INFO:
-            color = {40, 40, 40, 255};
+        case INFO:
+            color = {50, 50, 50, 255};
             break;
-        case LogLevel::WARN:
+        case WARN:
             color = {200, 140, 0, 255};
             break;
-        case LogLevel::ERROR:
+        case ERROR:
             color = {180, 30, 30, 255};
             break;
         }
@@ -50,7 +53,7 @@ void render_logger(SDL_Renderer *renderer, TTF_Font *font, const Logger &logger)
         SDL_Texture *tex = renderText(
             renderer,
             font,
-            logger.entries[i].text.c_str(),
+            entries[i].text.c_str(),
             color);
 
         if (!tex)

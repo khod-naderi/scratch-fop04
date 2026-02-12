@@ -26,7 +26,7 @@ struct Logger
 };
 
 /* API */
-void logger_log(Logger &logger, const std::string &text, LogLevel level = LogLevel::INFO);
-void render_logger(SDL_Renderer *renderer, TTF_Font *font, const Logger &logger);
+void logger_log(const std::string &text, LogLevel level = LogLevel::INFO);
+void render_logger(SDL_Renderer *renderer, TTF_Font *font);
 
 #endif

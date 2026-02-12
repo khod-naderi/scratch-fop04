@@ -3,6 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <string>
+#include "generaldef.h"
 #include "menubar.h"
 #include "color.h"
 #include "ui.h"
@@ -14,28 +15,36 @@
 
 int main(int argc, char *argv[])
 {
-    // -----------------------------
-    // Initialization
-    // -----------------------------
+    /*
+    ---------------------------------------------
+    Initialization part
+    in this part we intialize SDL2 library and resources like
+    fonts, SDL_Renderer, SDL_event handler, Windows
+    ---------------------------------------------
+    */
+    // Initialize SDL2 everything
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return SDL_INITIALIZE_ERROR;
     }
 
+    // Initialize SDL_ttf
     if (TTF_Init() != 0)
     {
         std::cerr << "TTF_Init Error: " << TTF_GetError() << std::endl;
         return SDL_TTF_INIT_ERROR;
     }
 
+    // Load font
     TTF_Font *font = TTF_OpenFont("assets/fonts/Sans_Serif.ttf", 16);
     if (!font)
     {
-        std::cerr << "Failed to load font" << std::endl;
+        std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
         return SDL_FONT_NOT_FOUND;
     }
 
+    // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(
         "Scratch",
         SDL_WINDOWPOS_CENTERED,
@@ -44,75 +53,68 @@ int main(int argc, char *argv[])
         MAIN_WINDOW_HEIGHT,
         SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS);
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(
-        window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    // -----------------------------
-    // Logger
-    // -----------------------------
-    Logger appLogger;
-    logger_log(appLogger, "Application started");
-    logger_log(appLogger, "SDL and TTF initialized");
-
-    // -----------------------------
-    // Initialize UI systems
-    // -----------------------------
+    // Initialize menu textures
     int errcode = menu_init(renderer, font);
     if (errcode != 0)
         return errcode;
-    logger_log(appLogger, "Menu initialized");
-
     errcode = categoryColumnInit(renderer, font);
     if (errcode != 0)
         return errcode;
-    logger_log(appLogger, "Category column initialized");
-
     errcode = blockColumnInit(renderer, font);
     if (errcode != 0)
         return errcode;
-    logger_log(appLogger, "Block column initialized");
-
     errcode = sprintBoxInit(renderer, font);
     if (errcode != 0)
         return errcode;
-    logger_log(appLogger, "Sprite box initialized");
-
     errcode = workspaceScreenInit(renderer, font);
     if (errcode != 0)
         return errcode;
-    logger_log(appLogger, "Workspace initialized");
 
-    // -----------------------------
-    // Window icon
-    // -----------------------------
+    /*
+    -------------------------------------
+    Set window icon
+    -------------------------------------
+    */
     SDL_Surface *appIconSurface = IMG_Load("assets/icons/icon.png");
     if (appIconSurface)
     {
         SDL_SetWindowIcon(window, appIconSurface);
         SDL_FreeSurface(appIconSurface);
-        logger_log(appLogger, "Window icon loaded");
     }
     else
     {
-        logger_log(appLogger, "Failed to load window icon", LogLevel::WARN);
+        std::cout << "[Warning] window app icon load error: " << SDL_GetError() << std::endl;
     }
 
-    SDL_bool running = SDL_TRUE;
-    SDL_Event eventSDL;
+    SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
-    // -----------------------------
-    // Main loop
-    // -----------------------------
+    SDL_Event eventSDL;
+    logger_log("Scratch is ready!", INFO);
+
+    /*
+    ---------------------------------------------
+    Main while of program
+    ---------------------------------------------
+    */
     while (running)
     {
+        // Get mouse pointer state
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
 
+        /*
+        ---------------------------------------------
+        Event Handler
+        in this part we handle SDL evnets before rendering next frame
+        ---------------------------------------------
+        */
         while (SDL_PollEvent(&eventSDL))
         {
+            // handle Quit button on top-right corner of page
             if (eventSDL.type == SDL_QUIT)
             {
-                logger_log(appLogger, "Quit event received");
                 running = SDL_FALSE;
             }
             else if (eventSDL.type == SDL_MOUSEMOTION)
@@ -143,31 +145,27 @@ int main(int argc, char *argv[])
                 int direction = -1;
                 if (eventSDL.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                     direction = 1;
-
-                // Logger scroll if hovered
-                if (isPointInRect(mouseX, mouseY, LOGGER_Box))
-                {
-                    appLogger.scroll_offset -= eventSDL.wheel.y * direction;
-                    if (appLogger.scroll_offset < 0)
-                        appLogger.scroll_offset = 0;
-                }
-                else
-                {
-                    controlBlockColumnMouseScroll(
-                        mouseX, mouseY,
-                        eventSDL.wheel.y * direction);
-                }
+                controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
             }
         }
 
+        /*
+        ---------------------------------------------
+        In This part we will update hover status of every hoverable thing
+        ---------------------------------------------
+        */
         updateMenuHoverState(mouseX, mouseY);
 
-        // -----------------------------
-        // Rendering
-        // -----------------------------
+        /*
+        ---------------------------------------------
+        Now it's to render next frame
+        ---------------------------------------------
+        */
+        // Clear background color to white.
         SDL_SetRenderDrawColor(renderer, color_white);
         SDL_RenderClear(renderer);
 
+        // Draw each part of screen
         drawWorkspaceScreen(renderer, font, mouseX, mouseY);
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
         drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
@@ -184,24 +182,21 @@ int main(int argc, char *argv[])
             drawSaveScreen(renderer, font, mouseX, mouseY);
         }
 
-        // ✅ Logger rendered last (on top)
-        render_logger(renderer, font, appLogger);
+        //  Logger rendering goes HERE
+        // (call the real function that exists in logger.cpp, not assumed methods)
+        render_logger(renderer, font);
 
+        // show next frame
         SDL_RenderPresent(renderer);
     }
 
-    // -----------------------------
-    // Cleanup
-    // -----------------------------
-    logger_log(appLogger, "Application shutting down");
-
+    // Cleanup and exiting from program.
     SDL_DestroyTexture(fileMenuText);
     SDL_DestroyTexture(editMenuText);
     SDL_DestroyTexture(logoTexture);
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-
     TTF_Quit();
     SDL_Quit();
 
