@@ -140,7 +140,6 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         else {
             SDL_SetRenderDrawColor(renderer, color_black);
         }
-
         SDL_RenderDrawRect(renderer, &thumbRect);
     }
 }
