@@ -13,12 +13,15 @@ This header file is for handling block category column
 
 extern int selectedCategoryId;
 
-enum CATEGORY_ID
+enum CategoryId
 {
     CATEGORY_EVENT,
     CATEGORY_CONTROL,
     CATEGORY_MOTION,
     CATEGORY_SOUND,
+    CATEGORY_LOOKS,
+    CATEGORY_OPERATOR,
+    CATEGORY_VARIABLES,
 };
 
 struct Category
@@ -26,10 +29,10 @@ struct Category
     const char *name;
     SDL_Color color;
 
+    SDL_Texture *texture;
+
     Category(const char *f_name, SDL_Color f_color);
 };
-
-extern SDL_Texture *categoriesText[];
 
 // all categories will be here
 extern std::vector<Category> categories;
