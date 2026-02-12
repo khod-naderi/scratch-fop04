@@ -25,30 +25,6 @@ struct Value
 
     Value() : type(VALUE_NUMBER), number(0.0), boolean(false), string("") {} // default constractor
 
-    Value fromNumber(double n)
-    {
-        Value v;
-        v.type = VALUE_NUMBER;
-        v.number = n;
-        return v;
-    }
-
-    Value fromString(std::string str)
-    {
-        Value v;
-        v.type = VALUE_STRING;
-        v.string = str;
-        return v;
-    }
-
-    Value fromBool(bool f)
-    {
-        Value v;
-        v.type = VALUE_BOOLEAN;
-        v.boolean = f;
-        return v;
-    }
-
     double asNumber() const
     {
         switch (type)
@@ -112,5 +88,9 @@ struct Value
         return "";
     }
 };
+
+Value fromNumber(double n);
+Value fromString(std::string str);
+Value fromBool(bool f);
 
 #endif
