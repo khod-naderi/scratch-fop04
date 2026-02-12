@@ -88,7 +88,7 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 
 /*
 -----------------------
-This function will search for item with specific id
+This function will search for item with specific id in legacy system
 -----------------------
 return -1 if not found
 */
@@ -101,6 +101,17 @@ int foundItemIndexById(int id)
     }
 
     return -1;
+}
+
+/*
+-----------------------
+This function will search for BlockInstance with specific id in new system
+-----------------------
+return pointer to BlockInstance or NULL if not found
+*/
+BlockInstance *findBlockInstanceById(int id)
+{
+    return codespaceGetInstance(workspaceCodeSpace, id);
 }
 
 /*
@@ -125,25 +136,38 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
         isBLockDraged = false;
 
         // Create new item
-        CodeBlock newItem;
-        newItem.posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
-        newItem.posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2;
-        newItem.blockMaster = dragedBlockIndex;
-        newItem.id = lastId++;
-        newItem.bottomId = -1;
-        if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
-        {
-            newItem.topId = isItemNearTopToConnect(newItem.posX, newItem.posY);
-            if (newItem.topId != -1) // connect Item to it's top item
-            {
-                int topItemIndex = foundItemIndexById(newItem.topId);
-                newItem.posX = activeCodeBlocks[topItemIndex].posX;
-                newItem.posY = activeCodeBlocks[topItemIndex].posY + blocksLibrary[activeCodeBlocks[topItemIndex].blockMaster].baseHeight;
+        int posX = relX - blocksLibrary[dragedBlockIndex].baseWidth / 2;
+        int posY = relY - blocksLibrary[dragedBlockIndex].baseHeight / 2;
 
-                activeCodeBlocks[topItemIndex].bottomId = newItem.id;
+        int newInstanceId = codespaceCreateInstance(workspaceCodeSpace, dragedBlockIndex, posX, posY);
+
+        if (newInstanceId != -1 && blocksLibrary[dragedBlockIndex].canHaveTopConnection)
+        {
+            int topId = isItemNearTopToConnect(posX, posY);
+            if (topId != -1) // connect Item to it's top item
+            {
+                BlockInstance *newInst = findBlockInstanceById(newInstanceId);
+                BlockInstance *topInst = findBlockInstanceById(topId);
+
+                if (newInst && topInst)
+                {
+                    Block topDef = blocksLibrary[topInst->defenitionId];
+                    newInst->posX = topInst->posX;
+                    newInst->posY = topInst->posY + topDef.baseHeight;
+
+                    codespaceAttachNext(workspaceCodeSpace, topId, newInstanceId);
+                }
             }
         }
 
+        // Legacy system - create old CodeBlock for compatibility
+        CodeBlock newItem;
+        newItem.posX = posX;
+        newItem.posY = posY;
+        newItem.blockMaster = dragedBlockIndex;
+        newItem.id = lastId++;
+        newItem.bottomId = -1;
+        newItem.topId = -1;
         activeCodeBlocks.push_back(newItem);
     }
 
