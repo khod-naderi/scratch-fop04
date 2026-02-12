@@ -24,6 +24,13 @@ Value execTurnAngleDegree(ExecutionContext &ctx, Value inputs[], int inputCount)
     return Value();
 }
 
+Value execGreenflag(ExecutionContext &ctx, Value inputs[], int inputCount)
+{
+    // event triggerer
+    // no runtime action
+    return Value();
+}
+
 Block blocksLibrary[] = {
     // [0] move %s steps
     {
@@ -43,6 +50,22 @@ Block blocksLibrary[] = {
         execMoveSteps, // execution
         150,           // base width
         40,            // base height
+    },
+    // [1] when green flag clicked
+    {
+        1,
+        "when green flag clicked",
+        CATEGORY_EVENT,
+        BLOCK_EVENT,
+        {},
+        0,
+        VALUE_NUMBER,
+        false,
+        true,
+        0,
+        execGreenflag,
+        200,
+        40,
     },
 };
 
