@@ -19,7 +19,7 @@ This header file is for handling UI component
 #define CANVAS_SCREEN_HEIGTH 500
 
 #define SCROLL_Y_SENSIVITY 5
-
+#define LOGGER_HEIGHT 150
 extern const SDL_Rect SCREEN;
 extern const SDL_Rect MENUBAR_ROW;
 extern const SDL_Rect CATEGORY_COLUMN;
