@@ -268,10 +268,71 @@ bool HandleAddSpriteClick( const int mouseX, const int mouseY ) {
                 }
                 addSpriteMenuState = Menu_Closed; // close menu after clicking on an option / choosing one sprite option
                 return true;
+            }
         }
     }
     return false;
 }
+
+/*
+-------------------------------------------------
+this function is for drawing the expanded menu with
+4 options when clicking on add sprite button
+-------------------------------------------------
+*/
+
+void DrawAddSpriteMenuOptions(SDL_Renderer* renderer, TTF_Font* font, const int mouseX, const int mouseY ) {
+    if ( addSpriteMenuState != Menu_Open ) {
+        return; // if menu is not open, we dont draw menu options
+    }
+
+    const int optionSize = 60;
+    const int spacing = 10;
+    const int MenuX = AddSpriteButtonRect.x + ( AddSpriteButtonRect.w - optionSize ) / 2; // center align with add sprite button
+    const int MenuStartY = AddSpriteButtonRect.y + AddSpriteButtonRect.h + spacing + 10;
+
+    // defining menu options
+    SDL_Texture* optionIcons[4] = { searchIcon, paintIcon, uploadIcon, randomIcon };
+
+    // drawing each menu option
+    for ( int i = 0; i < 4; i++ ) {
+
+        // calculating position for each option 
+        int optionY = MenuStartY + i * (optionSize + spacing);
+        menuOptions[i].rect = { MenuX, optionY, optionSize, optionSize };
+
+        // now cheching if hovering on this option
+        menuOptions[i].isHovered = ( mouseX >= menuOptions[i].rect.x && mouseX <= menuOptions[i].rect.x + menuOptions[i].rect.w &&
+                                    mouseY >= menuOptions[i].rect.y && mouseY <= menuOptions[i].rect.y + menuOptions[i].rect.h);
+        
+        // drawing option background
+        if ( menuOptions[i].isHovered ) {
+            SDL_SetRenderDrawColor(renderer, 100, 200, 100, 80); // green for hovered option
+        }
+        else {
+            SDL_SetRenderDrawColor(renderer, 150, 100, 200, 80); // purple for normal option
+        }
+        SDL_RenderFillRect(renderer, &menuOptions[i].rect);  
+        
+        // drawing border for option
+        SDL_SetRenderDrawColor(renderer, 100, 200, 100, 255);
+        SDL_RenderDrawRect(renderer, &menuOptions[i].rect);
+
+        // drawing option icon
+        if ( optionIcons[i] ) {
+            SDL_Rect iconRect = { menuOptions[i].rect.x + 6,
+                                  menuOptions[i].rect.y + 6,
+                                  menuOptions[i].rect.w - 11,
+                                  menuOptions[i].rect.h - 11 };
+        SDL_RenderCopy(renderer, optionIcons[i], nullptr, &iconRect);
+        }
+
+        // if hovering show option name next to the option
+    
+  }
+}
+
+
 /*
 -------------------------------------------------
 This function is for adding and initializeing a sprint to screen
@@ -282,15 +343,15 @@ it will return id of new sprint
 */
 int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgPath)
 {
-    SprintBody newSptint;
+    SprintBody newSprint;
 
-    newSptint.name = name;
+    newSprint.name = name;
 
     // spon on the center of screen
-    newSptint.posX = CANVAS_SCREEN_WIDTH / 2;
-    newSptint.posY = CANVAS_SCREEN_HEIGTH / 2;
+    newSprint.posX = CANVAS_SCREEN_WIDTH / 2;
+    newSprint.posY = CANVAS_SCREEN_HEIGTH / 2;
 
-    newSptint.angleRotation = 0; // render at it's original oriantation.
+    newSprint.angleRotation = 0; // render at it's original oriantation.
 
     int id = 0;
     for (const SprintBody &s : aliveSprints) // founding new latest ID
@@ -300,19 +361,19 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
             id = s.id + 1;
         }
     }
-    newSptint.id = id;
+    newSprint.id = id;
 
     // load texture of it's custome.
-    newSptint.nowCustome = renderImage(renderer, imgPath);
-    if (!newSptint.nowCustome)
+    newSprint.nowCustome = renderImage(renderer, imgPath);
+    if (!newSprint.nowCustome)
     {
         std::cerr << "Faild to load Custome image of \"" << name << "\": " << IMG_GetError() << std::endl;
         return SDL_IMAGE_LOAD_ERROR;
     }
 
-    aliveSprints.push_back(newSptint);
+    aliveSprints.push_back(newSprint);
 
-    return id;
+    return newSprint.id;
 }
 
 /*
