@@ -302,21 +302,93 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
 
         int newInstanceId = codespaceCreateInstance(workspaceCodeSpace, dragedBlockIndex, posX, posY);
 
-        if (newInstanceId != -1 && blocksLibrary[dragedBlockIndex].canHaveTopConnection)
+        if (newInstanceId != -1)
         {
-            int topId = isItemNearTopToConnect(posX, posY);
-            if (topId != -1) // connect Item to it's top item
+            bool connected = false;
+
+            //  sequential connection
+            if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
             {
-                BlockInstance *newInst = findBlockInstanceById(newInstanceId);
-                BlockInstance *topInst = findBlockInstanceById(topId);
-
-                if (newInst && topInst)
+                int topId = isItemNearTopToConnect(posX, posY);
+                if (topId != -1) // connect Item to it's top item
                 {
-                    Block topDef = blocksLibrary[topInst->defenitionId];
-                    newInst->posX = topInst->posX;
-                    newInst->posY = topInst->posY + topDef.baseHeight;
+                    BlockInstance *newInst = findBlockInstanceById(newInstanceId);
+                    BlockInstance *topInst = findBlockInstanceById(topId);
 
-                    codespaceAttachNext(workspaceCodeSpace, topId, newInstanceId);
+                    if (newInst && topInst)
+                    {
+                        Block topDef = blocksLibrary[topInst->defenitionId];
+                        newInst->posX = topInst->posX;
+                        newInst->posY = topInst->posY + topDef.baseHeight;
+
+                        codespaceAttachNext(workspaceCodeSpace, topId, newInstanceId);
+                        connected = true;
+                    }
+                }
+            }
+
+            //  body connection if sequential connection failed
+            if (!connected)
+            {
+                int bodyIndex = -1;
+                int parentId = isItemNearBodyToConnect(posX, posY, bodyIndex);
+                if (parentId != -1)
+                {
+                    BlockInstance *newInst = findBlockInstanceById(newInstanceId);
+                    BlockInstance *parentInst = findBlockInstanceById(parentId);
+
+                    if (newInst && parentInst)
+                    {
+                        // Position the block inside the body area
+                        Block parentDef = blocksLibrary[parentInst->defenitionId];
+                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
+                        int bodyHeight = 60; // Same as in isPointInBodyArea TODO: use predefined or dynamic values
+
+                        newInst->posX = parentInst->posX + 15;                     // Indent inside body
+                        newInst->posY = bodyStartY + (bodyIndex * bodyHeight) + 5; // Small margin from top TODO: use predefined values
+
+                        codespaceAttachToBody(workspaceCodeSpace, parentId, bodyIndex, newInstanceId);
+                        connected = true;
+                    }
+                }
+            }
+
+            // Try input connection if other connections failed
+            if (!connected)
+            {
+                Block draggedDef = blocksLibrary[dragedBlockIndex];
+                // Only expression blocks (operators, reporter) can be connected to inputs
+                if (draggedDef.type == BLOCK_OPERATOR || draggedDef.type == BLOCK_REPORTER)
+                {
+                    int slotIndex = -1;
+                    int hostId = isItemNearInputToConnect(posX, posY, slotIndex);
+                    if (hostId != -1)
+                    {
+                        BlockInstance *newInst = findBlockInstanceById(newInstanceId);
+                        BlockInstance *hostInst = findBlockInstanceById(hostId);
+
+                        if (newInst && hostInst)
+                        {
+                            // Position the block near the input slot (for visual feedback)
+                            // The actual rendering will be handled by the host block
+                            Block hostDef = blocksLibrary[hostInst->defenitionId];
+                            std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                            int totalWidth = 0;
+                            for (int i = 0; i < slotIndex; i++)
+                            {
+                                totalWidth += wst[i];
+                                if (i < hostInst->inputCount)
+                                    totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            }
+                            totalWidth += wst[slotIndex];
+
+                            newInst->posX = hostInst->posX + totalWidth;
+                            newInst->posY = hostInst->posY - draggedDef.baseHeight - 5; // Above the host block
+
+                            codespaceAttachToInput(workspaceCodeSpace, hostId, slotIndex, newInstanceId);
+                            connected = true;
+                        }
+                    }
                 }
             }
         }
@@ -326,20 +398,91 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
     if (isMovingItem && movingInstanceId != -1)
     {
         BlockInstance *movingInst = findBlockInstanceById(movingInstanceId);
-        if (movingInst && blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
+        if (movingInst)
         {
-            int topId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
-            if (topId != -1)
-            {
-                BlockInstance *topInst = findBlockInstanceById(topId);
-                if (topInst)
-                {
-                    Block topDef = blocksLibrary[topInst->defenitionId];
-                    int newX = topInst->posX;
-                    int newY = topInst->posY + topDef.baseHeight;
+            bool connected = false;
 
-                    updateChainPositions(movingChainIds, newX, newY);
-                    codespaceAttachNext(workspaceCodeSpace, topId, movingInstanceId);
+            // Try sequential connection first
+            if (blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
+            {
+                int topId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
+                if (topId != -1)
+                {
+                    BlockInstance *topInst = findBlockInstanceById(topId);
+                    if (topInst)
+                    {
+                        Block topDef = blocksLibrary[topInst->defenitionId];
+                        int newX = topInst->posX;
+                        int newY = topInst->posY + topDef.baseHeight;
+
+                        updateChainPositions(movingChainIds, newX, newY);
+                        codespaceAttachNext(workspaceCodeSpace, topId, movingInstanceId);
+                        connected = true;
+                    }
+                }
+            }
+
+            // Try body connection if sequential connection failed
+            if (!connected)
+            {
+                int bodyIndex = -1;
+                int parentId = isItemNearBodyToConnect(movingInst->posX, movingInst->posY, bodyIndex);
+                if (parentId != -1)
+                {
+                    BlockInstance *parentInst = findBlockInstanceById(parentId);
+
+                    if (parentInst)
+                    {
+                        // Position the moving chain inside the body area
+                        Block parentDef = blocksLibrary[parentInst->defenitionId];
+                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
+                        int bodyHeight = 60; // Same as in isPointInBodyArea
+
+                        int newX = parentInst->posX + 15;                     // Indent inside body
+                        int newY = bodyStartY + (bodyIndex * bodyHeight) + 5; // Small margin from top
+
+                        updateChainPositions(movingChainIds, newX, newY);
+                        codespaceAttachToBody(workspaceCodeSpace, parentId, bodyIndex, movingInstanceId);
+                        connected = true;
+                    }
+                }
+            }
+
+            // Try input connection if other connections failed
+            if (!connected)
+            {
+                Block movingDef = blocksLibrary[movingInst->defenitionId];
+                // Only expression blocks (operators, reporter) can be connected to inputs
+                if (movingDef.type == BLOCK_OPERATOR || movingDef.type == BLOCK_REPORTER)
+                {
+                    int slotIndex = -1;
+                    int hostId = isItemNearInputToConnect(movingInst->posX, movingInst->posY, slotIndex);
+                    if (hostId != -1)
+                    {
+                        BlockInstance *hostInst = findBlockInstanceById(hostId);
+
+                        if (hostInst)
+                        {
+                            // Position the moving block near the input slot
+                            Block hostDef = blocksLibrary[hostInst->defenitionId];
+                            std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                            int totalWidth = 0;
+                            for (int i = 0; i < slotIndex; i++)
+                            {
+                                totalWidth += wst[i];
+                                if (i < hostInst->inputCount)
+                                    totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            }
+                            totalWidth += wst[slotIndex];
+
+                            int newX = hostInst->posX + totalWidth;
+                            int newY = hostInst->posY - movingDef.baseHeight - 5; // Above the host block
+
+                            updateChainPositions(movingChainIds, newX, newY);
+                            codespaceAttachToInput(workspaceCodeSpace, hostId, slotIndex, movingInstanceId);
+                            connected = true;
+                        }
+                    }
                 }
             }
         }
