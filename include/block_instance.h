@@ -5,6 +5,7 @@
 
 #include "value.h"
 #include "block.h"
+#include "ui.h"
 
 /*
 for handling input value in block's slots
@@ -27,6 +28,7 @@ struct BlockInstance
     // input values - one per slots
     InputValue inputs[BLOCK_MAX_SLOTS];
     int inputCount;
+    TextBox *textboxes[BLOCK_MAX_SLOTS];
 
     // squeancial connection
     int parentId;
@@ -45,5 +47,6 @@ struct BlockInstance
 
 void blockInstanceConstruct(BlockInstance &inst);
 void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int instanceId, int posX, int posY);
+void blockInstanceUpdateDimension(BlockInstance &inst);
 
 #endif

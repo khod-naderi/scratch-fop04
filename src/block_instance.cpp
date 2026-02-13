@@ -1,5 +1,6 @@
 #include "block_instance.h"
 #include "blocks_library.h"
+#include "ui.h"
 
 /*
 -------------------------------
@@ -24,6 +25,7 @@ void blockInstanceConstruct(BlockInstance &inst)
     {
         inst.inputs[i].isBlock = false;
         inst.inputs[i].blockInstanceId = -1;
+        inst.textboxes[i] = new TextBox(DEFAULT_FONT);
     }
 
     for (int i = 0; i < BLOCK_MAX_BODIES; i++)
@@ -50,6 +52,8 @@ void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int in
         inst.inputs[i].isBlock = false;
         inst.inputs[i].literal = def.slots[i].defaultValue;
         inst.inputs[i].blockInstanceId = -1;
+        inst.textboxes[i] = new TextBox(DEFAULT_FONT);
+        inst.textboxes[i]->setStr(inst.inputs[i].literal.asString());
     }
 
     // copy bodies info
