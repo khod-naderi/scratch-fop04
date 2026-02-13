@@ -17,6 +17,13 @@ This header file is for managing custome and backgorund setting area named sprit
 // selected sprite id in sprite box
 int SelectedSpriteID = -1;
 
+// these global variables are for handling add sprite button and menu
+AddSpriteMenuState addSpriteMenuState = Menu_Closed;
+SDL_Rect AddSpriteButtonRect ;
+SDL_Rect MenuToolBarRect;
+MenuOption menuOptions[4];
+bool isHoveringAddSpriteButton = false;
+
 /*
 -------------------------------------------------
 This function is for adding and initializeing top bar of sprite box

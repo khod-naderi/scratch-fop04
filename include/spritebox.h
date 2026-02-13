@@ -27,7 +27,24 @@ struct SprintBody
     int scale = 100;        // scale of the sprint in percentage. 100 means original size.
     bool isVisible = true; // if fale, not available on canvas, there will be an option on top bar to handle visibility.
 };
+
 extern int SelectedSpriteID; // this variable will save selected sprite in sprite box
+
+
+// this struct&enum will handle sprite choosing logic and menu bar 
+enum AddSpriteMenuState {
+    Menu_Closed, // not shown
+    Menu_Hover_Main, // hovering on main button
+    Menu_Open // menu is open, showing 4 options: add, random, upload , paint
+};
+
+struct MenuOption {
+    const char* icon; 
+    std::string name; // "choose a sprite", "paint", "upload", "random"
+    SDL_Rect rect; // position and size of option
+    bool isHovered; 
+};
+
 
 // Sprint image dimenstion
 #define SPRINT_IMG_WITDH 100
