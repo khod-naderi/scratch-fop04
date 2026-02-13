@@ -39,6 +39,11 @@ bool isPointInBodyArea(const int pointX, const int pointY, const BlockInstance &
 int isItemNearInputToConnect(const int TL_X, const int TL_Y, int &outSlotIndex);
 bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance &inst, const int slotIndex);
 
+// Connection validation helpers
+bool canConnectSequentially(int topId, int bottomId);
+bool canConnectToBody(int parentId, int bodyIndex, int childId);
+bool canConnectToInput(int hostId, int slotIndex, int operatorId);
+
 std::string blockInstanceUpdateLabel(BlockInstance &inst);
 
 #endif

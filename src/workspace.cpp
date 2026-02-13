@@ -223,6 +223,104 @@ bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance 
 }
 
 /*
+-------------------------------
+Connection validation helpers
+-------------------------------
+*/
+bool canConnectSequentially(int topId, int bottomId)
+{
+    BlockInstance *topInst = codespaceGetInstance(workspaceCodeSpace, topId);
+    BlockInstance *bottomInst = codespaceGetInstance(workspaceCodeSpace, bottomId);
+
+    if (!topInst || !bottomInst)
+        return false;
+
+    Block topDef = blocksLibrary[topInst->defenitionId];
+    Block bottomDef = blocksLibrary[bottomInst->defenitionId];
+
+    // Top block must be able to have bottom connection
+    if (!topDef.canHaveBottomConnection)
+        return false;
+
+    // Bottom block must be able to have top connection
+    if (!bottomDef.canHaveTopConnection)
+        return false;
+
+    // Top block must not already have a next connection
+    if (topInst->nextId != -1)
+        return false;
+
+    // Bottom block must not already have a parent
+    if (bottomInst->parentId != -1)
+        return false;
+
+    return true;
+}
+
+bool canConnectToBody(int parentId, int bodyIndex, int childId)
+{
+    BlockInstance *parentInst = codespaceGetInstance(workspaceCodeSpace, parentId);
+    BlockInstance *childInst = codespaceGetInstance(workspaceCodeSpace, childId);
+
+    if (!parentInst || !childInst)
+        return false;
+
+    Block parentDef = blocksLibrary[parentInst->defenitionId];
+
+    // Parent must have bodies
+    if (parentDef.bodyCount == 0)
+        return false;
+
+    // Body index must be valid
+    if (bodyIndex < 0 || bodyIndex >= parentDef.bodyCount)
+        return false;
+
+    // Body must not already have a child (for now, assuming single child per body)
+    if (parentInst->bodies[bodyIndex] != -1)
+        return false;
+
+    // Child must not already have a parent
+    if (childInst->parentId != -1)
+        return false;
+
+    return true;
+}
+
+bool canConnectToInput(int hostId, int slotIndex, int operatorId)
+{
+    BlockInstance *hostInst = codespaceGetInstance(workspaceCodeSpace, hostId);
+    BlockInstance *operatorInst = codespaceGetInstance(workspaceCodeSpace, operatorId);
+
+    if (!hostInst || !operatorInst)
+        return false;
+
+    Block hostDef = blocksLibrary[hostInst->defenitionId];
+    Block operatorDef = blocksLibrary[operatorInst->defenitionId];
+
+    // Host must have input slots
+    if (hostDef.slotCount == 0)
+        return false;
+
+    // Slot index must be valid
+    if (slotIndex < 0 || slotIndex >= hostDef.slotCount)
+        return false;
+
+    // Slot must not already be occupied by a block
+    if (hostInst->inputs[slotIndex].isBlock)
+        return false;
+
+    // Operator must be an expression block (operator or reporter)
+    if (operatorDef.type != BLOCK_OPERATOR && operatorDef.type != BLOCK_REPORTER)
+        return false;
+
+    // Operator must not already have a parent
+    if (operatorInst->parentId != -1)
+        return false;
+
+    return true;
+}
+
+/*
 -----------------------
 This function will search for BlockInstance with specific id in new system
 -----------------------
