@@ -144,6 +144,85 @@ bool isPointInBodyArea(const int pointX, const int pointY, const BlockInstance &
 }
 
 /*
+-------------------------------
+This function checks if any BlockInstance with input slots is near the given position
+and can accept an expression block in one of its input slots.
+-------------------------------
+@input:
+TL_X: x position of top left corner of the dragged item (relative to workspace coordinate).
+TL_Y: y position of top left corner of the dragged item (relative to workspace coordinate).
+outSlotIndex: reference to store which slot index is near
+@output:
+if yes, it will return instanceId of that item and set outSlotIndex,
+if not, it will return -1
+*/
+int isItemNearInputToConnect(const int TL_X, const int TL_Y, int &outSlotIndex)
+{
+    for (int i = 0; i < MAX_INSTANCES; i++)
+    {
+        if (!workspaceCodeSpace.instanceUsed[i])
+            continue;
+
+        BlockInstance inst = workspaceCodeSpace.instances[i];
+        Block def = blocksLibrary[inst.defenitionId];
+
+        // Skip if this block has no input slots
+        if (def.slotCount == 0)
+            continue;
+
+        // Check each input slot area
+        for (int slotIdx = 0; slotIdx < def.slotCount; slotIdx++)
+        {
+            // Skip if slot is already occupied by a block
+            if (inst.inputs[slotIdx].isBlock)
+                continue;
+
+            if (isPointInInputSlot(TL_X, TL_Y, inst, slotIdx))
+            {
+                outSlotIndex = slotIdx;
+                return inst.instanceId;
+            }
+        }
+    }
+
+    return -1;
+}
+
+/*
+-------------------------------
+This function checks if a point is inside a specific input slot area of a block instance
+-------------------------------
+*/
+bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance &inst, const int slotIndex)
+{
+    Block def = blocksLibrary[inst.defenitionId];
+
+    if (slotIndex < 0 || slotIndex >= def.slotCount)
+        return false;
+
+    // Calculate input slot position based on textbox positions
+    // This uses same logic as the textbox positioning in drawWorkspaceScreen
+    std::vector<int> wst = calcLabelSizeByPart(def.label);
+    int totalWidth = 0;
+    for (int i = 0; i < slotIndex; i++)
+    {
+        totalWidth += wst[i];
+        if (i < inst.inputCount)
+            totalWidth += inst.textboxes[i]->cachedWidth;
+    }
+    totalWidth += wst[slotIndex];
+
+    // Input slot area rectangle (around where the textbox would be)
+    int slotLeft = inst.posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
+    int slotRight = slotLeft + (inst.textboxes[slotIndex] ? inst.textboxes[slotIndex]->cachedWidth : 50);
+    int slotTop = inst.posY;
+    int slotBottom = inst.posY + inst.cachedHeight;
+
+    return (pointX >= slotLeft && pointX <= slotRight &&
+            pointY >= slotTop && pointY <= slotBottom);
+}
+
+/*
 -----------------------
 This function will search for BlockInstance with specific id in new system
 -----------------------
