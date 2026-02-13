@@ -37,6 +37,11 @@ Value execRepeat(ExecutionContext &ctx, Value inputs[], int inputCount)
     return inputs[0];
 }
 
+Value execIfElse(ExecutionContext &ctx, Value inputs[], int inputCount)
+{
+    return inputs[0];
+}
+
 Value execAdd(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     return fromNumber(inputs[0].asNumber() + inputs[1].asNumber());
@@ -133,6 +138,24 @@ Block blocksLibrary[] = {
         execAdd,
         100,
         30,
+    },
+    // [5] if-else statement
+    {
+        3,
+        "if-else %s",
+        CATEGORY_CONTROL,
+        BLOCK_STATEMENT,
+        {
+            {"condition", VALUE_BOOLEAN, fromBool(true)},
+        },
+        1,
+        VALUE_NUMBER,
+        true,
+        true,
+        2,
+        execIfElse,
+        150,
+        40,
     },
 };
 
