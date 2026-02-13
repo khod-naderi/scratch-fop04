@@ -148,6 +148,83 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
 
 /*
 -------------------------------------------------
+This function is for drawing Sprite box.
+this function will run on every frame.
+-------------------------------------------------
+*/
+
+void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect SpriteArea ,
+     const int mouseX, const int mouseY ) { 
+        const int buttonSize = 80;
+        AddSpriteButtonRect = { SpriteArea.x + SpriteArea.w - buttonSize - 17,
+             SpriteArea.y + 17, buttonSize, buttonSize };
+
+        // hovering effect for add sprite button
+        isHoveringAddSpriteButton = ( mouseX >= AddSpriteButtonRect.x && mouseX <= AddSpriteButtonRect.x + AddSpriteButtonRect.w &&
+                                     mouseY >= AddSpriteButtonRect.y && mouseY <= AddSpriteButtonRect.y + AddSpriteButtonRect.h);
+        
+
+        // updating menu state based on hovering status
+        if ( isHoveringAddSpriteButton ) {
+            addSpriteMenuState = Menu_Hover_Main;
+        }
+        else if ( addSpriteMenuState == Menu_Hover_Main ) {
+            addSpriteMenuState = Menu_Closed;
+        }
+
+        // drawing add sprite button
+        if ( isHoveringAddSpriteButton) {
+            SDL_SetRenderDrawColor(renderer, 100, 200 , 100 , 255 ); // green color for hovered state
+        }
+        else {
+            SDL_SetRenderDrawColor(renderer, 150, 100, 200, 255 ); // purple color for normal state
+        }
+
+        SDL_RenderFillRect(renderer, &AddSpriteButtonRect);
+
+        //Draw border for add sprite button
+        SDL_SetRenderDrawColor(renderer, 100, 200, 100, 255);
+        SDL_RenderDrawRect(renderer, &AddSpriteButtonRect);
+
+        // now using cat icon for add sprite button
+        if (catIcon) {
+            SDL_RenderCopy(renderer, catIcon, nullptr, &AddSpriteButtonRect);
+        }
+
+        // adding one layer color ( to fix the hovering problem )
+        if ( isHoveringAddSpriteButton) {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 100, 200, 100, 80); // green - with transparency
+            SDL_RenderFillRect(renderer, &AddSpriteButtonRect);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        }
+        else {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 150, 100, 200, 80); // purple - with transparency
+            SDL_RenderFillRect(renderer, &AddSpriteButtonRect);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        }
+
+        // if Hovering show add sprite text next to the button. 
+        if (isHoveringAddSpriteButton) {
+            SDL_Color textColor = color_black;
+            SDL_Surface* textSurface = TTF_RenderText_Solid(font, "Add Sprite", textColor);
+            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+            int textX = AddSpriteButtonRect.x - textSurface->w - 10; // 10 pixels to the left of the button
+            int textY = AddSpriteButtonRect.y + (AddSpriteButtonRect.h - textSurface->h) / 2; // vertically centered
+
+            SDL_Rect textRect = {textX, textY, textSurface->w, textSurface->h};
+            SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
+            SDL_FreeSurface(textSurface);
+            SDL_DestroyTexture(textTexture);
+         }
+
+     }
+
+/*
+-------------------------------------------------
 This function is for adding and initializeing a sprint to screen
 this function will run only one time.
 -------------------------------------------------
@@ -221,6 +298,9 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
     // Draw top bar of sprite box
     DrawTopBarOfSpriteBox(renderer, font, topBar);
+
+    // Draw add sprite button and menu
+    DrawAddSpriteMenu(renderer, font, spriteArea, mouseX, mouseY);
 
     // Sprtie thumbnails
     const int thumbnailSize = 70;
@@ -315,11 +395,11 @@ true if loade, false otherwise
 */
 
 bool loadSpriteBoxMenuIcons(SDL_Renderer* renderer) {
-    catIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteChooseIcon.png");
-    paintIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteIcon.png");
-    uploadIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpritePaintIcon.png");
+    catIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteIcon.png");
+    paintIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpritePaintIcon.png");
+    uploadIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteUploadIcon.png");
     randomIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteRandomIcon.png");
-    searchIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteUploadIcon.png");
+    searchIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteChooseIcon.png");
 
     if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon) {
         std::cerr << "Failed to load one or more sprite box menu icons." << std::endl;
@@ -340,6 +420,11 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
     if (errcode)
         return errcode;
 
+    // Adding menu bar icons
+    if (!loadSpriteBoxMenuIcons(renderer)) {
+        std::cerr << "Failed to load sprite box menu icons." << std::endl;
+    }    
+
     return 0;
 }
 
@@ -348,7 +433,6 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
 This function is for handling selection on sprite thumbnails 
 ----------------------------------------------------
 */
-
 void SpriteBoxClick(const int mouseX , const int mouseY ) 
 {
     int thumbnailSize = 70;

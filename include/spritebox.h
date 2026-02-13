@@ -56,4 +56,5 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 void SpriteBoxClick(const int mouseX, const int mouseY);
 void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar);
 bool loadSpriteBoxMenuIcons(SDL_Renderer *renderer);
+void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect SpriteArea , const int mouseX, const int mouseY );
 #endif
