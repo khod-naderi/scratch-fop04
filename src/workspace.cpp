@@ -15,6 +15,7 @@ This CPP file is for managing code view named workspace
 #include "block_instance.h"
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 CodeSpace workspaceCodeSpace;
 
@@ -28,6 +29,14 @@ bool isScrollingWorkspace = false;
 int mouseX0, mouseY0;
 int scrollOffsetX = 0;
 int scrollOffsetY = 0;
+
+/*
+This functions will calulate width of static labels
+used to find correct position of textboxes
+*/
+#define INLINE_LABEL_TEXBOX_MARGIN 2
+std::vector<int> calcLabelSizeByPart(const char *label);
+std::vector<int> calcLabelSizeByPartCamulative(const char *label);
 
 /*
 -------------------------------
@@ -415,6 +424,15 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             th,
         };
         SDL_RenderCopy(renderer, texture, NULL, &textRect);
+
+        // Textboxes
+        std::vector<int> wst = calcLabelSizeByPartCamulative(def.label);
+        for (int i = 0; i < inst.inputCount; i++)
+        {
+            inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + wst[i] + BLOCKINSTANCE_RL_MARGIN / 2;
+            inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
+            inst.textboxes[i]->draw(renderer);
+        }
     }
 
     return;
@@ -458,4 +476,50 @@ std::string blockInstanceUpdateLabel(BlockInstance &inst)
     inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
 
     return out;
+}
+
+std::vector<int> calcLabelSizeByPart(const char *label)
+{
+    std::vector<int> out;
+    std::string temp = "";
+    for (int i = 0; i < strlen(label); i++)
+    {
+        if (label[i] == '%')
+        {
+            i++;
+            if (label[i] == 's')
+            {
+                int tw;
+                TTF_SizeText(DEFAULT_FONT, temp.c_str(), &tw, nullptr);
+                out.push_back(tw);
+                temp.clear();
+            }
+            continue;
+        }
+
+        temp.push_back(label[i]);
+    }
+
+    if (!temp.empty())
+    {
+        int tw;
+        TTF_SizeText(DEFAULT_FONT, temp.c_str(), &tw, nullptr);
+        out.push_back(tw);
+        temp.clear();
+    }
+
+    return out;
+}
+
+std::vector<int> calcLabelSizeByPartCamulative(const char *label)
+{
+    std::vector<int> sizes = calcLabelSizeByPart(label);
+    if (sizes.size() <= 1)
+        return sizes;
+
+    for (auto it = sizes.begin() + 1; it != sizes.end(); ++it)
+    {
+        *it = *it + *(it - 1);
+    }
+    return sizes;
 }
