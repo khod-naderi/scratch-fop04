@@ -67,3 +67,31 @@ void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int in
     inst.cachedHeight = def.baseHeight;
     inst.cachedWidth = def.baseWidth;
 }
+
+std::string lprintf(const char *format, const InputValue values[])
+{
+    std::string out = "";
+    int j = 0;
+    for (size_t i = 0; i < strlen(format); i++)
+    {
+        if (format[i] == '%')
+        {
+            i++;
+            if (format[i] == 's')
+            {
+                if (values[i].isBlock)
+                {
+                    // TODO: BlockInstance *inst = findIn values->blockInstanceId
+                }
+                else
+                {
+                    out += values[j].literal.asString();
+                }
+                j++;
+                continue;
+            }
+        }
+        out.push_back(format[i]);
+    }
+    return out;
+}

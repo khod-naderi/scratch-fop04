@@ -47,6 +47,6 @@ struct BlockInstance
 
 void blockInstanceConstruct(BlockInstance &inst);
 void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int instanceId, int posX, int posY);
-void blockInstanceUpdateDimension(BlockInstance &inst);
+std::string lprintf(const char *format, const InputValue values[])
 
 #endif
