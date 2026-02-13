@@ -58,4 +58,8 @@ void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int in
     {
         inst.bodies[i] = -1;
     }
+
+    // copy dimensions from definition
+    inst.cachedHeight = def.baseHeight;
+    inst.cachedWidth = def.baseWidth;
 }
