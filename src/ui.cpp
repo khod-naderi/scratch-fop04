@@ -80,7 +80,6 @@ std::vector<TextBox *> textboxList;
 TextBox::TextBox(TTF_Font *font_i)
 {
     id = textboxLastId++;
-    _str = "";
     isFucused = false;
     posX = 0;
     posY = 0;
@@ -88,6 +87,7 @@ TextBox::TextBox(TTF_Font *font_i)
     font = font_i;
     fgColor = color_black;
     bgColor = color_white;
+    setStr(" ");
 
     textboxList.push_back(this);
 }
@@ -95,7 +95,6 @@ TextBox::TextBox(TTF_Font *font_i)
 TextBox::TextBox(TTF_Font *font_i, std::string &defaultStr)
 {
     id = textboxLastId++;
-    _str = defaultStr;
     isFucused = false;
     posX = 0;
     posY = 0;
@@ -103,6 +102,7 @@ TextBox::TextBox(TTF_Font *font_i, std::string &defaultStr)
     font = font_i;
     fgColor = color_black;
     bgColor = color_white;
+    setStr(defaultStr);
 
     textboxList.push_back(this);
 }
@@ -138,7 +138,7 @@ void TextBox::draw(SDL_Renderer *renderer)
     else
         SDL_SetRenderDrawColor(renderer, bgColor);
 
-    SDL_RenderDrawRect(renderer, &bgRect);
+    SDL_RenderFillRect(renderer, &bgRect);
 
     // Draw text string
     SDL_Rect fgRect = {
