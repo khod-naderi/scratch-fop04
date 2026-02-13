@@ -12,6 +12,7 @@
 #include "spritebox.h"
 #include "workspace.h"
 #include "saveload.h"
+#include "logger.h"
 
 int main(int argc, char *argv[])
 {
@@ -91,6 +92,7 @@ int main(int argc, char *argv[])
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
     SDL_Event eventSDL;
+    logger_log("Scratch is ready!", INFO);
 
     /*
     ---------------------------------------------
@@ -171,6 +173,7 @@ int main(int argc, char *argv[])
         drawCanvasScreen(renderer, font, mouseX, mouseY);
         drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
+
         if (isOnLoadScreen)
         {
             drawLoadScreen(renderer, font, mouseX, mouseY);
@@ -179,6 +182,10 @@ int main(int argc, char *argv[])
         {
             drawSaveScreen(renderer, font, mouseX, mouseY);
         }
+
+        //  Logger rendering goes HERE
+        // (call the real function that exists in logger.cpp, not assumed methods)
+        render_logger(renderer, font);
 
         // show next frame
         SDL_RenderPresent(renderer);

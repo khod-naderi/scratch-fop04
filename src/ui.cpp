@@ -23,6 +23,11 @@ const SDL_Rect fileMenuRect = {LOGO_MARGIN_LEFT + LOGO_WIDTH + 2 * MENU_MARGIN_L
 const SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEFT, 5, 60, MENUBAR_HEIGHT - 10};
 
 const SDL_Rect SAVELOAD_BOX = {MAIN_WINDOW_WIDTH / 4, MAIN_WINDOW_HEIGHT / 3, MAIN_WINDOW_WIDTH / 2, MAIN_WINDOW_HEIGHT / 3};
+const SDL_Rect LOGGER_Box = {
+    CATEGORY_COLUMN_WIDTH + CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH,
+    MAIN_WINDOW_HEIGHT - LOGGER_HEIGHT,
+    MAIN_WINDOW_WIDTH - (CATEGORY_COLUMN_WIDTH + CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + CANVAS_SCREEN_WIDTH),
+    LOGGER_HEIGHT};
 
 /*
     This function render text
@@ -61,4 +66,19 @@ SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
     SDL_FreeSurface(custome);
 
     return imgText;
+}
+/*
+this function draws a thick rectangle instead of the default sdl2 rectangle.
+*/
+void draw_thick_rect(SDL_Renderer *renderer, const SDL_Rect &rect, int thickness)
+{
+    SDL_Rect temp = rect;
+    for (int i = 0; i < thickness; ++i)
+    {
+        SDL_RenderDrawRect(renderer, &temp);
+        temp.x++;
+        temp.y++;
+        temp.w -= 2;
+        temp.h -= 2;
+    }
 }
