@@ -4,6 +4,9 @@ This header file is for managing custome and backgorund setting area named sprit
 -------------------------------------------
 */
 
+// most of functions are called in the function : dawSpriteBoxScreen,
+// which is called in main loop to render sprite box every frame.
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -222,7 +225,53 @@ void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect Sprite
          }
 
      }
+     
+/*
+-------------------------------------------------
+This function is for handling clicking on cat icon
+true if clicked/ false otherwise
+-------------------------------------------------
+*/
 
+bool HandleAddSpriteClick( const int mouseX, const int mouseY ) {
+    // first check if mouse is on add sprite button
+    if ( mouseX >= AddSpriteButtonRect.x && mouseX <= AddSpriteButtonRect.x + AddSpriteButtonRect.w &&
+         mouseY >= AddSpriteButtonRect.y && mouseY <= AddSpriteButtonRect.y + AddSpriteButtonRect.h) {
+            // clicked on add sprite button
+            if ( addSpriteMenuState == Menu_Open ) {
+                addSpriteMenuState = Menu_Closed;
+            }
+            else {
+                addSpriteMenuState = Menu_Open;
+            }
+            return true; 
+         }
+
+    // if menu is open, check if mouse is on any of menu options
+    if ( addSpriteMenuState == Menu_Open ) {
+        for ( int i = 0; i < 4; i++ ) {
+            if ( menuOptions[i].isHovered ) {
+                // controling each option separately
+                switch ( i ) {
+                    case 0: // choose a sprite 
+                    // calling the function for adding a new sprite .
+                    break;
+                    case 1: // paint 
+                    // calling the function for opening paint page.
+                    break;
+                    case 2: // upload
+                    // calling the function for uploading a new sprite from local files.
+                    break;
+                    case 3: // random
+                    // calling the function for adding a random sprite.
+                    break;
+                }
+                addSpriteMenuState = Menu_Closed; // close menu after clicking on an option / choosing one sprite option
+                return true;
+        }
+    }
+    return false;
+}
 /*
 -------------------------------------------------
 This function is for adding and initializeing a sprint to screen
