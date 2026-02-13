@@ -62,3 +62,36 @@ SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
 
     return imgText;
 }
+
+/*
+--------------------------------------------
+    UI elements
+--------------------------------------------
+*/
+
+/*
+-----------------------
+    TextBox
+-----------------------
+*/
+int textboxLastId = 0;
+
+TextBox::TextBox()
+{
+    id = textboxLastId++;
+    str = "";
+    isFucused = false;
+    posX = 0;
+    posY = 0;
+    isVisible = true;
+}
+
+TextBox::TextBox(std::string defaultStr)
+{
+    id = textboxLastId++;
+    str = defaultStr;
+    isFucused = false;
+    posX = 0;
+    posY = 0;
+    isVisible = true;
+}

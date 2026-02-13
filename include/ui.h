@@ -9,6 +9,7 @@ This header file is for handling UI component
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include "category.h"
+#include <string>
 
 #ifndef UI_HEADER
 #define UI_HEADER
@@ -40,5 +41,35 @@ void render_extension_button(SDL_Renderer *renderer, SDL_Rect bounds);
 // Define menu reactangles
 extern const SDL_Rect fileMenuRect;
 extern const SDL_Rect editMenuRect;
+
+/*
+----------------------------------------
+    Ui elements
+----------------------------------------
+*/
+
+// textbox
+struct TextBox
+{
+    // Identifier
+    int id;
+
+    // Position
+    int posX;
+    int posY;
+
+    // Storage memory
+    std::string str;
+
+    // Controll variables
+    bool isFucused;
+
+    // Visibility
+    bool isVisible;
+
+    // Constructor
+    TextBox();
+    TextBox(std::string defaultStr);
+};
 
 #endif
