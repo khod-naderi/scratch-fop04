@@ -438,6 +438,44 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             inst.textboxes[i]->draw(renderer);
             totalWitdh += inst.textboxes[i]->cachedWidth;
         }
+
+        // Bodies
+        // frame
+        int totalHeightBlock = 0;
+        for (int i = 0; i < inst.bodyCount; i++)
+        {
+            int bodiesTotalHeight = 0; // TODO: make it dynamic by bodies
+
+            SDL_Rect sideRect = {
+                WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX,
+                WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + inst.cachedHeight + totalHeightBlock,
+                10,
+                bodiesTotalHeight + 40,
+            };
+            SDL_Rect bottomRect = {
+                WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX,
+                WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + inst.cachedHeight + sideRect.h + totalHeightBlock,
+                inst.cachedWidth,
+                20,
+            };
+
+            totalHeightBlock += (bottomRect.y - sideRect.y) + bottomRect.h;
+
+            if (!isBLockDraged && isPointInRect(mouseX, mouseY, itemRect))
+            {
+                SDL_SetRenderDrawColor(renderer, colorDim(categories[def.categoryId].color));
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(renderer, categories[def.categoryId].color);
+            }
+            SDL_RenderFillRect(renderer, &sideRect);
+            SDL_RenderFillRect(renderer, &bottomRect);
+            // item border
+            SDL_SetRenderDrawColor(renderer, color_black);
+            SDL_RenderDrawRect(renderer, &sideRect);
+            SDL_RenderDrawRect(renderer, &bottomRect);
+        }
     }
 
     return;
