@@ -43,6 +43,9 @@ void render_extension_button(SDL_Renderer *renderer, SDL_Rect bounds);
 extern const SDL_Rect fileMenuRect;
 extern const SDL_Rect editMenuRect;
 
+// default font (DO NOT USE IT)
+extern TTF_Font *DEFAULT_FONT;
+
 /*
 ----------------------------------------
     Ui elements

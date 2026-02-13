@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
         std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
         return SDL_FONT_NOT_FOUND;
     }
+    DEFAULT_FONT = font;
 
     // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(

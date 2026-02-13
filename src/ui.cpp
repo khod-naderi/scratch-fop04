@@ -24,10 +24,13 @@ const SDL_Rect editMenuRect = {fileMenuRect.x + fileMenuRect.w + MENU_MARGIN_LEF
 
 const SDL_Rect SAVELOAD_BOX = {MAIN_WINDOW_WIDTH / 4, MAIN_WINDOW_HEIGHT / 3, MAIN_WINDOW_WIDTH / 2, MAIN_WINDOW_HEIGHT / 3};
 
+TTF_Font *DEFAULT_FONT;
+
 /*
     This function render text
 */
-SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color)
+SDL_Texture *
+renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color)
 {
     SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
     if (!surface)
