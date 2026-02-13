@@ -389,6 +389,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         BlockInstance inst = workspaceCodeSpace.instances[i];
         Block def = blocksLibrary[inst.defenitionId];
 
+        updateBlockInstanceInputValues(inst);
+
         std::string blStr = blockInstanceUpdateLabel(inst);
 
         SDL_Rect itemRect = {

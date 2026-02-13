@@ -96,3 +96,21 @@ std::string lprintf(const char *format, const InputValue values[])
     }
     return out;
 }
+
+/*
+This function will update input value of a blockinstace with it's textboxes.
+*/
+void updateBlockInstanceInputValues(BlockInstance &inst)
+{
+    for (int i = 0; i < inst.inputCount; i++)
+    {
+        if (inst.inputs[i].isBlock)
+        {
+            // TODO: Block connection inputs
+        }
+        else
+        {
+            inst.inputs[i].literal = fromString(inst.textboxes[i]->getStr());
+        }
+    }
+}
