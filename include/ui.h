@@ -49,6 +49,9 @@ extern const SDL_Rect editMenuRect;
 */
 
 // textbox
+#define TEXTBOX_RL_MARGIN 4
+#define TEXTBOX_TB_MARGIN 4
+
 struct TextBox
 {
     // Identifier
@@ -83,6 +86,9 @@ struct TextBox
     // Functions
     void setStr(const std::string &istr);
     std::string getStr() const;
+
+    // Drawing
+    void draw(SDL_Renderer *renderer);
 };
 
 #endif

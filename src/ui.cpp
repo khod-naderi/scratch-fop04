@@ -119,3 +119,37 @@ void TextBox::setStr(const std::string &istr)
     // update dimentions
     TTF_SizeText(font, _str.c_str(), &cachedWidth, &cachedHeight);
 }
+
+void TextBox::draw(SDL_Renderer *renderer)
+{
+    if (!isVisible)
+        return;
+
+    SDL_Rect bgRect = {
+        posX,
+        posY,
+        cachedWidth + TEXTBOX_RL_MARGIN,  // +[TEXTBOX_RL_MARGIN]px for left-right margin
+        cachedHeight + TEXTBOX_TB_MARGIN, // +[TEXTBOX_RL_MARGIN]px for top-bottom margin
+    };
+
+    // Draw background
+    if (isFucused)
+        SDL_SetRenderDrawColor(renderer, colorLight(bgColor));
+    else
+        SDL_SetRenderDrawColor(renderer, bgColor);
+
+    SDL_RenderDrawRect(renderer, &bgRect);
+
+    // Draw text string
+    SDL_Rect fgRect = {
+        posX + TEXTBOX_RL_MARGIN / 2,
+        posY + TEXTBOX_TB_MARGIN / 2,
+        cachedWidth,
+        cachedHeight,
+    };
+
+    SDL_Texture *textureTxt = renderText(renderer, font, getStr().c_str(), fgColor);
+    if (textureTxt == nullptr)
+        return;
+    SDL_RenderCopy(renderer, textureTxt, NULL, &fgRect);
+}
