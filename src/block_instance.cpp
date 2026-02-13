@@ -82,6 +82,7 @@ std::string lprintf(const char *format, const InputValue values[])
                 if (values[i].isBlock)
                 {
                     // TODO: BlockInstance *inst = findIn values->blockInstanceId
+                    out += values[j].literal.asString();
                 }
                 else
                 {

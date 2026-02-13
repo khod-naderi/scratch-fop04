@@ -47,6 +47,6 @@ struct BlockInstance
 
 void blockInstanceConstruct(BlockInstance &inst);
 void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int instanceId, int posX, int posY);
-std::string lprintf(const char *format, const InputValue values[])
+std::string lprintf(const char *format, const InputValue values[]);
 
 #endif

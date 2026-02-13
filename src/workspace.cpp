@@ -380,11 +380,13 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         BlockInstance inst = workspaceCodeSpace.instances[i];
         Block def = blocksLibrary[inst.defenitionId];
 
+        std::string blStr = blockInstanceUpdateLabel(inst);
+
         SDL_Rect itemRect = {
             WORKSPACE_COLUMN.x + inst.posX + scrollOffsetX,
             WORKSPACE_COLUMN.y + inst.posY + scrollOffsetY,
-            def.baseWidth,
-            def.baseHeight,
+            inst.cachedWidth,
+            inst.cachedHeight,
         };
 
         // item background
@@ -404,7 +406,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         // item text
         int tw, th;
-        SDL_Texture *texture = renderText(renderer, font, def.label, color_white);
+        SDL_Texture *texture = renderText(renderer, font, blStr.c_str(), color_white);
         SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
         SDL_Rect textRect = {
             itemRect.x + (itemRect.w - tw) / 2,
@@ -445,4 +447,15 @@ void detachBlockFromWorkspace(int id)
 void removeBlockFromWorkspace(int id)
 {
     codespaceRemoveInstance(workspaceCodeSpace, id);
+}
+
+std::string blockInstanceUpdateLabel(BlockInstance &inst)
+{
+    const char *format = blocksLibrary[inst.defenitionId].label;
+    std::string out = lprintf(format, inst.inputs);
+
+    TTF_SizeText(inst.textboxes[0]->font, out.c_str(), &inst.cachedWidth, nullptr);
+    inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
+
+    return out;
 }

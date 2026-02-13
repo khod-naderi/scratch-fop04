@@ -31,4 +31,6 @@ void attachBlocksSequentially(int topId, int bottomId);
 void detachBlockFromWorkspace(int id);
 void removeBlockFromWorkspace(int id);
 
+std::string blockInstanceUpdateLabel(BlockInstance &inst);
+
 #endif
