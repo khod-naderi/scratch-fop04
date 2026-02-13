@@ -603,6 +603,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].baseWidth / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
         const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].baseHeight / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
 
+        // sequential connection shadow
+        bool shadowDrawn = false;
         if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
         {
             int nearItemId = isItemNearTopToConnect(TL_X, TL_Y);
@@ -624,6 +626,80 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                     // Fill item background
                     SDL_SetRenderDrawColor(renderer, color_softGray);
                     SDL_RenderFillRect(renderer, &dragedItemRect);
+                    shadowDrawn = true;
+                }
+            }
+        }
+
+        // body connection shadow if sequential shadow not drawn
+        if (!shadowDrawn)
+        {
+            int bodyIndex = -1;
+            int parentId = isItemNearBodyToConnect(TL_X, TL_Y, bodyIndex);
+            if (parentId != -1)
+            {
+                BlockInstance *parentInst = findBlockInstanceById(parentId);
+                if (parentInst)
+                {
+                    Block parentDef = blocksLibrary[parentInst->defenitionId];
+                    int bodyStartY = parentInst->posY + parentDef.baseHeight;
+                    int bodyHeight = 60; // Same as in isPointInBodyArea
+
+                    // Draw dragged item shadow in body area
+                    SDL_Rect dragedItemRect = {
+                        WORKSPACE_COLUMN.x + parentInst->posX + 15 + scrollOffsetX,
+                        WORKSPACE_COLUMN.y + bodyStartY + (bodyIndex * bodyHeight) + 5 + scrollOffsetY,
+                        blocksLibrary[dragedBlockIndex].baseWidth,
+                        blocksLibrary[dragedBlockIndex].baseHeight,
+                    };
+
+                    // Fill item background with different color for body connections
+                    SDL_SetRenderDrawColor(renderer, color_softGray);
+                    SDL_RenderFillRect(renderer, &dragedItemRect);
+                    shadowDrawn = true;
+                }
+            }
+        }
+
+        // Try input connection shadow if other shadows not drawn
+        if (!shadowDrawn)
+        {
+            Block draggedDef = blocksLibrary[dragedBlockIndex];
+            // Only expression blocks (operators, reporter) can be connected to inputs
+            if (draggedDef.type == BLOCK_OPERATOR || draggedDef.type == BLOCK_REPORTER)
+            {
+                int slotIndex = -1;
+                int hostId = isItemNearInputToConnect(TL_X, TL_Y, slotIndex);
+                if (hostId != -1)
+                {
+                    BlockInstance *hostInst = findBlockInstanceById(hostId);
+                    if (hostInst)
+                    {
+                        // Calculate input slot position
+                        Block hostDef = blocksLibrary[hostInst->defenitionId];
+                        std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                        int totalWidth = 0;
+                        for (int i = 0; i < slotIndex; i++)
+                        {
+                            totalWidth += wst[i];
+                            if (i < hostInst->inputCount)
+                                totalWidth += hostInst->textboxes[i]->cachedWidth;
+                        }
+                        totalWidth += wst[slotIndex];
+
+                        // Draw dragged item shadow near input slot
+                        SDL_Rect dragedItemRect = {
+                            WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + scrollOffsetX,
+                            WORKSPACE_COLUMN.y + hostInst->posY - draggedDef.baseHeight - 5 + scrollOffsetY,
+                            draggedDef.baseWidth,
+                            draggedDef.baseHeight,
+                        };
+
+                        // Fill item background with input connection color
+                        SDL_SetRenderDrawColor(renderer, color_blurgray);
+                        SDL_RenderFillRect(renderer, &dragedItemRect);
+                        shadowDrawn = true;
+                    }
                 }
             }
         }
@@ -633,38 +709,130 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     if (isMovingItem && movingInstanceId != -1)
     {
         BlockInstance *movingInst = findBlockInstanceById(movingInstanceId);
-        if (movingInst && blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
+        if (movingInst)
         {
-            int topItemId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
-            if (topItemId != -1) //  there is a near connectable item
+            bool movingShadowDrawn = false;
+
+            // Try sequential connection shadow first
+            if (blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
             {
-                BlockInstance *topInst = findBlockInstanceById(topItemId);
-                if (topInst)
+                int topItemId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
+                if (topItemId != -1) //  there is a near connectable item
                 {
-                    Block topDef = blocksLibrary[topInst->defenitionId];
-                    int totalHeight = 0;
-
-                    for (int id : movingChainIds)
+                    BlockInstance *topInst = findBlockInstanceById(topItemId);
+                    if (topInst)
                     {
-                        BlockInstance *chainInst = findBlockInstanceById(id);
-                        if (!chainInst)
-                            continue;
+                        Block topDef = blocksLibrary[topInst->defenitionId];
+                        int totalHeight = 0;
 
-                        Block chainDef = blocksLibrary[chainInst->defenitionId];
+                        for (int id : movingChainIds)
+                        {
+                            BlockInstance *chainInst = findBlockInstanceById(id);
+                            if (!chainInst)
+                                continue;
 
-                        // Draw shadow for each block in chain
-                        SDL_Rect shadowRect = {
-                            WORKSPACE_COLUMN.x + topInst->posX + scrollOffsetX,
-                            WORKSPACE_COLUMN.y + topInst->posY + topDef.baseHeight + totalHeight + scrollOffsetY,
-                            chainDef.baseWidth,
-                            chainDef.baseHeight,
-                        };
+                            Block chainDef = blocksLibrary[chainInst->defenitionId];
 
-                        totalHeight += chainDef.baseHeight;
+                            // Draw shadow for each block in chain
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + topInst->posX + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + topInst->posY + topDef.baseHeight + totalHeight + scrollOffsetY,
+                                chainDef.baseWidth,
+                                chainDef.baseHeight,
+                            };
 
-                        // Fill item background
-                        SDL_SetRenderDrawColor(renderer, color_softGray);
-                        SDL_RenderFillRect(renderer, &shadowRect);
+                            totalHeight += chainDef.baseHeight;
+
+                            // Fill item background
+                            SDL_SetRenderDrawColor(renderer, color_softGray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                        }
+                        movingShadowDrawn = true;
+                    }
+                }
+            }
+
+            // Try body connection shadow if sequential shadow not drawn
+            if (!movingShadowDrawn)
+            {
+                int bodyIndex = -1;
+                int parentId = isItemNearBodyToConnect(movingInst->posX, movingInst->posY, bodyIndex);
+                if (parentId != -1)
+                {
+                    BlockInstance *parentInst = findBlockInstanceById(parentId);
+                    if (parentInst)
+                    {
+                        Block parentDef = blocksLibrary[parentInst->defenitionId];
+                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
+                        int bodyHeight = 60; // Same as in isPointInBodyArea
+                        int totalHeight = 0;
+
+                        for (int id : movingChainIds)
+                        {
+                            BlockInstance *chainInst = findBlockInstanceById(id);
+                            if (!chainInst)
+                                continue;
+
+                            Block chainDef = blocksLibrary[chainInst->defenitionId];
+
+                            // Draw shadow for each block in chain inside body area
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + parentInst->posX + 15 + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + bodyStartY + (bodyIndex * bodyHeight) + 5 + totalHeight + scrollOffsetY,
+                                chainDef.baseWidth,
+                                chainDef.baseHeight,
+                            };
+
+                            totalHeight += chainDef.baseHeight;
+
+                            // Fill item background with body connection color
+                            SDL_SetRenderDrawColor(renderer, color_softGray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                        }
+                        movingShadowDrawn = true;
+                    }
+                }
+            }
+
+            // Try input connection shadow if other shadows not drawn
+            if (!movingShadowDrawn)
+            {
+                Block movingDef = blocksLibrary[movingInst->defenitionId];
+                // Only expression blocks (operators, reporter) can be connected to inputs
+                if (movingDef.type == BLOCK_OPERATOR || movingDef.type == BLOCK_REPORTER)
+                {
+                    int slotIndex = -1;
+                    int hostId = isItemNearInputToConnect(movingInst->posX, movingInst->posY, slotIndex);
+                    if (hostId != -1)
+                    {
+                        BlockInstance *hostInst = findBlockInstanceById(hostId);
+                        if (hostInst)
+                        {
+                            // Calculate input slot position
+                            Block hostDef = blocksLibrary[hostInst->defenitionId];
+                            std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                            int totalWidth = 0;
+                            for (int i = 0; i < slotIndex; i++)
+                            {
+                                totalWidth += wst[i];
+                                if (i < hostInst->inputCount)
+                                    totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            }
+                            totalWidth += wst[slotIndex];
+
+                            // Draw moving item shadow near input slot
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + hostInst->posY - movingDef.baseHeight - 5 + scrollOffsetY,
+                                movingDef.baseWidth,
+                                movingDef.baseHeight,
+                            };
+
+                            // Fill item background with input connection color
+                            SDL_SetRenderDrawColor(renderer, color_blurgray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                            movingShadowDrawn = true;
+                        }
                     }
                 }
             }
