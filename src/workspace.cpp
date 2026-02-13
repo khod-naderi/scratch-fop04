@@ -428,12 +428,15 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         SDL_RenderCopy(renderer, texture, NULL, &textRect);
 
         // Textboxes
-        std::vector<int> wst = calcLabelSizeByPartCamulative(def.label);
+        std::vector<int> wst = calcLabelSizeByPart(def.label);
+        int totalWitdh = 0;
         for (int i = 0; i < inst.inputCount; i++)
         {
-            inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + wst[i] + BLOCKINSTANCE_RL_MARGIN / 2;
+            totalWitdh += wst[i];
+            inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWitdh + BLOCKINSTANCE_RL_MARGIN / 2;
             inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
             inst.textboxes[i]->draw(renderer);
+            totalWitdh += inst.textboxes[i]->cachedWidth;
         }
     }
 
