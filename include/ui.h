@@ -58,8 +58,8 @@ struct TextBox
     int posX;
     int posY;
 
-    // Storage memory
-    std::string str;
+    // Storage memory - DO NOT CHANGE IT DIRECTLY
+    std::string _str;
 
     // Controll variables
     bool isFucused;
@@ -67,9 +67,22 @@ struct TextBox
     // Visibility
     bool isVisible;
 
+    // Cached dimension
+    int cachedWidth;
+    int cachedHeight;
+
+    // Font and color
+    TTF_Font *font;
+    SDL_Color fgColor;
+    SDL_Color bgColor;
+
     // Constructor
-    TextBox();
-    TextBox(std::string defaultStr);
+    TextBox(TTF_Font *font_i);
+    TextBox(TTF_Font *font_i, std::string &defaultStr);
+
+    // Functions
+    void setStr(const std::string &istr);
+    std::string getStr() const;
 };
 
 #endif

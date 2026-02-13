@@ -75,23 +75,47 @@ SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
 -----------------------
 */
 int textboxLastId = 0;
+std::vector<TextBox *> textboxList;
 
-TextBox::TextBox()
+TextBox::TextBox(TTF_Font *font_i)
 {
     id = textboxLastId++;
-    str = "";
+    _str = "";
     isFucused = false;
     posX = 0;
     posY = 0;
     isVisible = true;
+    font = font_i;
+    fgColor = color_black;
+    bgColor = color_white;
+
+    textboxList.push_back(this);
 }
 
-TextBox::TextBox(std::string defaultStr)
+TextBox::TextBox(TTF_Font *font_i, std::string &defaultStr)
 {
     id = textboxLastId++;
-    str = defaultStr;
+    _str = defaultStr;
     isFucused = false;
     posX = 0;
     posY = 0;
     isVisible = true;
+    font = font_i;
+    fgColor = color_black;
+    bgColor = color_white;
+
+    textboxList.push_back(this);
+}
+
+std::string TextBox::getStr() const
+{
+    return _str;
+}
+
+void TextBox::setStr(const std::string &istr)
+{
+    _str = istr;
+
+    // update dimentions
+    TTF_SizeText(font, _str.c_str(), &cachedWidth, &cachedHeight);
 }
