@@ -31,6 +31,10 @@ void attachBlocksSequentially(int topId, int bottomId);
 void detachBlockFromWorkspace(int id);
 void removeBlockFromWorkspace(int id);
 
+// Body connection detection
+int isItemNearBodyToConnect(const int TL_X, const int TL_Y, int &outBodyIndex);
+bool isPointInBodyArea(const int pointX, const int pointY, const BlockInstance &inst, const int bodyIndex);
+
 std::string blockInstanceUpdateLabel(BlockInstance &inst);
 
 #endif

@@ -75,6 +75,75 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
 }
 
 /*
+-------------------------------
+This function checks if any BlockInstance with bodies is near the given position
+and can accept a child block in one of its bodies.
+-------------------------------
+@input:
+TL_X: x position of top left corner of the dragged item (relative to workspace coordinate).
+TL_Y: y position of top left corner of the dragged item (relative to workspace coordinate).
+outBodyIndex: pointer to store which body index is near
+@output:
+if yes, it will return instanceId of that item and set outBodyIndex,
+if not, it will return -1
+*/
+int isItemNearBodyToConnect(const int TL_X, const int TL_Y, int &outBodyIndex)
+{
+    for (int i = 0; i < MAX_INSTANCES; i++)
+    {
+        if (!workspaceCodeSpace.instanceUsed[i])
+            continue;
+
+        BlockInstance inst = workspaceCodeSpace.instances[i];
+        Block def = blocksLibrary[inst.defenitionId];
+
+        // Skip if this block has no bodies
+        if (def.bodyCount == 0)
+            continue;
+
+        // Check each body area
+        for (int bodyIdx = 0; bodyIdx < def.bodyCount; bodyIdx++)
+        {
+            if (isPointInBodyArea(TL_X, TL_Y, inst, bodyIdx))
+            {
+                outBodyIndex = bodyIdx;
+                return inst.instanceId;
+            }
+        }
+    }
+
+    return -1;
+}
+
+/*
+-------------------------------
+This function checks if a point is inside a specific body area of a block instance
+-------------------------------
+*/
+bool isPointInBodyArea(const int pointX, const int pointY, const BlockInstance &inst, const int bodyIndex)
+{
+    Block def = blocksLibrary[inst.defenitionId];
+
+    if (bodyIndex < 0 || bodyIndex >= def.bodyCount)
+        return false;
+
+    // Calculate body area bounds
+    // Body areas start after the main block and are stacked vertically
+    int bodyStartY = inst.posY + def.baseHeight;
+    int bodyHeight = 60; // Default body height, TODO: make it dynamic
+    int bodyY = bodyStartY + (bodyIndex * bodyHeight);
+
+    // Body area rectangle
+    int bodyLeft = inst.posX + 10; // Margin from left edge
+    int bodyRight = inst.posX + def.baseWidth - 10;
+    int bodyTop = bodyY;
+    int bodyBottom = bodyY + bodyHeight;
+
+    return (pointX >= bodyLeft && pointX <= bodyRight &&
+            pointY >= bodyTop && pointY <= bodyBottom);
+}
+
+/*
 -----------------------
 This function will search for BlockInstance with specific id in new system
 -----------------------
