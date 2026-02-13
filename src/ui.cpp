@@ -158,6 +158,16 @@ char keysym2char(const SDL_Keysym &keysym)
 --------------------------------------------
 */
 
+void controlUiElementClickDown(int mouseX, int mouseY)
+{
+    controlTextboxesClickDown(mouseX, mouseY);
+}
+
+void controlUiElementKeyboardHit(const SDL_Keysym &key)
+{
+    controlTextboxesKeyboardHit(key);
+}
+
 /*
 -----------------------
     TextBox
@@ -223,7 +233,7 @@ void TextBox::draw(SDL_Renderer *renderer)
 
     // Draw background
     if (isFucused)
-        SDL_SetRenderDrawColor(renderer, colorLight(bgColor));
+        SDL_SetRenderDrawColor(renderer, colorDim(bgColor));
     else
         SDL_SetRenderDrawColor(renderer, bgColor);
 
@@ -241,4 +251,51 @@ void TextBox::draw(SDL_Renderer *renderer)
     if (textureTxt == nullptr)
         return;
     SDL_RenderCopy(renderer, textureTxt, NULL, &fgRect);
+}
+
+void controlTextboxesClickDown(int mouseX, int mouseY)
+{
+    for (TextBox *txb : textboxList)
+    {
+        SDL_Rect rect = {
+            txb->posX,
+            txb->posY,
+            txb->cachedWidth + TEXTBOX_RL_MARGIN,  // +[TEXTBOX_RL_MARGIN]px for left-right margin
+            txb->cachedHeight + TEXTBOX_TB_MARGIN, // +[TEXTBOX_RL_MARGIN]px for top-bottom margin
+        };
+
+        if (txb->isVisible && isPointInRect(mouseX, mouseY, rect))
+            txb->isFucused = true;
+        else
+            txb->isFucused = false;
+    }
+}
+
+void controlTextboxesKeyboardHit(const SDL_Keysym &key)
+{
+    for (TextBox *txb : textboxList)
+    {
+        if (txb->isFucused)
+        {
+            if (key.sym == SDLK_ESCAPE)
+            {
+                txb->isFucused = false;
+                return;
+            }
+
+            std::string newStr = txb->getStr();
+
+            if (key.sym == SDLK_BACKSPACE)
+            {
+                if (!newStr.empty())
+                    newStr.pop_back();
+            }
+            else
+            {
+                char keychar = keysym2char(key);
+                newStr.push_back(keychar);
+            }
+            txb->setStr(newStr);
+        }
+    }
 }

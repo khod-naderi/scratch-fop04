@@ -48,6 +48,8 @@ extern const SDL_Rect editMenuRect;
     Ui elements
 ----------------------------------------
 */
+void controlUiElementClickDown(int mouseX, int mouseY);
+void controlUiElementKeyboardHit(const SDL_Keysym &key);
 
 // textbox
 #define TEXTBOX_RL_MARGIN 4
@@ -91,5 +93,8 @@ struct TextBox
     // Drawing
     void draw(SDL_Renderer *renderer);
 };
+
+void controlTextboxesClickDown(int mouseX, int mouseY);
+void controlTextboxesKeyboardHit(const SDL_Keysym &key);
 
 #endif

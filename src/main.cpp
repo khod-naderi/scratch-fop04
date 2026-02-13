@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
+                    controlUiElementClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEBUTTONUP)
@@ -145,6 +146,10 @@ int main(int argc, char *argv[])
                 if (eventSDL.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                     direction = 1;
                 controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
+            }
+            else if (eventSDL.type == SDL_KEYDOWN)
+            {
+                controlUiElementKeyboardHit(eventSDL.key.keysym);
             }
         }
 
