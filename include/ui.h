@@ -33,6 +33,7 @@ extern const SDL_Rect SAVELOAD_BOX;
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color);
 SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath);
 bool isPointInRect(int x, int y, const SDL_Rect &rect);
+char keysym2char(const SDL_Keysym &key);
 
 void render_categories(SDL_Renderer *renderer, Category categories[], int count, int selected);
 void render_blocks(SDL_Renderer *renderer, Block blocks[], int count, float scroll_offset, SDL_Rect viewport);

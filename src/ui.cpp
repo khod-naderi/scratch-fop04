@@ -64,6 +64,95 @@ SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath)
 }
 
 /*
+    This function will return proper character of keySym (if non-printable, return '\0')
+    also handling meta 'SHIFT' key holding
+*/
+char keysym2char(const SDL_Keysym &keysym)
+{
+    SDL_Keycode key = keysym.sym;
+    Uint16 mod = keysym.mod;
+    bool shift_pressed = (mod & KMOD_SHIFT) != 0;
+
+    // Handle letters (a-z)
+    if (key >= SDLK_a && key <= SDLK_z)
+    {
+        char base_char = 'a' + (key - SDLK_a);
+        return shift_pressed ? toupper(base_char) : base_char;
+    }
+
+    // Handle numbers and their shift symbols
+    if (key >= SDLK_0 && key <= SDLK_9)
+    {
+        if (shift_pressed)
+        {
+            // Shift + number keys produce symbols
+            switch (key)
+            {
+            case SDLK_0:
+                return ')';
+            case SDLK_1:
+                return '!';
+            case SDLK_2:
+                return '@';
+            case SDLK_3:
+                return '#';
+            case SDLK_4:
+                return '$';
+            case SDLK_5:
+                return '%';
+            case SDLK_6:
+                return '^';
+            case SDLK_7:
+                return '&';
+            case SDLK_8:
+                return '*';
+            case SDLK_9:
+                return '(';
+            default:
+                return '\0';
+            }
+        }
+        else
+        {
+            return '0' + (key - SDLK_0);
+        }
+    }
+
+    // Handle special symbols
+    switch (key)
+    {
+    case SDLK_SPACE:
+        return ' ';
+    case SDLK_MINUS:
+        return shift_pressed ? '_' : '-';
+    case SDLK_EQUALS:
+        return shift_pressed ? '+' : '=';
+    case SDLK_LEFTBRACKET:
+        return shift_pressed ? '{' : '[';
+    case SDLK_RIGHTBRACKET:
+        return shift_pressed ? '}' : ']';
+    case SDLK_BACKSLASH:
+        return shift_pressed ? '|' : '\\';
+    case SDLK_SEMICOLON:
+        return shift_pressed ? ':' : ';';
+    case SDLK_QUOTE:
+        return shift_pressed ? '"' : '\'';
+    case SDLK_COMMA:
+        return shift_pressed ? '<' : ',';
+    case SDLK_PERIOD:
+        return shift_pressed ? '>' : '.';
+    case SDLK_SLASH:
+        return shift_pressed ? '?' : '/';
+    case SDLK_BACKQUOTE:
+        return shift_pressed ? '~' : '`';
+
+    // Function keys, arrows, etc. don't have character representations
+    default:
+        return '\0';
+    }
+}
+
+/*
 --------------------------------------------
     UI elements
 --------------------------------------------
