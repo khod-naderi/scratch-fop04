@@ -17,6 +17,13 @@ This header file is for managing custome and backgorund setting area named sprit
 // selected sprite id in sprite box
 int SelectedSpriteID = -1;
 
+// these are for adding png icons for add sprite menu
+SDL_Texture* catIcon = nullptr;
+SDL_Texture* paintIcon = nullptr;
+SDL_Texture* uploadIcon = nullptr;
+SDL_Texture* randomIcon = nullptr;
+SDL_Texture* searchIcon = nullptr;
+
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
 SDL_Rect AddSpriteButtonRect ;
@@ -299,6 +306,26 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         SDL_DestroyTexture(textTexture);
 
     }
+}
+/*
+----------------------------------------------------
+this function is for loading all UI icons for sprite box menu
+true if loade, false otherwise
+----------------------------------------------------
+*/
+
+bool loadSpriteBoxMenuIcons(SDL_Renderer* renderer) {
+    catIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteChooseIcon.png");
+    paintIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteIcon.png");
+    uploadIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpritePaintIcon.png");
+    randomIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteRandomIcon.png");
+    searchIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteUploadIcon.png");
+
+    if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon) {
+        std::cerr << "Failed to load one or more sprite box menu icons." << std::endl;
+        return false;
+    }
+    return true;
 }
 
 /*

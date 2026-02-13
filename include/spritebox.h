@@ -55,4 +55,5 @@ int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgP
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
 void SpriteBoxClick(const int mouseX, const int mouseY);
 void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar);
+bool loadSpriteBoxMenuIcons(SDL_Renderer *renderer);
 #endif
