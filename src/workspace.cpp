@@ -1205,7 +1205,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                 if (topItemId != -1) //  there is a near connectable item
                 {
                     BlockInstance *topInst = findBlockInstanceById(topItemId);
-                    if (canConnectSequentially(topItemId, movingInst->defenitionId))
+                    if (canConnectSequentially(topItemId, movingInst->instanceId))
                     {
                         // Calculate total height including bodies for proper shadow positioning
                         int topTotalHeight = topInst->cachedHeight;
