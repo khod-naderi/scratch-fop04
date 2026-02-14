@@ -330,6 +330,7 @@ bool canConnectToBody(int parentId, int bodyIndex, int childId)
         return false;
 
     Block parentDef = blocksLibrary[parentInst->defenitionId];
+    Block childDef = blocksLibrary[childInst->defenitionId];
 
     // Parent must have bodies
     if (parentDef.bodyCount == 0)
@@ -345,6 +346,10 @@ bool canConnectToBody(int parentId, int bodyIndex, int childId)
 
     // Child must not already have a parent
     if (childInst->parentId != -1)
+        return false;
+
+    // Child must can have top connection
+    if (!childDef.canHaveTopConnection)
         return false;
 
     return true;
@@ -671,7 +676,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                         BlockInstance *newInst = findBlockInstanceById(newInstanceId);
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
 
-                        if (newInst && hostInst && !hostInst->inputs[slotIndex].isBlock)
+                        if (canConnectToInput(hostId, slotIndex, newInstanceId))
                         {
                             // Position the block near the input slot (for visual feedback)
                             // The actual rendering will be handled by the host block
@@ -802,7 +807,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     {
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
 
-                        if (hostInst && !hostInst->inputs[slotIndex].isBlock)
+                        if (canConnectToInput(hostId, slotIndex, movingInst->instanceId))
                         {
                             // Position the moving block near the input slot
                             Block hostDef = blocksLibrary[hostInst->defenitionId];
@@ -1298,7 +1303,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                     if (hostId != -1)
                     {
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
-                        if (hostInst && !hostInst->inputs[slotIndex].isBlock)
+                        if (canConnectToInput(hostId, slotIndex, movingInst->instanceId))
                         {
                             // Calculate input slot position
                             Block hostDef = blocksLibrary[hostInst->defenitionId];
