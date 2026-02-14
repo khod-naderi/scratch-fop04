@@ -116,10 +116,16 @@ void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mous
     for (auto &t : tabs)
     {
         bool active = (currentTab == t.tab);
+        bool hovered = isPointInRect(mouseX, mouseY, t.rect);
 
+        // Background color logic
         if (active)
         {
             SDL_SetRenderDrawColor(renderer, color_activeTabGray);
+        }
+        else if (hovered)
+        {
+            SDL_SetRenderDrawColor(renderer, color_hoveredMenuOption);
         }
         else
         {
@@ -128,9 +134,11 @@ void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mous
 
         SDL_RenderFillRect(renderer, &t.rect);
 
+        // Border
         SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
         SDL_RenderDrawRect(renderer, &t.rect);
 
+        // Text
         SDL_Texture *txt = renderText(renderer, font, t.label, color_black);
         if (txt)
         {
@@ -141,9 +149,11 @@ void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mous
                 t.rect.y + (t.rect.h - h) / 2,
                 w, h};
             SDL_RenderCopy(renderer, txt, nullptr, &tr);
+            SDL_DestroyTexture(txt);
         }
     }
 }
+
 void controlEditorTabClick(int mouseX, int mouseY)
 {
     if (isPointInRect(mouseX, mouseY, CODE_TAB_RECT))

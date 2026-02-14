@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
+                    controlEditorTabClick(mouseX, mouseY);
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
@@ -176,6 +177,7 @@ int main(int argc, char *argv[])
             drawCatagoryColumn(renderer, font, mouseX, mouseY);
             drawBlockColumn(renderer, font, mouseX, mouseY);
             drawWorkspaceScreen(renderer, font, mouseX, mouseY);
+            render_logger(renderer, font);
         }
         else if (currentTab == TAB_SOUND)
         {
@@ -195,10 +197,6 @@ int main(int argc, char *argv[])
         {
             drawSaveScreen(renderer, font, mouseX, mouseY);
         }
-
-        //  Logger rendering goes HERE
-        // (call the real function that exists in logger.cpp, not assumed methods)
-        render_logger(renderer, font);
 
         // show next frame
         SDL_RenderPresent(renderer);
