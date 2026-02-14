@@ -112,7 +112,20 @@ int calculateBodyHeight(const BlockInstance &inst, int bodyIndex)
                 break;
 
             Block bodyBlockDef = blocksLibrary[bodyBlock->defenitionId];
-            bodyContentHeight += bodyBlockDef.baseHeight;
+            // bodyContentHeight += bodyBlockDef.baseHeight;
+            if (bodyBlock->bodyCount == 0)
+            {
+                bodyContentHeight += bodyBlock->cachedHeight;
+            }
+            else
+            {
+                int totalBodyHeight = bodyBlock->cachedHeight;
+                for (int i = 0; i < bodyBlock->bodyCount; i++)
+                {
+                    totalBodyHeight += calculateBodyHeight(*bodyBlock, i);
+                }
+                bodyContentHeight += totalBodyHeight + 15 * bodyBlock->bodyCount; // +15px Bottom side paddind
+            }
 
             currentBlockId = bodyBlock->nextId;
         }
