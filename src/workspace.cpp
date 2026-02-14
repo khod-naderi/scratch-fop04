@@ -431,7 +431,20 @@ void updateChildBlockPositions(BlockInstance &parent)
                 bodyBlock->posY = bodyStartY + accumulatedHeight + yOffset;
 
                 Block bodyBlockDef = blocksLibrary[bodyBlock->defenitionId];
-                yOffset += bodyBlockDef.baseHeight;
+                // yOffset += bodyBlockDef.baseHeight;
+                if (bodyBlock->bodyCount == 0)
+                {
+                    yOffset += bodyBlock->cachedHeight;
+                }
+                else
+                {
+                    int totalBodyHeight = bodyBlock->cachedHeight;
+                    for (int i = 0; i < bodyBlock->bodyCount; i++)
+                    {
+                        totalBodyHeight += calculateBodyHeight(*bodyBlock, i);
+                    }
+                    yOffset += totalBodyHeight + 15 * bodyBlock->bodyCount; // +15px Bottom side paddind
+                }
 
                 // Recursively update this block's children
                 updateChildBlockPositions(*bodyBlock);
@@ -559,7 +572,19 @@ void updateChainPositions(const std::vector<int> &chain, int startX, int startY)
         // Update child positions recursively
         updateChildBlockPositions(*inst);
 
-        currentY += def.baseHeight;
+        if (inst->bodyCount == 0)
+        {
+            currentY += inst->cachedHeight;
+        }
+        else
+        {
+            int totalBodyHeight = inst->cachedHeight;
+            for (int i = 0; i < inst->bodyCount; i++)
+            {
+                totalBodyHeight += calculateBodyHeight(*inst, i);
+            }
+            currentY += totalBodyHeight + 15 * inst->bodyCount; // +15px Bottom side paddind
+        }
     }
 }
 
