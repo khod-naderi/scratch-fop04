@@ -601,7 +601,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     BlockInstance *newInst = findBlockInstanceById(newInstanceId);
                     BlockInstance *topInst = findBlockInstanceById(topId);
 
-                    if (newInst && topInst)
+                    if (canConnectSequentially(topId, newInstanceId))
                     {
                         // Calculate total height including bodies for proper positioning
                         int totalHeight = topInst->cachedHeight;
@@ -629,7 +629,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     BlockInstance *newInst = findBlockInstanceById(newInstanceId);
                     BlockInstance *parentInst = findBlockInstanceById(parentId);
 
-                    if (newInst && parentInst)
+                    if (canConnectToBody(parentId, bodyIndex, newInstanceId))
                     {
                         // Position the block inside the body area
                         int bodyStartY = parentInst->posY + parentInst->cachedHeight;
@@ -671,7 +671,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                         BlockInstance *newInst = findBlockInstanceById(newInstanceId);
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
 
-                        if (newInst && hostInst)
+                        if (newInst && hostInst && !hostInst->inputs[slotIndex].isBlock)
                         {
                             // Position the block near the input slot (for visual feedback)
                             // The actual rendering will be handled by the host block
@@ -729,7 +729,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                 if (topId != -1)
                 {
                     BlockInstance *topInst = findBlockInstanceById(topId);
-                    if (topInst)
+                    if (canConnectSequentially(topId, movingInst->instanceId))
                     {
                         // Calculate total height including bodies for proper positioning
                         int totalHeight = topInst->cachedHeight;
@@ -757,7 +757,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                 {
                     BlockInstance *parentInst = findBlockInstanceById(parentId);
 
-                    if (parentInst)
+                    if (canConnectToBody(parentId, bodyIndex, movingInstanceId))
                     {
                         // Position the moving chain inside the body area
                         int bodyStartY = parentInst->posY + parentInst->cachedHeight;
@@ -802,7 +802,7 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     {
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
 
-                        if (hostInst)
+                        if (hostInst && !hostInst->inputs[slotIndex].isBlock)
                         {
                             // Position the moving block near the input slot
                             Block hostDef = blocksLibrary[hostInst->defenitionId];
@@ -1076,7 +1076,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             if (nearItemId != -1) // there is a near connectable item
             {
                 BlockInstance *nearInst = findBlockInstanceById(nearItemId);
-                if (nearInst)
+                if (nearInst && blocksLibrary[dragedBlockIndex].canHaveTopConnection)
                 {
                     // Calculate total height including bodies for proper shadow positioning
                     int totalHeight = nearInst->cachedHeight;
@@ -1109,7 +1109,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             if (parentId != -1)
             {
                 BlockInstance *parentInst = findBlockInstanceById(parentId);
-                if (parentInst)
+                // std::cout << parentInst->bodies[bodyIndex] << std::endl;
+                if (parentInst && parentInst->bodies[bodyIndex] == -1 && blocksLibrary[dragedBlockIndex].canHaveTopConnection)
                 {
                     int bodyStartY = parentInst->posY + parentInst->cachedHeight;
 
@@ -1148,7 +1149,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                 if (hostId != -1)
                 {
                     BlockInstance *hostInst = findBlockInstanceById(hostId);
-                    if (hostInst)
+                    if (hostInst && !hostInst->inputs[slotIndex].isBlock)
                     {
                         // Calculate input slot position
                         Block hostDef = blocksLibrary[hostInst->defenitionId];
@@ -1199,7 +1200,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                 if (topItemId != -1) //  there is a near connectable item
                 {
                     BlockInstance *topInst = findBlockInstanceById(topItemId);
-                    if (topInst)
+                    if (canConnectSequentially(topItemId, movingInst->defenitionId))
                     {
                         // Calculate total height including bodies for proper shadow positioning
                         int topTotalHeight = topInst->cachedHeight;
@@ -1245,7 +1246,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                 if (parentId != -1)
                 {
                     BlockInstance *parentInst = findBlockInstanceById(parentId);
-                    if (parentInst)
+                    if (canConnectToBody(parentId, bodyIndex, movingInst->instanceId))
                     {
                         int bodyStartY = parentInst->posY + parentInst->cachedHeight;
 
@@ -1297,7 +1298,7 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                     if (hostId != -1)
                     {
                         BlockInstance *hostInst = findBlockInstanceById(hostId);
-                        if (hostInst)
+                        if (hostInst && !hostInst->inputs[slotIndex].isBlock)
                         {
                             // Calculate input slot position
                             Block hostDef = blocksLibrary[hostInst->defenitionId];
