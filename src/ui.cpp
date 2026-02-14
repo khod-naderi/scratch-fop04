@@ -28,6 +28,23 @@ const SDL_Rect LOGGER_Box = {
     MAIN_WINDOW_HEIGHT - LOGGER_HEIGHT,
     MAIN_WINDOW_WIDTH - (CATEGORY_COLUMN_WIDTH + CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + CANVAS_SCREEN_WIDTH),
     LOGGER_HEIGHT};
+const SDL_Rect CODE_TAB_RECT = {
+    WORKSPACE_COLUMN.x,
+    MENUBAR_HEIGHT,
+    90,
+    30};
+
+const SDL_Rect COSTUME_TAB_RECT = {
+    WORKSPACE_COLUMN.x + 90,
+    MENUBAR_HEIGHT,
+    110,
+    30};
+
+const SDL_Rect SOUND_TAB_RECT = {
+    WORKSPACE_COLUMN.x + 200,
+    MENUBAR_HEIGHT,
+    90,
+    30};
 
 /*
     This function render text
@@ -81,4 +98,58 @@ void draw_thick_rect(SDL_Renderer *renderer, const SDL_Rect &rect, int thickness
         temp.w -= 2;
         temp.h -= 2;
     }
+}
+void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mouseY)
+{
+    struct TabInfo
+    {
+        SDL_Rect rect;
+        const char *label;
+        EditorTab tab;
+    };
+
+    TabInfo tabs[] = {
+        {CODE_TAB_RECT, "Code", TAB_CODE},
+        {COSTUME_TAB_RECT, "Costume", TAB_COSTUME},
+        {SOUND_TAB_RECT, "Sound", TAB_SOUND}};
+
+    for (auto &t : tabs)
+    {
+        bool active = (currentTab == t.tab);
+
+        if (active)
+        {
+            SDL_SetRenderDrawColor(renderer, color_activeTabGray);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, color_menuDropbox);
+        }
+
+        SDL_RenderFillRect(renderer, &t.rect);
+
+        SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
+        SDL_RenderDrawRect(renderer, &t.rect);
+
+        SDL_Texture *txt = renderText(renderer, font, t.label, color_black);
+        if (txt)
+        {
+            int w, h;
+            SDL_QueryTexture(txt, nullptr, nullptr, &w, &h);
+            SDL_Rect tr = {
+                t.rect.x + (t.rect.w - w) / 2,
+                t.rect.y + (t.rect.h - h) / 2,
+                w, h};
+            SDL_RenderCopy(renderer, txt, nullptr, &tr);
+        }
+    }
+}
+void controlEditorTabClick(int mouseX, int mouseY)
+{
+    if (isPointInRect(mouseX, mouseY, CODE_TAB_RECT))
+        currentTab = TAB_CODE;
+    else if (isPointInRect(mouseX, mouseY, COSTUME_TAB_RECT))
+        currentTab = TAB_COSTUME;
+    else if (isPointInRect(mouseX, mouseY, SOUND_TAB_RECT))
+        currentTab = TAB_SOUND;
 }

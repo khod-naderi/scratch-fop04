@@ -37,6 +37,10 @@ void render_categories(SDL_Renderer *renderer, Category categories[], int count,
 void render_blocks(SDL_Renderer *renderer, Block blocks[], int count, float scroll_offset, SDL_Rect viewport);
 void render_extension_button(SDL_Renderer *renderer, SDL_Rect bounds);
 void draw_thick_rect(SDL_Renderer *renderer, const SDL_Rect &rect, int thickness);
+void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mouseY);
+void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mouseY);
+void controlEditorTabClick(int mouseX, int mouseY);
+
 // Define menu reactangles
 extern const SDL_Rect fileMenuRect;
 extern const SDL_Rect editMenuRect;
