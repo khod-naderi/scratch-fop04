@@ -3,22 +3,26 @@
 #include "generaldef.h"
 #include "color.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <vector>
+#include <string>
 
 /* -------------------------------------------------
-   Temporary sound data
+   Sound asset state
 ------------------------------------------------- */
-static const char *soundNames[] = {
-    "pop.wav",
-    "meow.wav",
-    "laser.wav"};
+struct SoundAsset
+{
+    std::string name;
+    int volume; // 0 - 100
+};
 
-static const int SOUND_COUNT = 3;
+static std::vector<SoundAsset> sounds = {
+    {"pop.wav", 50},
+    {"meow.wav", 50},
+    {"laser.wav", 50},
+};
 
 static int selectedSound = 0;
 static int hoveredSound = -1;
-static int volumeValue = 50;
 
 /* -------------------------------------------------
    Helper: draw a simple button
@@ -69,7 +73,7 @@ void drawSoundEditor(
     const int BUTTON_HEIGHT = 32;
     const int ITEM_HEIGHT = 28;
 
-    /* REQUIRED editor area — unchanged geometry */
+    /* REQUIRED editor area — unchanged */
     SDL_Rect editorArea = {
         0,
         MENUBAR_HEIGHT + TAB_BAR_HEIGHT,
@@ -116,7 +120,7 @@ void drawSoundEditor(
     hoveredSound = -1;
     int itemY = soundList.y + 45;
 
-    for (int i = 0; i < SOUND_COUNT; ++i)
+    for (size_t i = 0; i < sounds.size(); ++i)
     {
         SDL_Rect itemRect = {
             soundList.x + 5,
@@ -126,9 +130,9 @@ void drawSoundEditor(
 
         bool hovered = isPointInRect(mouseX, mouseY, itemRect);
         if (hovered)
-            hoveredSound = i;
+            hoveredSound = (int)i;
 
-        if (i == selectedSound)
+        if ((int)i == selectedSound)
             SDL_SetRenderDrawColor(renderer, 200, 220, 255, 255);
         else if (hovered)
             SDL_SetRenderDrawColor(renderer, color_hoveredMenuOption);
@@ -138,7 +142,7 @@ void drawSoundEditor(
         SDL_RenderFillRect(renderer, &itemRect);
 
         SDL_Texture *txt =
-            renderText(renderer, font, soundNames[i], color_black);
+            renderText(renderer, font, sounds[i].name.c_str(), color_black);
 
         if (txt)
         {
@@ -156,14 +160,14 @@ void drawSoundEditor(
         if (hovered &&
             (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
         {
-            selectedSound = i;
+            selectedSound = (int)i;
         }
 
         itemY += ITEM_HEIGHT + 4;
     }
 
     /* ---------------------------
-       Upload button
+       Upload button (dummy)
     --------------------------- */
     SDL_Rect uploadBtn = {
         soundList.x + 10,
@@ -192,31 +196,49 @@ void drawSoundEditor(
 
     SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
     SDL_RenderDrawRect(renderer, &soundEditor);
+
+    if (selectedSound < 0 || selectedSound >= (int)sounds.size())
+        return;
+
     /* ---------------------------
-       Centered mixer controls
+       Mixer layout center
     --------------------------- */
     int centerX = soundEditor.x + soundEditor.w / 2;
     int mixerStartY = soundEditor.y + (soundEditor.h - 180) / 2;
 
-    /* BIGGER Play / Stop buttons */
-    SDL_Rect playBtn = {
-        centerX - 120,
-        mixerStartY,
-        100, // was 80
-        44}; // was BUTTON_HEIGHT (32)
+    /* ✅ CENTERED FILE NAME (FIXED POSITION) */
+    SDL_Texture *nameText =
+        renderText(renderer, font, sounds[selectedSound].name.c_str(), color_black);
 
-    SDL_Rect stopBtn = {
-        centerX + 20,
-        mixerStartY,
-        100, // was 80
-        44};
+    if (nameText)
+    {
+        int w, h;
+        SDL_QueryTexture(nameText, nullptr, nullptr, &w, &h);
+
+        SDL_Rect tr = {
+            centerX - w / 2,
+            mixerStartY - h - 20, // ✅ ABOVE mixer, NEVER touches slider
+            w,
+            h};
+
+        SDL_RenderCopy(renderer, nameText, nullptr, &tr);
+        SDL_DestroyTexture(nameText);
+    }
+
+    /* ---------------------------
+       Play / Stop buttons
+    --------------------------- */
+    SDL_Rect playBtn = {centerX - 120, mixerStartY, 100, 44};
+    SDL_Rect stopBtn = {centerX + 20, mixerStartY, 100, 44};
 
     drawButton(renderer, font, playBtn, "Play",
                isPointInRect(mouseX, mouseY, playBtn));
     drawButton(renderer, font, stopBtn, "Stop",
                isPointInRect(mouseX, mouseY, stopBtn));
 
-    /* Volume label */
+    /* ---------------------------
+       Volume
+    --------------------------- */
     int volY = mixerStartY + 44 + 35;
 
     SDL_Texture *volText =
@@ -226,29 +248,18 @@ void drawSoundEditor(
     {
         int w, h;
         SDL_QueryTexture(volText, nullptr, nullptr, &w, &h);
-        SDL_Rect tr = {
-            centerX - w / 2,
-            volY,
-            w,
-            h};
+        SDL_Rect tr = {centerX - w / 2, volY, w, h};
         SDL_RenderCopy(renderer, volText, nullptr, &tr);
         SDL_DestroyTexture(volText);
     }
 
-    /* BIGGER slider bar */
-    SDL_Rect sliderBar = {
-        centerX - 160,
-        volY + 30,
-        320, // was 220
-        10}; // was 6
+    SDL_Rect sliderBar = {centerX - 160, volY + 30, 320, 10};
 
     SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
     SDL_RenderFillRect(renderer, &sliderBar);
-
     SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
     SDL_RenderDrawRect(renderer, &sliderBar);
 
-    /* Slider interaction unchanged */
     if (isPointInRect(mouseX, mouseY, sliderBar) &&
         (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
     {
@@ -257,15 +268,14 @@ void drawSoundEditor(
             rel = 0;
         if (rel > sliderBar.w)
             rel = sliderBar.w;
-        volumeValue = (rel * 100) / sliderBar.w;
+        sounds[selectedSound].volume = (rel * 100) / sliderBar.w;
     }
 
-    /* BIGGER knob */
     SDL_Rect sliderKnob = {
-        sliderBar.x + (sliderBar.w * volumeValue) / 100 - 8,
+        sliderBar.x + (sliderBar.w * sounds[selectedSound].volume) / 100 - 8,
         sliderBar.y - 6,
-        16,  // was 12
-        22}; // was 14
+        16,
+        22};
 
     SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
     SDL_RenderFillRect(renderer, &sliderKnob);
