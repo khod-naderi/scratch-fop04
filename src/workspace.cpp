@@ -39,6 +39,16 @@ std::vector<int> calcLabelSizeByPart(const char *label);
 std::vector<int> calcLabelSizeByPartCamulative(const char *label);
 
 /*
+Helper function to calculate dynamic body height based on content
+*/
+int calculateBodyHeight(const BlockInstance &inst, int bodyIndex);
+
+/*
+Helper function to update cached height including body heights
+*/
+void updateBlockInstanceCachedHeight(BlockInstance &inst);
+
+/*
 -------------------------------
 This function check if any BlockInstance that can have bottom connection is near the top of this item.
 -------------------------------
@@ -63,8 +73,16 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
         if (inst.nextId != -1 || !def.canHaveBottomConnection)
             continue;
 
-        const int blc_x = inst.posX;
-        const int blc_y = inst.posY + def.baseHeight;
+        // Calculate total height including bodies
+        int totalHeight = inst.cachedHeight;
+        for (int bodyIdx = 0; bodyIdx < inst.bodyCount; bodyIdx++)
+        {
+            totalHeight += calculateBodyHeight(inst, bodyIdx) + 15; // Add body height + bottom margin
+        }
+
+        // Connection point is at the bottom-center of the target block
+        const int blc_x = inst.posX + inst.cachedWidth / 2; // Center horizontally
+        const int blc_y = inst.posY + totalHeight;
         if (std::sqrt(std::pow((blc_x - TL_X), 2) + std::pow((blc_y - TL_Y), 2)) <= CONNECTION_MINIMUM_DISTANCE)
         {
             return inst.instanceId;
@@ -72,6 +90,43 @@ int isItemNearTopToConnect(const int TL_X, const int TL_Y)
     }
 
     return -1;
+}
+
+/*
+Helper function to calculate dynamic body height based on content
+*/
+int calculateBodyHeight(const BlockInstance &inst, int bodyIndex)
+{
+    if (bodyIndex < 0 || bodyIndex >= inst.bodyCount)
+        return 60; // Default minimum height
+
+    int bodyContentHeight = 0;
+    if (inst.bodies[bodyIndex] != -1)
+    {
+        // Calculate height of all blocks in this body
+        int currentBlockId = inst.bodies[bodyIndex];
+        while (currentBlockId != -1)
+        {
+            BlockInstance *bodyBlock = findBlockInstanceById(currentBlockId);
+            if (!bodyBlock)
+                break;
+
+            Block bodyBlockDef = blocksLibrary[bodyBlock->defenitionId];
+            bodyContentHeight += bodyBlockDef.baseHeight;
+
+            currentBlockId = bodyBlock->nextId;
+        }
+    }
+
+    // Minimum body height when empty, with padding for content
+    return std::max(bodyContentHeight + 20, 60); // 20px padding, minimum 60px
+}
+
+void updateBlockInstanceCachedHeight(BlockInstance &inst)
+{
+    Block def = blocksLibrary[inst.defenitionId];
+    // Only use base height for the block head, not including bodies
+    inst.cachedHeight = def.baseHeight;
 }
 
 /*
@@ -129,15 +184,23 @@ bool isPointInBodyArea(const int pointX, const int pointY, const BlockInstance &
 
     // Calculate body area bounds
     // Body areas start after the main block and are stacked vertically
-    int bodyStartY = inst.posY + def.baseHeight;
-    int bodyHeight = 60; // Default body height, TODO: make it dynamic
-    int bodyY = bodyStartY + (bodyIndex * bodyHeight);
+    int bodyStartY = inst.posY + inst.cachedHeight;
 
-    // Body area rectangle
-    int bodyLeft = inst.posX + 10; // Margin from left edge
-    int bodyRight = inst.posX + def.baseWidth - 10;
-    int bodyTop = bodyY;
-    int bodyBottom = bodyY + bodyHeight;
+    // Calculate accumulated height of previous bodies using dynamic heights
+    int accumulatedHeight = 0;
+    for (int i = 0; i < bodyIndex; i++)
+    {
+        accumulatedHeight += calculateBodyHeight(inst, i) + 15; // Add bottom margin
+    }
+
+    int bodyHeight = calculateBodyHeight(inst, bodyIndex);
+    int bodyY = bodyStartY + accumulatedHeight;
+
+    // Body area rectangle - make it more accessible
+    int bodyLeft = inst.posX + 15;                     // Margin from left edge for indentation
+    int bodyRight = inst.posX + inst.cachedWidth - 15; // Use cached width
+    int bodyTop = bodyY + 5;                           // Small margin from top
+    int bodyBottom = bodyY + bodyHeight - 5;           // Small margin from bottom
 
     return (pointX >= bodyLeft && pointX <= bodyRight &&
             pointY >= bodyTop && pointY <= bodyBottom);
@@ -207,16 +270,17 @@ bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance 
     for (int i = 0; i < slotIndex; i++)
     {
         totalWidth += wst[i];
-        if (i < inst.inputCount)
+        if (i < inst.inputCount && inst.textboxes[i])
             totalWidth += inst.textboxes[i]->cachedWidth;
     }
     totalWidth += wst[slotIndex];
 
     // Input slot area rectangle (around where the textbox would be)
     int slotLeft = inst.posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
-    int slotRight = slotLeft + (inst.textboxes[slotIndex] ? inst.textboxes[slotIndex]->cachedWidth : 50);
-    int slotTop = inst.posY;
-    int slotBottom = inst.posY + inst.cachedHeight;
+    int slotWidth = (inst.textboxes[slotIndex] ? inst.textboxes[slotIndex]->cachedWidth : 50);
+    int slotRight = slotLeft + slotWidth;
+    int slotTop = inst.posY + 5;                        // Small margin from top
+    int slotBottom = inst.posY + inst.cachedHeight - 5; // Small margin from bottom
 
     return (pointX >= slotLeft && pointX <= slotRight &&
             pointY >= slotTop && pointY <= slotBottom);
@@ -333,6 +397,77 @@ BlockInstance *findBlockInstanceById(int id)
 
 /*
 -----------------------
+Recursively update positions of child blocks (bodies and inputs)
+-----------------------
+*/
+void updateChildBlockPositions(BlockInstance &parent)
+{
+    // Update body children positions
+    for (int bodyIdx = 0; bodyIdx < parent.bodyCount; bodyIdx++)
+    {
+        if (parent.bodies[bodyIdx] != -1)
+        {
+            int bodyStartY = parent.posY + parent.cachedHeight;
+            int accumulatedHeight = 0;
+            for (int i = 0; i < bodyIdx; i++)
+            {
+                accumulatedHeight += calculateBodyHeight(parent, i) + 15;
+            }
+
+            int currentBlockId = parent.bodies[bodyIdx];
+            int yOffset = 10; // Initial margin from top
+            while (currentBlockId != -1)
+            {
+                BlockInstance *bodyBlock = findBlockInstanceById(currentBlockId);
+                if (!bodyBlock)
+                    break;
+
+                bodyBlock->posX = parent.posX + 20; // Indent
+                bodyBlock->posY = bodyStartY + accumulatedHeight + yOffset;
+
+                Block bodyBlockDef = blocksLibrary[bodyBlock->defenitionId];
+                yOffset += bodyBlockDef.baseHeight;
+
+                // Recursively update this block's children
+                updateChildBlockPositions(*bodyBlock);
+
+                currentBlockId = bodyBlock->nextId;
+            }
+        }
+    }
+
+    // Update input slot children positions
+    Block def = blocksLibrary[parent.defenitionId];
+    std::vector<int> wst = calcLabelSizeByPart(def.label);
+    for (int slotIdx = 0; slotIdx < parent.inputCount; slotIdx++)
+    {
+        if (parent.inputs[slotIdx].isBlock)
+        {
+            int totalWidth = 0;
+            for (int i = 0; i < slotIdx; i++)
+            {
+                totalWidth += wst[i];
+                if (i < parent.inputCount && parent.textboxes[i])
+                    totalWidth += parent.textboxes[i]->cachedWidth;
+            }
+            totalWidth += wst[slotIdx];
+
+            BlockInstance *inputBlock = findBlockInstanceById(parent.inputs[slotIdx].blockInstanceId);
+            if (inputBlock)
+            {
+                Block inputDef = blocksLibrary[inputBlock->defenitionId];
+                inputBlock->posX = parent.posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
+                inputBlock->posY = parent.posY + (parent.cachedHeight - inputDef.baseHeight) / 2;
+
+                // Recursively update this block's children
+                updateChildBlockPositions(*inputBlock);
+            }
+        }
+    }
+}
+
+/*
+-----------------------
 Build a chain of connected blocks starting from the given block
 -----------------------
 */
@@ -353,6 +488,52 @@ void buildMovingChain(int startId, std::vector<int> &chain)
 
 /*
 -----------------------
+Bring a block instance to front by moving it to the end of the array
+-----------------------
+*/
+void bringBlockToFront(int instanceId)
+{
+    int sourceSlot = -1;
+    for (int i = 0; i < MAX_INSTANCES; i++)
+    {
+        if (workspaceCodeSpace.instanceUsed[i] &&
+            workspaceCodeSpace.instances[i].instanceId == instanceId)
+        {
+            sourceSlot = i;
+            break;
+        }
+    }
+
+    if (sourceSlot == -1)
+        return;
+
+    // Find last used slot
+    int lastUsedSlot = -1;
+    for (int i = MAX_INSTANCES - 1; i >= 0; i--)
+    {
+        if (workspaceCodeSpace.instanceUsed[i])
+        {
+            lastUsedSlot = i;
+            break;
+        }
+    }
+
+    // If already at end or no swap needed
+    if (sourceSlot == lastUsedSlot || lastUsedSlot == -1)
+        return;
+
+    // Swap instances
+    BlockInstance temp = workspaceCodeSpace.instances[sourceSlot];
+    workspaceCodeSpace.instances[sourceSlot] = workspaceCodeSpace.instances[lastUsedSlot];
+    workspaceCodeSpace.instances[lastUsedSlot] = temp;
+
+    bool tempUsed = workspaceCodeSpace.instanceUsed[sourceSlot];
+    workspaceCodeSpace.instanceUsed[sourceSlot] = workspaceCodeSpace.instanceUsed[lastUsedSlot];
+    workspaceCodeSpace.instanceUsed[lastUsedSlot] = tempUsed;
+}
+
+/*
+-----------------------
 Update positions of all blocks in a chain
 -----------------------
 */
@@ -369,6 +550,10 @@ void updateChainPositions(const std::vector<int> &chain, int startX, int startY)
         Block def = blocksLibrary[inst->defenitionId];
         inst->posX = startX;
         inst->posY = currentY;
+
+        // Update child positions recursively
+        updateChildBlockPositions(*inst);
+
         currentY += def.baseHeight;
     }
 }
@@ -407,7 +592,10 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
             //  sequential connection
             if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
             {
-                int topId = isItemNearTopToConnect(posX, posY);
+                // For sequential connections, use the top-center of the dragged block
+                const int topCenterX = posX + blocksLibrary[dragedBlockIndex].baseWidth / 2;
+                const int topCenterY = posY;
+                int topId = isItemNearTopToConnect(topCenterX, topCenterY);
                 if (topId != -1) // connect Item to it's top item
                 {
                     BlockInstance *newInst = findBlockInstanceById(newInstanceId);
@@ -415,9 +603,15 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
 
                     if (newInst && topInst)
                     {
-                        Block topDef = blocksLibrary[topInst->defenitionId];
+                        // Calculate total height including bodies for proper positioning
+                        int totalHeight = topInst->cachedHeight;
+                        for (int bodyIdx = 0; bodyIdx < topInst->bodyCount; bodyIdx++)
+                        {
+                            totalHeight += calculateBodyHeight(*topInst, bodyIdx) + 15; // Add body height + bottom margin
+                        }
+
                         newInst->posX = topInst->posX;
-                        newInst->posY = topInst->posY + topDef.baseHeight;
+                        newInst->posY = topInst->posY + totalHeight;
 
                         codespaceAttachNext(workspaceCodeSpace, topId, newInstanceId);
                         connected = true;
@@ -438,14 +632,26 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     if (newInst && parentInst)
                     {
                         // Position the block inside the body area
-                        Block parentDef = blocksLibrary[parentInst->defenitionId];
-                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
-                        int bodyHeight = 60; // Same as in isPointInBodyArea TODO: use predefined or dynamic values
+                        int bodyStartY = parentInst->posY + parentInst->cachedHeight;
 
-                        newInst->posX = parentInst->posX + 15;                     // Indent inside body
-                        newInst->posY = bodyStartY + (bodyIndex * bodyHeight) + 5; // Small margin from top TODO: use predefined values
+                        // Calculate accumulated height of previous bodies using dynamic heights
+                        int accumulatedHeight = 0;
+                        for (int i = 0; i < bodyIndex; i++)
+                        {
+                            accumulatedHeight += calculateBodyHeight(*parentInst, i) + 15; // Add bottom margin
+                        }
+
+                        newInst->posX = parentInst->posX + 20;               // Indent inside body
+                        newInst->posY = bodyStartY + accumulatedHeight + 10; // Small margin from top
 
                         codespaceAttachToBody(workspaceCodeSpace, parentId, bodyIndex, newInstanceId);
+
+                        // Update child positions recursively
+                        updateChildBlockPositions(*parentInst);
+
+                        // Bring connected block to front for proper z-index
+                        bringBlockToFront(newInstanceId);
+
                         connected = true;
                     }
                 }
@@ -475,15 +681,27 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                             for (int i = 0; i < slotIndex; i++)
                             {
                                 totalWidth += wst[i];
-                                if (i < hostInst->inputCount)
+                                if (i < hostInst->inputCount && hostInst->textboxes[i])
                                     totalWidth += hostInst->textboxes[i]->cachedWidth;
                             }
                             totalWidth += wst[slotIndex];
 
-                            newInst->posX = hostInst->posX + totalWidth;
-                            newInst->posY = hostInst->posY - draggedDef.baseHeight - 5; // Above the host block
+                            // Position the block inside the input slot area
+                            newInst->posX = hostInst->posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
+                            newInst->posY = hostInst->posY + (hostInst->cachedHeight - draggedDef.baseHeight) / 2; // Center vertically
 
                             codespaceAttachToInput(workspaceCodeSpace, hostId, slotIndex, newInstanceId);
+
+                            // Update host block width to accommodate the new input block
+                            hostInst->cachedWidth = std::max(hostInst->cachedWidth,
+                                                             totalWidth + draggedDef.baseWidth + BLOCKINSTANCE_RL_MARGIN);
+
+                            // Update child positions recursively
+                            updateChildBlockPositions(*hostInst);
+
+                            // Bring connected block to front for proper z-index
+                            bringBlockToFront(newInstanceId);
+
                             connected = true;
                         }
                     }
@@ -503,15 +721,25 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
             // Try sequential connection first
             if (blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
             {
-                int topId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
+                // For sequential connections, use the top-center of the moving block
+                Block movingDef = blocksLibrary[movingInst->defenitionId];
+                const int topCenterX = movingInst->posX + movingDef.baseWidth / 2;
+                const int topCenterY = movingInst->posY;
+                int topId = isItemNearTopToConnect(topCenterX, topCenterY);
                 if (topId != -1)
                 {
                     BlockInstance *topInst = findBlockInstanceById(topId);
                     if (topInst)
                     {
-                        Block topDef = blocksLibrary[topInst->defenitionId];
+                        // Calculate total height including bodies for proper positioning
+                        int totalHeight = topInst->cachedHeight;
+                        for (int bodyIdx = 0; bodyIdx < topInst->bodyCount; bodyIdx++)
+                        {
+                            totalHeight += calculateBodyHeight(*topInst, bodyIdx) + 15; // Add body height + bottom margin
+                        }
+
                         int newX = topInst->posX;
-                        int newY = topInst->posY + topDef.baseHeight;
+                        int newY = topInst->posY + totalHeight;
 
                         updateChainPositions(movingChainIds, newX, newY);
                         codespaceAttachNext(workspaceCodeSpace, topId, movingInstanceId);
@@ -532,15 +760,30 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                     if (parentInst)
                     {
                         // Position the moving chain inside the body area
-                        Block parentDef = blocksLibrary[parentInst->defenitionId];
-                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
-                        int bodyHeight = 60; // Same as in isPointInBodyArea
+                        int bodyStartY = parentInst->posY + parentInst->cachedHeight;
 
-                        int newX = parentInst->posX + 15;                     // Indent inside body
-                        int newY = bodyStartY + (bodyIndex * bodyHeight) + 5; // Small margin from top
+                        // Calculate accumulated height of previous bodies using dynamic heights
+                        int accumulatedHeight = 0;
+                        for (int i = 0; i < bodyIndex; i++)
+                        {
+                            accumulatedHeight += calculateBodyHeight(*parentInst, i) + 15; // Add bottom margin
+                        }
+
+                        int newX = parentInst->posX + 20;               // Indent inside body
+                        int newY = bodyStartY + accumulatedHeight + 10; // Small margin from top
 
                         updateChainPositions(movingChainIds, newX, newY);
                         codespaceAttachToBody(workspaceCodeSpace, parentId, bodyIndex, movingInstanceId);
+
+                        // Update child positions recursively
+                        updateChildBlockPositions(*parentInst);
+
+                        // Bring moved chain to front for proper z-index
+                        for (int chainId : movingChainIds)
+                        {
+                            bringBlockToFront(chainId);
+                        }
+
                         connected = true;
                     }
                 }
@@ -568,16 +811,31 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                             for (int i = 0; i < slotIndex; i++)
                             {
                                 totalWidth += wst[i];
-                                if (i < hostInst->inputCount)
+                                if (i < hostInst->inputCount && hostInst->textboxes[i])
                                     totalWidth += hostInst->textboxes[i]->cachedWidth;
                             }
                             totalWidth += wst[slotIndex];
 
-                            int newX = hostInst->posX + totalWidth;
-                            int newY = hostInst->posY - movingDef.baseHeight - 5; // Above the host block
+                            // Position the block inside the input slot area
+                            int newX = hostInst->posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
+                            int newY = hostInst->posY + (hostInst->cachedHeight - movingDef.baseHeight) / 2; // Center vertically
 
                             updateChainPositions(movingChainIds, newX, newY);
                             codespaceAttachToInput(workspaceCodeSpace, hostId, slotIndex, movingInstanceId);
+
+                            // Update host block width to accommodate the new input block
+                            hostInst->cachedWidth = std::max(hostInst->cachedWidth,
+                                                             totalWidth + movingDef.baseWidth + BLOCKINSTANCE_RL_MARGIN);
+
+                            // Update child positions recursively
+                            updateChildBlockPositions(*hostInst);
+
+                            // Bring moved chain to front for proper z-index
+                            for (int chainId : movingChainIds)
+                            {
+                                bringBlockToFront(chainId);
+                            }
+
                             connected = true;
                         }
                     }
@@ -641,6 +899,12 @@ void controlWorkspaceClickDown(const int mouseX, const int mouseY)
             // Build the chain of connected blocks
             buildMovingChain(movingInstanceId, movingChainIds);
 
+            // Bring moving chain to front for proper z-index
+            for (int chainId : movingChainIds)
+            {
+                bringBlockToFront(chainId);
+            }
+
             break;
         }
     }
@@ -695,249 +959,7 @@ void controlWorkspaceMouseMotion(const int mouseX, const int mouseY)
 
 void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
-    // Draw shadow for connecting draged item
-    if (isBLockDraged)
-    {
-        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].baseWidth / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
-        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].baseHeight / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
-
-        // sequential connection shadow
-        bool shadowDrawn = false;
-        if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
-        {
-            int nearItemId = isItemNearTopToConnect(TL_X, TL_Y);
-            if (nearItemId != -1) // there is a near connectable item
-            {
-                BlockInstance *nearInst = findBlockInstanceById(nearItemId);
-                if (nearInst)
-                {
-                    Block nearDef = blocksLibrary[nearInst->defenitionId];
-
-                    // Draw dragged item shadow
-                    SDL_Rect dragedItemRect = {
-                        WORKSPACE_COLUMN.x + nearInst->posX + scrollOffsetX,
-                        WORKSPACE_COLUMN.y + nearInst->posY + nearDef.baseHeight + scrollOffsetY,
-                        blocksLibrary[dragedBlockIndex].baseWidth,
-                        blocksLibrary[dragedBlockIndex].baseHeight,
-                    };
-
-                    // Fill item background
-                    SDL_SetRenderDrawColor(renderer, color_softGray);
-                    SDL_RenderFillRect(renderer, &dragedItemRect);
-                    shadowDrawn = true;
-                }
-            }
-        }
-
-        // body connection shadow if sequential shadow not drawn
-        if (!shadowDrawn)
-        {
-            int bodyIndex = -1;
-            int parentId = isItemNearBodyToConnect(TL_X, TL_Y, bodyIndex);
-            if (parentId != -1)
-            {
-                BlockInstance *parentInst = findBlockInstanceById(parentId);
-                if (parentInst)
-                {
-                    Block parentDef = blocksLibrary[parentInst->defenitionId];
-                    int bodyStartY = parentInst->posY + parentDef.baseHeight;
-                    int bodyHeight = 60; // Same as in isPointInBodyArea
-
-                    // Draw dragged item shadow in body area
-                    SDL_Rect dragedItemRect = {
-                        WORKSPACE_COLUMN.x + parentInst->posX + 15 + scrollOffsetX,
-                        WORKSPACE_COLUMN.y + bodyStartY + (bodyIndex * bodyHeight) + 5 + scrollOffsetY,
-                        blocksLibrary[dragedBlockIndex].baseWidth,
-                        blocksLibrary[dragedBlockIndex].baseHeight,
-                    };
-
-                    // Fill item background with different color for body connections
-                    SDL_SetRenderDrawColor(renderer, color_softGray);
-                    SDL_RenderFillRect(renderer, &dragedItemRect);
-                    shadowDrawn = true;
-                }
-            }
-        }
-
-        // Try input connection shadow if other shadows not drawn
-        if (!shadowDrawn)
-        {
-            Block draggedDef = blocksLibrary[dragedBlockIndex];
-            // Only expression blocks (operators, reporter) can be connected to inputs
-            if (draggedDef.type == BLOCK_OPERATOR || draggedDef.type == BLOCK_REPORTER)
-            {
-                int slotIndex = -1;
-                int hostId = isItemNearInputToConnect(TL_X, TL_Y, slotIndex);
-                if (hostId != -1)
-                {
-                    BlockInstance *hostInst = findBlockInstanceById(hostId);
-                    if (hostInst)
-                    {
-                        // Calculate input slot position
-                        Block hostDef = blocksLibrary[hostInst->defenitionId];
-                        std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
-                        int totalWidth = 0;
-                        for (int i = 0; i < slotIndex; i++)
-                        {
-                            totalWidth += wst[i];
-                            if (i < hostInst->inputCount)
-                                totalWidth += hostInst->textboxes[i]->cachedWidth;
-                        }
-                        totalWidth += wst[slotIndex];
-
-                        // Draw dragged item shadow near input slot
-                        SDL_Rect dragedItemRect = {
-                            WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + scrollOffsetX,
-                            WORKSPACE_COLUMN.y + hostInst->posY - draggedDef.baseHeight - 5 + scrollOffsetY,
-                            draggedDef.baseWidth,
-                            draggedDef.baseHeight,
-                        };
-
-                        // Fill item background with input connection color
-                        SDL_SetRenderDrawColor(renderer, color_blurgray);
-                        SDL_RenderFillRect(renderer, &dragedItemRect);
-                        shadowDrawn = true;
-                    }
-                }
-            }
-        }
-    }
-
-    // Draw shadow for connecting moving chain
-    if (isMovingItem && movingInstanceId != -1)
-    {
-        BlockInstance *movingInst = findBlockInstanceById(movingInstanceId);
-        if (movingInst)
-        {
-            bool movingShadowDrawn = false;
-
-            // Try sequential connection shadow first
-            if (blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
-            {
-                int topItemId = isItemNearTopToConnect(movingInst->posX, movingInst->posY);
-                if (topItemId != -1) //  there is a near connectable item
-                {
-                    BlockInstance *topInst = findBlockInstanceById(topItemId);
-                    if (topInst)
-                    {
-                        Block topDef = blocksLibrary[topInst->defenitionId];
-                        int totalHeight = 0;
-
-                        for (int id : movingChainIds)
-                        {
-                            BlockInstance *chainInst = findBlockInstanceById(id);
-                            if (!chainInst)
-                                continue;
-
-                            Block chainDef = blocksLibrary[chainInst->defenitionId];
-
-                            // Draw shadow for each block in chain
-                            SDL_Rect shadowRect = {
-                                WORKSPACE_COLUMN.x + topInst->posX + scrollOffsetX,
-                                WORKSPACE_COLUMN.y + topInst->posY + topDef.baseHeight + totalHeight + scrollOffsetY,
-                                chainDef.baseWidth,
-                                chainDef.baseHeight,
-                            };
-
-                            totalHeight += chainDef.baseHeight;
-
-                            // Fill item background
-                            SDL_SetRenderDrawColor(renderer, color_softGray);
-                            SDL_RenderFillRect(renderer, &shadowRect);
-                        }
-                        movingShadowDrawn = true;
-                    }
-                }
-            }
-
-            // Try body connection shadow if sequential shadow not drawn
-            if (!movingShadowDrawn)
-            {
-                int bodyIndex = -1;
-                int parentId = isItemNearBodyToConnect(movingInst->posX, movingInst->posY, bodyIndex);
-                if (parentId != -1)
-                {
-                    BlockInstance *parentInst = findBlockInstanceById(parentId);
-                    if (parentInst)
-                    {
-                        Block parentDef = blocksLibrary[parentInst->defenitionId];
-                        int bodyStartY = parentInst->posY + parentDef.baseHeight;
-                        int bodyHeight = 60; // Same as in isPointInBodyArea
-                        int totalHeight = 0;
-
-                        for (int id : movingChainIds)
-                        {
-                            BlockInstance *chainInst = findBlockInstanceById(id);
-                            if (!chainInst)
-                                continue;
-
-                            Block chainDef = blocksLibrary[chainInst->defenitionId];
-
-                            // Draw shadow for each block in chain inside body area
-                            SDL_Rect shadowRect = {
-                                WORKSPACE_COLUMN.x + parentInst->posX + 15 + scrollOffsetX,
-                                WORKSPACE_COLUMN.y + bodyStartY + (bodyIndex * bodyHeight) + 5 + totalHeight + scrollOffsetY,
-                                chainDef.baseWidth,
-                                chainDef.baseHeight,
-                            };
-
-                            totalHeight += chainDef.baseHeight;
-
-                            // Fill item background with body connection color
-                            SDL_SetRenderDrawColor(renderer, color_softGray);
-                            SDL_RenderFillRect(renderer, &shadowRect);
-                        }
-                        movingShadowDrawn = true;
-                    }
-                }
-            }
-
-            // Try input connection shadow if other shadows not drawn
-            if (!movingShadowDrawn)
-            {
-                Block movingDef = blocksLibrary[movingInst->defenitionId];
-                // Only expression blocks (operators, reporter) can be connected to inputs
-                if (movingDef.type == BLOCK_OPERATOR || movingDef.type == BLOCK_REPORTER)
-                {
-                    int slotIndex = -1;
-                    int hostId = isItemNearInputToConnect(movingInst->posX, movingInst->posY, slotIndex);
-                    if (hostId != -1)
-                    {
-                        BlockInstance *hostInst = findBlockInstanceById(hostId);
-                        if (hostInst)
-                        {
-                            // Calculate input slot position
-                            Block hostDef = blocksLibrary[hostInst->defenitionId];
-                            std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
-                            int totalWidth = 0;
-                            for (int i = 0; i < slotIndex; i++)
-                            {
-                                totalWidth += wst[i];
-                                if (i < hostInst->inputCount)
-                                    totalWidth += hostInst->textboxes[i]->cachedWidth;
-                            }
-                            totalWidth += wst[slotIndex];
-
-                            // Draw moving item shadow near input slot
-                            SDL_Rect shadowRect = {
-                                WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + scrollOffsetX,
-                                WORKSPACE_COLUMN.y + hostInst->posY - movingDef.baseHeight - 5 + scrollOffsetY,
-                                movingDef.baseWidth,
-                                movingDef.baseHeight,
-                            };
-
-                            // Fill item background with input connection color
-                            SDL_SetRenderDrawColor(renderer, color_blurgray);
-                            SDL_RenderFillRect(renderer, &shadowRect);
-                            movingShadowDrawn = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Draw BlockInstances
+    // Draw BlockInstances first (background layer)
     for (int i = 0; i < MAX_INSTANCES; i++)
     {
         if (!workspaceCodeSpace.instanceUsed[i])
@@ -1001,22 +1023,23 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         int totalHeightBlock = 0;
         for (int i = 0; i < inst.bodyCount; i++)
         {
-            int bodiesTotalHeight = 0; // TODO: make it dynamic by bodies
+            // Use the helper function to calculate dynamic body height
+            int bodyHeight = calculateBodyHeight(inst, i);
 
             SDL_Rect sideRect = {
                 WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX,
                 WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + inst.cachedHeight + totalHeightBlock,
-                10,
-                bodiesTotalHeight + 40,
+                15,
+                bodyHeight,
             };
             SDL_Rect bottomRect = {
                 WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX,
-                WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + inst.cachedHeight + sideRect.h + totalHeightBlock,
+                WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + inst.cachedHeight + bodyHeight + totalHeightBlock,
                 inst.cachedWidth,
-                20,
+                15,
             };
 
-            totalHeightBlock += (bottomRect.y - sideRect.y) + bottomRect.h;
+            totalHeightBlock += bodyHeight + 15; // Add bottom rect height
 
             if (!isBLockDraged && isPointInRect(mouseX, mouseY, itemRect))
             {
@@ -1032,6 +1055,278 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             SDL_SetRenderDrawColor(renderer, color_black);
             SDL_RenderDrawRect(renderer, &sideRect);
             SDL_RenderDrawRect(renderer, &bottomRect);
+        }
+    }
+
+    // Draw shadows on top of blocks for proper z-index
+    // Draw shadow for connecting draged item
+    if (isBLockDraged)
+    {
+        const int TL_X = mouseX - blocksLibrary[dragedBlockIndex].baseWidth / 2 - WORKSPACE_COLUMN.x - scrollOffsetX;
+        const int TL_Y = mouseY - blocksLibrary[dragedBlockIndex].baseHeight / 2 - WORKSPACE_COLUMN.y - scrollOffsetY;
+
+        // sequential connection shadow
+        bool shadowDrawn = false;
+        if (blocksLibrary[dragedBlockIndex].canHaveTopConnection)
+        {
+            // For sequential connections, use the top-center of the dragged block
+            const int topCenterX = TL_X + blocksLibrary[dragedBlockIndex].baseWidth / 2;
+            const int topCenterY = TL_Y;
+            int nearItemId = isItemNearTopToConnect(topCenterX, topCenterY);
+            if (nearItemId != -1) // there is a near connectable item
+            {
+                BlockInstance *nearInst = findBlockInstanceById(nearItemId);
+                if (nearInst)
+                {
+                    // Calculate total height including bodies for proper shadow positioning
+                    int totalHeight = nearInst->cachedHeight;
+                    for (int bodyIdx = 0; bodyIdx < nearInst->bodyCount; bodyIdx++)
+                    {
+                        totalHeight += calculateBodyHeight(*nearInst, bodyIdx) + 15; // Add body height + bottom margin
+                    }
+
+                    // Draw dragged item shadow
+                    SDL_Rect dragedItemRect = {
+                        WORKSPACE_COLUMN.x + nearInst->posX + scrollOffsetX,
+                        WORKSPACE_COLUMN.y + nearInst->posY + totalHeight + scrollOffsetY,
+                        blocksLibrary[dragedBlockIndex].baseWidth,
+                        blocksLibrary[dragedBlockIndex].baseHeight,
+                    };
+
+                    // Fill item background
+                    SDL_SetRenderDrawColor(renderer, color_softGray);
+                    SDL_RenderFillRect(renderer, &dragedItemRect);
+                    shadowDrawn = true;
+                }
+            }
+        }
+
+        // body connection shadow if sequential shadow not drawn
+        if (!shadowDrawn)
+        {
+            int bodyIndex = -1;
+            int parentId = isItemNearBodyToConnect(TL_X, TL_Y, bodyIndex);
+            if (parentId != -1)
+            {
+                BlockInstance *parentInst = findBlockInstanceById(parentId);
+                if (parentInst)
+                {
+                    int bodyStartY = parentInst->posY + parentInst->cachedHeight;
+
+                    // Calculate accumulated height of previous bodies using dynamic heights
+                    int accumulatedHeight = 0;
+                    for (int i = 0; i < bodyIndex; i++)
+                    {
+                        accumulatedHeight += calculateBodyHeight(*parentInst, i) + 15; // Add bottom margin
+                    }
+
+                    // Draw dragged item shadow in body area
+                    SDL_Rect dragedItemRect = {
+                        WORKSPACE_COLUMN.x + parentInst->posX + 20 + scrollOffsetX,
+                        WORKSPACE_COLUMN.y + bodyStartY + accumulatedHeight + 10 + scrollOffsetY,
+                        blocksLibrary[dragedBlockIndex].baseWidth,
+                        blocksLibrary[dragedBlockIndex].baseHeight,
+                    };
+
+                    // Fill item background with different color for body connections
+                    SDL_SetRenderDrawColor(renderer, color_softGray);
+                    SDL_RenderFillRect(renderer, &dragedItemRect);
+                    shadowDrawn = true;
+                }
+            }
+        }
+
+        // Try input connection shadow if other shadows not drawn
+        if (!shadowDrawn)
+        {
+            Block draggedDef = blocksLibrary[dragedBlockIndex];
+            // Only expression blocks (operators, reporter) can be connected to inputs
+            if (draggedDef.type == BLOCK_OPERATOR || draggedDef.type == BLOCK_REPORTER)
+            {
+                int slotIndex = -1;
+                int hostId = isItemNearInputToConnect(TL_X, TL_Y, slotIndex);
+                if (hostId != -1)
+                {
+                    BlockInstance *hostInst = findBlockInstanceById(hostId);
+                    if (hostInst)
+                    {
+                        // Calculate input slot position
+                        Block hostDef = blocksLibrary[hostInst->defenitionId];
+                        std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                        int totalWidth = 0;
+                        for (int i = 0; i < slotIndex; i++)
+                        {
+                            totalWidth += wst[i];
+                            if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                totalWidth += hostInst->textboxes[i]->cachedWidth;
+                        }
+                        totalWidth += wst[slotIndex];
+
+                        // Draw dragged item shadow inside input slot area
+                        SDL_Rect dragedItemRect = {
+                            WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2 + scrollOffsetX,
+                            WORKSPACE_COLUMN.y + hostInst->posY + (hostInst->cachedHeight - draggedDef.baseHeight) / 2 + scrollOffsetY,
+                            draggedDef.baseWidth,
+                            draggedDef.baseHeight,
+                        };
+
+                        // Fill item background with input connection color
+                        SDL_SetRenderDrawColor(renderer, color_blurgray);
+                        SDL_RenderFillRect(renderer, &dragedItemRect);
+                        shadowDrawn = true;
+                    }
+                }
+            }
+        }
+    }
+
+    // Draw shadow for connecting moving chain
+    if (isMovingItem && movingInstanceId != -1)
+    {
+        BlockInstance *movingInst = findBlockInstanceById(movingInstanceId);
+        if (movingInst)
+        {
+            bool movingShadowDrawn = false;
+
+            // Try sequential connection shadow first
+            if (blocksLibrary[movingInst->defenitionId].canHaveTopConnection)
+            {
+                // For sequential connections, use the top-center of the moving block
+                Block movingDef = blocksLibrary[movingInst->defenitionId];
+                const int topCenterX = movingInst->posX + movingDef.baseWidth / 2;
+                const int topCenterY = movingInst->posY;
+                int topItemId = isItemNearTopToConnect(topCenterX, topCenterY);
+                if (topItemId != -1) //  there is a near connectable item
+                {
+                    BlockInstance *topInst = findBlockInstanceById(topItemId);
+                    if (topInst)
+                    {
+                        // Calculate total height including bodies for proper shadow positioning
+                        int topTotalHeight = topInst->cachedHeight;
+                        for (int bodyIdx = 0; bodyIdx < topInst->bodyCount; bodyIdx++)
+                        {
+                            topTotalHeight += calculateBodyHeight(*topInst, bodyIdx) + 15; // Add body height + bottom margin
+                        }
+
+                        int chainHeight = 0;
+
+                        for (int id : movingChainIds)
+                        {
+                            BlockInstance *chainInst = findBlockInstanceById(id);
+                            if (!chainInst)
+                                continue;
+
+                            Block chainDef = blocksLibrary[chainInst->defenitionId];
+
+                            // Draw shadow for each block in chain
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + topInst->posX + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + topInst->posY + topTotalHeight + chainHeight + scrollOffsetY,
+                                chainDef.baseWidth,
+                                chainDef.baseHeight,
+                            };
+
+                            chainHeight += chainDef.baseHeight;
+
+                            // Fill item background
+                            SDL_SetRenderDrawColor(renderer, color_softGray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                        }
+                        movingShadowDrawn = true;
+                    }
+                }
+            }
+
+            // Try body connection shadow if sequential shadow not drawn
+            if (!movingShadowDrawn)
+            {
+                int bodyIndex = -1;
+                int parentId = isItemNearBodyToConnect(movingInst->posX, movingInst->posY, bodyIndex);
+                if (parentId != -1)
+                {
+                    BlockInstance *parentInst = findBlockInstanceById(parentId);
+                    if (parentInst)
+                    {
+                        int bodyStartY = parentInst->posY + parentInst->cachedHeight;
+
+                        // Calculate accumulated height of previous bodies using dynamic heights
+                        int accumulatedHeight = 0;
+                        for (int i = 0; i < bodyIndex; i++)
+                        {
+                            accumulatedHeight += calculateBodyHeight(*parentInst, i) + 15; // Add bottom margin
+                        }
+
+                        int totalHeight = 0;
+
+                        for (int id : movingChainIds)
+                        {
+                            BlockInstance *chainInst = findBlockInstanceById(id);
+                            if (!chainInst)
+                                continue;
+
+                            Block chainDef = blocksLibrary[chainInst->defenitionId];
+
+                            // Draw shadow for each block in chain inside body area
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + parentInst->posX + 20 + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + bodyStartY + accumulatedHeight + 10 + totalHeight + scrollOffsetY,
+                                chainDef.baseWidth,
+                                chainDef.baseHeight,
+                            };
+
+                            totalHeight += chainDef.baseHeight;
+
+                            // Fill item background with body connection color
+                            SDL_SetRenderDrawColor(renderer, color_softGray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                        }
+                        movingShadowDrawn = true;
+                    }
+                }
+            }
+
+            // Try input connection shadow if other shadows not drawn
+            if (!movingShadowDrawn)
+            {
+                Block movingDef = blocksLibrary[movingInst->defenitionId];
+                // Only expression blocks (operators, reporter) can be connected to inputs
+                if (movingDef.type == BLOCK_OPERATOR || movingDef.type == BLOCK_REPORTER)
+                {
+                    int slotIndex = -1;
+                    int hostId = isItemNearInputToConnect(movingInst->posX, movingInst->posY, slotIndex);
+                    if (hostId != -1)
+                    {
+                        BlockInstance *hostInst = findBlockInstanceById(hostId);
+                        if (hostInst)
+                        {
+                            // Calculate input slot position
+                            Block hostDef = blocksLibrary[hostInst->defenitionId];
+                            std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+                            int totalWidth = 0;
+                            for (int i = 0; i < slotIndex; i++)
+                            {
+                                totalWidth += wst[i];
+                                if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                    totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            }
+                            totalWidth += wst[slotIndex];
+
+                            // Draw moving item shadow inside input slot area
+                            SDL_Rect shadowRect = {
+                                WORKSPACE_COLUMN.x + hostInst->posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2 + scrollOffsetX,
+                                WORKSPACE_COLUMN.y + hostInst->posY + (hostInst->cachedHeight - movingDef.baseHeight) / 2 + scrollOffsetY,
+                                movingDef.baseWidth,
+                                movingDef.baseHeight,
+                            };
+
+                            // Fill item background with input connection color
+                            SDL_SetRenderDrawColor(renderer, color_blurgray);
+                            SDL_RenderFillRect(renderer, &shadowRect);
+                            movingShadowDrawn = true;
+                        }
+                    }
+                }
+            }
         }
     }
 
