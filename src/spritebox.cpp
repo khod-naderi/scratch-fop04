@@ -31,7 +31,12 @@ SDL_Texture* searchIcon = nullptr;
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
 SDL_Rect AddSpriteButtonRect ;
 SDL_Rect MenuToolBarRect;
-MenuOption menuOptions[4];
+MenuOption menuOptions[4] = {
+    {nullptr, "Choose a Sprite", {0, 0, 0, 0}, false},
+    {nullptr, "Paint", {0, 0, 0, 0}, false},
+    {nullptr, "Upload", {0, 0, 0, 0}, false},
+    {nullptr, "Random", {0, 0, 0, 0}, false}
+};
 bool isHoveringAddSpriteButton = false;
 
 /*
@@ -167,14 +172,6 @@ void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect Sprite
                                      mouseY >= AddSpriteButtonRect.y && mouseY <= AddSpriteButtonRect.y + AddSpriteButtonRect.h);
         
 
-        // updating menu state based on hovering status
-        if ( isHoveringAddSpriteButton ) {
-            addSpriteMenuState = Menu_Hover_Main;
-        }
-        else if ( addSpriteMenuState == Menu_Hover_Main ) {
-            addSpriteMenuState = Menu_Closed;
-        }
-
         // drawing add sprite button
         if ( isHoveringAddSpriteButton) {
             SDL_SetRenderDrawColor(renderer, 100, 200 , 100 , 255 ); // green color for hovered state
@@ -287,7 +284,7 @@ void DrawAddSpriteMenuOptions(SDL_Renderer* renderer, TTF_Font* font, const int 
     }
 
     const int optionSize = 60;
-    const int spacing = 10;
+    const int spacing = 2;
     const int MenuX = AddSpriteButtonRect.x + ( AddSpriteButtonRect.w - optionSize ) / 2; // center align with add sprite button
     const int MenuStartY = AddSpriteButtonRect.y + AddSpriteButtonRect.h + spacing + 10;
 
@@ -328,10 +325,22 @@ void DrawAddSpriteMenuOptions(SDL_Renderer* renderer, TTF_Font* font, const int 
         }
 
         // if hovering show option name next to the option
+        if ( menuOptions[i].isHovered ) {
+            SDL_Color textColor = color_black;
+            SDL_Surface* textSurface = TTF_RenderText_Solid(font, menuOptions[i].name.c_str(), textColor);
+            if ( textSurface ) {
+                SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+                int textX = menuOptions[i].rect.x - textSurface->w - 10;
+                int textY = menuOptions[i].rect.y + (menuOptions[i].rect.h - textSurface->h) / 2; 
+                SDL_Rect textRect = {textX, textY, textSurface->w, textSurface->h};
+                SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+                SDL_FreeSurface(textSurface);
+                SDL_DestroyTexture(textTexture);
+            }
+        }
     
   }
 }
-
 
 /*
 -------------------------------------------------
@@ -411,6 +420,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
     // Draw add sprite button and menu
     DrawAddSpriteMenu(renderer, font, spriteArea, mouseX, mouseY);
+    DrawAddSpriteMenuOptions(renderer, font, mouseX, mouseY);
 
     // Sprtie thumbnails
     const int thumbnailSize = 70;
@@ -545,6 +555,10 @@ This function is for handling selection on sprite thumbnails
 */
 void SpriteBoxClick(const int mouseX , const int mouseY ) 
 {
+    if (HandleAddSpriteClick(mouseX, mouseY)) {
+        return;
+    }
+
     int thumbnailSize = 70;
     int spacing = 10;
 
