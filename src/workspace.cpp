@@ -288,7 +288,10 @@ bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance 
         if (inst.inputs[i].isBlock)
         {
             BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
-            totalWidth += instSlot->cachedWidth;
+            if (instSlot)
+            {
+                totalWidth += instSlot->cachedWidth;
+            }
         }
         else
         {
@@ -492,7 +495,10 @@ void updateChildBlockPositions(BlockInstance &parent)
                 if (parent.inputs[i].isBlock)
                 {
                     BlockInstance *instSlot = findBlockInstanceById(parent.inputs[i].blockInstanceId);
-                    totalWidth += instSlot->cachedWidth;
+                    if (instSlot)
+                    {
+                        totalWidth += instSlot->cachedWidth;
+                    }
                 }
                 else
                 {
@@ -747,7 +753,10 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                                 if (hostInst->inputs[i].isBlock)
                                 {
                                     BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
-                                    totalWidth += instSlot->cachedWidth;
+                                    if (instSlot)
+                                    {
+                                        totalWidth += instSlot->cachedWidth;
+                                    }
                                 }
                                 else
                                 {
@@ -886,7 +895,10 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                                 if (hostInst->inputs[i].isBlock)
                                 {
                                     BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
-                                    totalWidth += instSlot->cachedWidth;
+                                    if (instSlot)
+                                    {
+                                        totalWidth += instSlot->cachedWidth;
+                                    }
                                 }
                                 else
                                 {
@@ -1088,21 +1100,25 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         // Textboxes
         std::vector<int> wst = calcLabelSizeByPart(def.label);
-        int totalWitdh = 0;
+        int totalWidth = 0;
         for (int i = 0; i < inst.inputCount; i++)
         {
-            totalWitdh += wst[i];
+            totalWidth += wst[i];
             if (inst.inputs[i].isBlock)
             {
                 BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
-                totalWitdh += instSlot->cachedWidth;
+                if (instSlot)
+                {
+                    totalWidth += instSlot->cachedWidth;
+                }
             }
             else
             {
-                inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWitdh + BLOCKINSTANCE_RL_MARGIN / 2;
+                // Position textbox correctly with proper margin calculation
+                inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
                 inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
                 inst.textboxes[i]->draw(renderer);
-                totalWitdh += inst.textboxes[i]->cachedWidth;
+                totalWidth += inst.textboxes[i]->cachedWidth;
             }
         }
 
@@ -1251,7 +1267,10 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                             if (hostInst->inputs[i].isBlock)
                             {
                                 BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
-                                totalWidth += instSlot->cachedWidth;
+                                if (instSlot)
+                                {
+                                    totalWidth += instSlot->cachedWidth;
+                                }
                             }
                             else
                             {
@@ -1409,7 +1428,10 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                                 if (hostInst->inputs[i].isBlock)
                                 {
                                     BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
-                                    totalWidth += instSlot->cachedWidth;
+                                    if (instSlot)
+                                    {
+                                        totalWidth += instSlot->cachedWidth;
+                                    }
                                 }
                                 else
                                 {
@@ -1474,20 +1496,35 @@ void blockInstanceUpdateWidth(BlockInstance &inst)
     Block hostDef = blocksLibrary[inst.defenitionId];
     std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
     int totalWidth = 0;
+
+    // Add all label parts and input widths
     for (int i = 0; i < inst.inputCount; i++)
     {
         totalWidth += wst[i];
         if (inst.inputs[i].isBlock)
         {
             BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
-            totalWidth += instSlot->cachedWidth;
+            if (instSlot)
+            {
+                // Recursively update nested block width first
+                blockInstanceUpdateWidth(*instSlot);
+                totalWidth += instSlot->cachedWidth;
+            }
         }
         else
         {
             totalWidth += inst.textboxes[i]->cachedWidth;
         }
     }
-    inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
+
+    // Add the final label part if it exists
+    if (wst.size() > inst.inputCount)
+    {
+        totalWidth += wst[inst.inputCount];
+    }
+
+    // Set the cached width with margin
+    inst.cachedWidth = std::max(totalWidth + BLOCKINSTANCE_RL_MARGIN, hostDef.baseWidth);
 }
 
 std::string getBlockInstanceString(BlockInstance &inst)
