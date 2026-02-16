@@ -20,6 +20,9 @@ This header file is for managing custome and backgorund setting area named sprit
 // selected sprite id in sprite box
 int SelectedSpriteID = -1;
 
+// state of the screen
+ScreenState currentState = State_MainEditor;
+
 // these are for adding png icons for add sprite menu
 SDL_Texture* catIcon = nullptr;
 SDL_Texture* paintIcon = nullptr;
@@ -251,7 +254,7 @@ bool HandleAddSpriteClick( const int mouseX, const int mouseY ) {
                 // controling each option separately
                 switch ( i ) {
                     case 0: // choose a sprite 
-                    // calling the function for adding a new sprite .
+                    currentState = State_Sprite_Picker; 
                     break;
                     case 1: // paint 
                     // calling the function for opening paint page.
@@ -583,4 +586,27 @@ void SpriteBoxClick(const int mouseX , const int mouseY )
             break; 
         }
     } 
+}
+
+/*
+----------------------------------------------------
+This function is for drawing sprite picker screen when clicking on choose a sprite option in add sprite menu
+----------------------------------------------------
+*/
+
+void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY ) {
+    // 1. drawing the screen text at top 
+    const char* title = "Choose a Sprite";
+    SDL_Color titleColor = color_black;
+    SDL_Surface* titleSurface = TTF_RenderText_Solid(font, title, titleColor);
+    if ( titleSurface ) {
+        SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
+    int titleX = MAIN_WINDOW_WIDTH / 2 - titleSurface->w / 2;
+    int titleY = 55;
+    SDL_Rect titleRect = { titleX, titleY, titleSurface->w, titleSurface->h };
+    SDL_RenderCopy(renderer, titleTexture, nullptr, &titleRect);
+    SDL_DestroyTexture(titleTexture);
+    }
+    SDL_FreeSurface(titleSurface);
+    
 }
