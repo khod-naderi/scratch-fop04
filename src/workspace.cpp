@@ -39,6 +39,12 @@ std::vector<int> calcLabelSizeByPart(const char *label);
 std::vector<int> calcLabelSizeByPartCamulative(const char *label);
 
 /*
+Helper function to calculate X positions for all input slots in a block
+Returns vector of X positions relative to block's left edge
+*/
+std::vector<int> calculateSlotPositions(const BlockInstance &inst);
+
+/*
 Helper function to calculate dynamic body height based on content
 */
 int calculateBodyHeight(const BlockInstance &inst, int bodyIndex);
@@ -1098,27 +1104,16 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         };
         SDL_RenderCopy(renderer, texture, NULL, &textRect);
 
-        // Textboxes
-        std::vector<int> wst = calcLabelSizeByPart(def.label);
-        int totalWidth = 0;
+        // Textboxes - use new slot position calculation approach
+        std::vector<int> slotPositions = calculateSlotPositions(inst);
         for (int i = 0; i < inst.inputCount; i++)
         {
-            totalWidth += wst[i];
-            if (inst.inputs[i].isBlock)
+            if (!inst.inputs[i].isBlock)
             {
-                BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
-                if (instSlot)
-                {
-                    totalWidth += instSlot->cachedWidth;
-                }
-            }
-            else
-            {
-                // Position textbox correctly with proper margin calculation
-                inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWidth + BLOCKINSTANCE_RL_MARGIN / 2;
+                // Position textbox using pre-calculated slot position
+                inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + slotPositions[i] + BLOCKINSTANCE_RL_MARGIN / 2;
                 inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
                 inst.textboxes[i]->draw(renderer);
-                totalWidth += inst.textboxes[i]->cachedWidth;
             }
         }
 
@@ -1582,4 +1577,51 @@ std::vector<int> calcLabelSizeByPartCamulative(const char *label)
         *it = *it + *(it - 1);
     }
     return sizes;
+}
+
+/*
+Helper function to calculate X positions for all input slots in a block
+Returns vector of X positions relative to block's left edge
+*/
+std::vector<int> calculateSlotPositions(const BlockInstance &inst)
+{
+    std::vector<int> positions;
+    if (inst.inputCount == 0)
+    {
+        return positions;
+    }
+
+    Block *def = &blocksLibrary[inst.defenitionId];
+    if (!def)
+    {
+        return positions;
+    }
+
+    std::vector<int> labelParts = calcLabelSizeByPart(def->label);
+    int currentX = 0;
+
+    for (int i = 0; i < inst.inputCount; i++)
+    {
+        // Add width of label part before this slot
+        currentX += labelParts[i];
+
+        // Store position for this slot
+        positions.push_back(currentX);
+
+        // Add width of this slot's content
+        if (inst.inputs[i].isBlock)
+        {
+            BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
+            if (instSlot)
+            {
+                currentX += instSlot->cachedWidth;
+            }
+        }
+        else
+        {
+            currentX += inst.textboxes[i]->cachedWidth;
+        }
+    }
+
+    return positions;
 }
