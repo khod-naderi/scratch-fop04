@@ -5,6 +5,7 @@
 */
 #include <string>
 #include <iomanip>
+#include <sstream>
 
 #ifndef VALUE_HEADER
 #define VALUE_HEADER
