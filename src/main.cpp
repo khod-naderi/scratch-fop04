@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
         std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
         return SDL_FONT_NOT_FOUND;
     }
+    DEFAULT_FONT = font;
 
     // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
+                    controlUiElementClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEBUTTONUP)
@@ -148,6 +150,10 @@ int main(int argc, char *argv[])
                 if (eventSDL.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                     direction = 1;
                 controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
+            }
+            else if (eventSDL.type == SDL_KEYDOWN)
+            {
+                controlUiElementKeyboardHit(eventSDL.key.keysym);
             }
         }
 

@@ -1,5 +1,6 @@
 #include "block_instance.h"
 #include "blocks_library.h"
+#include "ui.h"
 
 /*
 -------------------------------
@@ -24,6 +25,7 @@ void blockInstanceConstruct(BlockInstance &inst)
     {
         inst.inputs[i].isBlock = false;
         inst.inputs[i].blockInstanceId = -1;
+        inst.textboxes[i] = new TextBox(DEFAULT_FONT);
     }
 
     for (int i = 0; i < BLOCK_MAX_BODIES; i++)
@@ -50,6 +52,8 @@ void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int in
         inst.inputs[i].isBlock = false;
         inst.inputs[i].literal = def.slots[i].defaultValue;
         inst.inputs[i].blockInstanceId = -1;
+        inst.textboxes[i] = new TextBox(DEFAULT_FONT);
+        inst.textboxes[i]->setStr(inst.inputs[i].literal.asString());
     }
 
     // copy bodies info
@@ -57,5 +61,56 @@ void blockInstanceConstructFromDefinition(BlockInstance &inst, int defId, int in
     for (int i = 0; i < def.bodyCount; i++)
     {
         inst.bodies[i] = -1;
+    }
+
+    // copy dimensions from definition
+    inst.cachedHeight = def.baseHeight;
+    inst.cachedWidth = def.baseWidth;
+}
+
+std::string lprintf(const char *format, const InputValue values[])
+{
+    std::string out = "";
+    int j = 0;
+    for (size_t i = 0; i < strlen(format); i++)
+    {
+        if (format[i] == '%')
+        {
+            i++;
+            if (format[i] == 's')
+            {
+                if (values[i].isBlock)
+                {
+                    // TODO: BlockInstance *inst = findIn values->blockInstanceId
+                    out += values[j].literal.asString();
+                }
+                else
+                {
+                    out += values[j].literal.asString();
+                }
+                j++;
+                continue;
+            }
+        }
+        out.push_back(format[i]);
+    }
+    return out;
+}
+
+/*
+This function will update input value of a blockinstace with it's textboxes.
+*/
+void updateBlockInstanceInputValues(BlockInstance &inst)
+{
+    for (int i = 0; i < inst.inputCount; i++)
+    {
+        if (inst.inputs[i].isBlock)
+        {
+            // TODO: Block connection inputs
+        }
+        else
+        {
+            inst.inputs[i].literal = fromString(inst.textboxes[i]->getStr());
+        }
     }
 }
