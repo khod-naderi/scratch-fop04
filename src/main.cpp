@@ -43,11 +43,13 @@ int main(int argc, char *argv[])
         return SDL_FONT_NOT_FOUND;
     }
 
+    
     // loading JPG image support
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if ((IMG_Init(imgFlags) & imgFlags) ){
+    int initted = IMG_Init(imgFlags);
+    if ( ( initted & imgFlags ) != imgFlags ){
         std::cerr << "Failed to initialize SDL_image with PNG and JPG support: " << IMG_GetError() << std::endl;
-        return false;
+        return -1;
     }
 
     // Creating a static windows
@@ -199,6 +201,7 @@ int main(int argc, char *argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();
+    IMG_Quit();
     SDL_Quit();
 
     return 0;
