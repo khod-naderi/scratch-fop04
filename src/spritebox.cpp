@@ -601,12 +601,54 @@ void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mo
     SDL_Surface* titleSurface = TTF_RenderText_Solid(font, title, titleColor);
     if ( titleSurface ) {
         SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
-    int titleX = MAIN_WINDOW_WIDTH / 2 - titleSurface->w / 2;
+    int titleX = CATEGORY_COLUMN_WIDTH + MAIN_WINDOW_WIDTH / 2 - titleSurface->w / 2;
     int titleY = 55;
     SDL_Rect titleRect = { titleX, titleY, titleSurface->w, titleSurface->h };
     SDL_RenderCopy(renderer, titleTexture, nullptr, &titleRect);
     SDL_DestroyTexture(titleTexture);
     }
     SDL_FreeSurface(titleSurface);
+
+    // 2. drawing back button at top left corner
+    SDL_Rect backButtonRect = { CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 100 , 55, 80, 30 };
+    SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255);
+    SDL_RenderFillRect(renderer, &backButtonRect);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &backButtonRect);
+
+    // 3. hover effect for back button
+    bool isHoveringBackButton = ( mouseX >= backButtonRect.x && mouseX <= backButtonRect.x + backButtonRect.w &&
+                                 mouseY >= backButtonRect.y && mouseY <= backButtonRect.y + backButtonRect.h);
+    if ( isHoveringBackButton ) {
+        SDL_SetRenderDrawColor(renderer, 201, 201, 201, 255);
+    }
+    else {
+        SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255);
+    }
+    SDL_RenderFillRect(renderer, &backButtonRect);
+
+    // 4. writing back button text
+    SDL_Color textColor = color_black;
+    SDL_Surface* backTextSurface = TTF_RenderText_Solid(font, "< back", textColor);
+    if ( backTextSurface ) {
+        SDL_Texture* backTextTexture = SDL_CreateTextureFromSurface(renderer, backTextSurface);
+        int textX = backButtonRect.x + 15; 
+        int textY = backButtonRect.y + (backButtonRect.h - backTextSurface->h) / 2; 
+        SDL_Rect textRect = {textX, textY, backTextSurface->w, backTextSurface->h};
+        SDL_RenderCopy(renderer, backTextTexture, nullptr, &textRect);
+        SDL_DestroyTexture(backTextTexture);
+    }
+    SDL_FreeSurface(backTextSurface);
+
+    // 5. if back button is clicked, return to main editor screen
+
+
+    // 6. drawing separate line between sprite picker and other parts of screen
+    SDL_SetRenderDrawColor(renderer, color_black);
+    int SepratorY = backButtonRect.y + backButtonRect.h + 20;
+    SDL_RenderDrawLine(renderer, CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 50, SepratorY, MAIN_WINDOW_WIDTH, SepratorY);
+
+    // 7. drawing sprite options
     
+
 }
