@@ -44,6 +44,7 @@ bool canConnectSequentially(int topId, int bottomId);
 bool canConnectToBody(int parentId, int bodyIndex, int childId);
 bool canConnectToInput(int hostId, int slotIndex, int operatorId);
 
-std::string blockInstanceUpdateLabel(BlockInstance &inst);
+std::string getBlockInstanceString(BlockInstance &inst);
+void blockInstanceUpdateWidth(BlockInstance &inst);
 
 #endif

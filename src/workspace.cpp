@@ -283,8 +283,17 @@ bool isPointInInputSlot(const int pointX, const int pointY, const BlockInstance 
     for (int i = 0; i < slotIndex; i++)
     {
         totalWidth += wst[i];
-        if (i < inst.inputCount && inst.textboxes[i])
+        // if (i < inst.inputCount && inst.textboxes[i])
+        //     totalWidth += inst.textboxes[i]->cachedWidth;
+        if (inst.inputs[i].isBlock)
+        {
+            BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
+            totalWidth += instSlot->cachedWidth;
+        }
+        else
+        {
             totalWidth += inst.textboxes[i]->cachedWidth;
+        }
     }
     totalWidth += wst[slotIndex];
 
@@ -478,8 +487,17 @@ void updateChildBlockPositions(BlockInstance &parent)
             for (int i = 0; i < slotIdx; i++)
             {
                 totalWidth += wst[i];
-                if (i < parent.inputCount && parent.textboxes[i])
+                // if (i < parent.inputCount && parent.textboxes[i])
+                //     totalWidth += parent.textboxes[i]->cachedWidth;
+                if (parent.inputs[i].isBlock)
+                {
+                    BlockInstance *instSlot = findBlockInstanceById(parent.inputs[i].blockInstanceId);
+                    totalWidth += instSlot->cachedWidth;
+                }
+                else
+                {
                     totalWidth += parent.textboxes[i]->cachedWidth;
+                }
             }
             totalWidth += wst[slotIdx];
 
@@ -724,8 +742,17 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                             for (int i = 0; i < slotIndex; i++)
                             {
                                 totalWidth += wst[i];
-                                if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                // if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                //     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                if (hostInst->inputs[i].isBlock)
+                                {
+                                    BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
+                                    totalWidth += instSlot->cachedWidth;
+                                }
+                                else
+                                {
                                     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                }
                             }
                             totalWidth += wst[slotIndex];
 
@@ -854,8 +881,17 @@ void controlWorkspaceClickUp(const int mouseX, const int mouseY)
                             for (int i = 0; i < slotIndex; i++)
                             {
                                 totalWidth += wst[i];
-                                if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                // if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                //     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                if (hostInst->inputs[i].isBlock)
+                                {
+                                    BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
+                                    totalWidth += instSlot->cachedWidth;
+                                }
+                                else
+                                {
                                     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                }
                             }
                             totalWidth += wst[slotIndex];
 
@@ -1013,7 +1049,8 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         updateBlockInstanceInputValues(inst);
 
-        std::string blStr = blockInstanceUpdateLabel(inst);
+        std::string blStr = getBlockInstanceString(inst);
+        blockInstanceUpdateWidth(inst);
 
         SDL_Rect itemRect = {
             WORKSPACE_COLUMN.x + inst.posX + scrollOffsetX,
@@ -1055,10 +1092,18 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         for (int i = 0; i < inst.inputCount; i++)
         {
             totalWitdh += wst[i];
-            inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWitdh + BLOCKINSTANCE_RL_MARGIN / 2;
-            inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
-            inst.textboxes[i]->draw(renderer);
-            totalWitdh += inst.textboxes[i]->cachedWidth;
+            if (inst.inputs[i].isBlock)
+            {
+                BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
+                totalWitdh += instSlot->cachedWidth;
+            }
+            else
+            {
+                inst.textboxes[i]->posX = WORKSPACE_COLUMN.x + scrollOffsetX + inst.posX + totalWitdh + BLOCKINSTANCE_RL_MARGIN / 2;
+                inst.textboxes[i]->posY = WORKSPACE_COLUMN.y + scrollOffsetY + inst.posY + (inst.cachedHeight - inst.textboxes[i]->cachedHeight) / 2;
+                inst.textboxes[i]->draw(renderer);
+                totalWitdh += inst.textboxes[i]->cachedWidth;
+            }
         }
 
         // Bodies
@@ -1201,8 +1246,17 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                         for (int i = 0; i < slotIndex; i++)
                         {
                             totalWidth += wst[i];
-                            if (i < hostInst->inputCount && hostInst->textboxes[i])
+                            // if (i < hostInst->inputCount && hostInst->textboxes[i])
+                            //     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            if (hostInst->inputs[i].isBlock)
+                            {
+                                BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
+                                totalWidth += instSlot->cachedWidth;
+                            }
+                            else
+                            {
                                 totalWidth += hostInst->textboxes[i]->cachedWidth;
+                            }
                         }
                         totalWidth += wst[slotIndex];
 
@@ -1350,8 +1404,17 @@ void drawWorkspaceScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
                             for (int i = 0; i < slotIndex; i++)
                             {
                                 totalWidth += wst[i];
-                                if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                // if (i < hostInst->inputCount && hostInst->textboxes[i])
+                                //     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                if (hostInst->inputs[i].isBlock)
+                                {
+                                    BlockInstance *instSlot = findBlockInstanceById(hostInst->inputs[i].blockInstanceId);
+                                    totalWidth += instSlot->cachedWidth;
+                                }
+                                else
+                                {
                                     totalWidth += hostInst->textboxes[i]->cachedWidth;
+                                }
                             }
                             totalWidth += wst[slotIndex];
 
@@ -1406,13 +1469,34 @@ void removeBlockFromWorkspace(int id)
     codespaceRemoveInstance(workspaceCodeSpace, id);
 }
 
-std::string blockInstanceUpdateLabel(BlockInstance &inst)
+void blockInstanceUpdateWidth(BlockInstance &inst)
+{
+    Block hostDef = blocksLibrary[inst.defenitionId];
+    std::vector<int> wst = calcLabelSizeByPart(hostDef.label);
+    int totalWidth = 0;
+    for (int i = 0; i < inst.inputCount; i++)
+    {
+        totalWidth += wst[i];
+        if (inst.inputs[i].isBlock)
+        {
+            BlockInstance *instSlot = findBlockInstanceById(inst.inputs[i].blockInstanceId);
+            totalWidth += instSlot->cachedWidth;
+        }
+        else
+        {
+            totalWidth += inst.textboxes[i]->cachedWidth;
+        }
+    }
+    inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
+}
+
+std::string getBlockInstanceString(BlockInstance &inst)
 {
     const char *format = blocksLibrary[inst.defenitionId].label;
     std::string out = lprintf(format, inst.inputs);
 
-    TTF_SizeText(inst.textboxes[0]->font, out.c_str(), &inst.cachedWidth, nullptr);
-    inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
+    // TTF_SizeText(inst.textboxes[0]->font, out.c_str(), &inst.cachedWidth, nullptr);
+    // inst.cachedWidth += BLOCKINSTANCE_RL_MARGIN;
 
     return out;
 }
