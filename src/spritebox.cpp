@@ -517,26 +517,20 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
         }
 
         // draw trash icon on top right corner of thumbnail when selected
-        if ( isSelected ) {
-            const char* trashIconPath = "🗑️";
-            SDL_Color textColor = { 200, 50, 50, 255 };
+        if ( isSelected && TrashIcon ) {
+            const int TRASH_SIZE = 20;
 
-            SDL_Surface* trashSurface = TTF_RenderText_Solid(font, trashIconPath, textColor);
-            if ( trashSurface ) {
-                SDL_Texture* trashTexture = SDL_CreateTextureFromSurface(renderer, trashSurface );
-                // position of trash icon
-                int trashX = thumbRect.x + thumbRect.w - trashSurface->w - 5;
-                int trashY = thumbRect.y + 2;
+            int trashX = thumbRect.x + thumbRect.w - TRASH_SIZE - 4; 
+            int trashY = thumbRect.y + 4;
 
-                SDL_Rect trashRect = { trashX, trashY, trashSurface->w, trashSurface->h };
-                SDL_SetRenderDrawColor (renderer, 255, 255, 255, 200); 
-                SDL_Rect trashBackground = { trashRect.x - 2, trashRect.y - 2, trashRect.w + 4, trashRect.h + 4 };
-                SDL_RenderFillRect(renderer, &trashBackground);
-                SDL_RenderCopy(renderer, trashTexture, nullptr, &trashRect);
-                SDL_FreeSurface(trashSurface);
-                SDL_DestroyTexture(trashTexture);
-
-            }
+            SDL_Rect trashRect = { trashX, trashY, TRASH_SIZE, TRASH_SIZE };
+            
+            SDL_SetRenderDrawColor(renderer, color_white );
+            SDL_Rect trashBackGround = { trashRect.x - 2, trashRect.y - 2, trashRect.w + 4, trashRect.h + 4 };
+            SDL_RenderFillRect(renderer, &trashBackGround);
+            SDL_SetRenderDrawColor(renderer, 200, 50, 50, 255);
+            SDL_RenderDrawRect(renderer, &trashBackGround);
+            SDL_RenderCopy(renderer, TrashIcon, nullptr, &trashRect);
 
         } 
 
