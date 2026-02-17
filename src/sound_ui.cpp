@@ -3,14 +3,21 @@
 #include "generaldef.h"
 #include "color.h"
 
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
+#include <SDL2/SDL_ttf.h>
+extern "C"
+{
+#include "tinyfiledialogs.h"
+}
+
 #include <filesystem>
 #include <vector>
 #include <string>
 
-/* -------------------------------------------------
-   Sound asset
-------------------------------------------------- */
+/* =========================================================
+   Sound Asset
+========================================================= */
 struct SoundAsset
 {
     std::string name;
@@ -23,22 +30,21 @@ struct SoundAsset
     int volume = 100;
 };
 
+/* =========================================================
+   State
+========================================================= */
 static std::vector<SoundAsset> sounds;
-static int selectedSound = 0;
-static int hoveredSound = -1;
+static int selectedSound = -1;
 
 static bool scanned = false;
 static bool loaded = false;
 
-/* -------------------------------------------------
-   SDL audio device
-------------------------------------------------- */
 static SDL_AudioDeviceID audioDevice = 0;
 static SDL_AudioSpec deviceSpec{};
 
-/* -------------------------------------------------
+/* =========================================================
    Scan assets/sounds once
-------------------------------------------------- */
+========================================================= */
 static void scanSoundsOnce()
 {
     if (scanned)
@@ -53,63 +59,50 @@ static void scanSoundsOnce()
 
     SDL_free(base);
 
-    if (!std::filesystem::exists(dir))
+    if (std::filesystem::exists(dir))
     {
-        scanned = true;
-        return;
-    }
-
-    for (const auto &e : std::filesystem::directory_iterator(dir))
-    {
-        if (e.is_regular_file() && e.path().extension() == ".wav")
+        for (auto &e : std::filesystem::directory_iterator(dir))
         {
-            SoundAsset s;
-            s.name = e.path().filename().string();
-            s.path = e.path().string();
-            sounds.push_back(s);
+            if (e.is_regular_file() && e.path().extension() == ".wav")
+            {
+                SoundAsset s;
+                s.name = e.path().filename().string();
+                s.path = e.path().string();
+                sounds.push_back(s);
+            }
         }
     }
+
+    if (!sounds.empty())
+        selectedSound = 0;
 
     scanned = true;
 }
 
-/* -------------------------------------------------
+/* =========================================================
    Load WAVs once
-------------------------------------------------- */
+========================================================= */
 static void loadWavsOnce()
 {
     if (loaded)
         return;
 
     for (auto &s : sounds)
-    {
-        SDL_LoadWAV(
-            s.path.c_str(),
-            &s.spec,
-            &s.buffer,
-            &s.length);
-    }
+        SDL_LoadWAV(s.path.c_str(), &s.spec, &s.buffer, &s.length);
 
     loaded = true;
 }
 
-/* -------------------------------------------------
-   Play sound
-------------------------------------------------- */
+/* =========================================================
+   Audio
+========================================================= */
 static void playSound(const SoundAsset &s)
 {
     if (!s.buffer || s.length == 0)
         return;
 
     if (!audioDevice)
-    {
-        audioDevice = SDL_OpenAudioDevice(
-            nullptr,
-            0,
-            &s.spec,
-            &deviceSpec,
-            0);
-    }
+        audioDevice = SDL_OpenAudioDevice(nullptr, 0, &s.spec, &deviceSpec, 0);
 
     if (!audioDevice)
         return;
@@ -128,51 +121,112 @@ static void playSound(const SoundAsset &s)
     SDL_PauseAudioDevice(audioDevice, 0);
 }
 
-/* -------------------------------------------------
-   Stop sound
-------------------------------------------------- */
 static void stopSound()
 {
     if (audioDevice)
         SDL_ClearQueuedAudio(audioDevice);
 }
 
-/* -------------------------------------------------
-   Button helper
-------------------------------------------------- */
-static void drawButton(
-    SDL_Renderer *renderer,
-    TTF_Font *font,
-    const SDL_Rect &rect,
-    const char *label,
-    bool hovered)
+/* =========================================================
+   Open File Explorer (tinyfiledialogs)
+========================================================= */
+static std::string openWavFileDialog()
 {
-    SDL_SetRenderDrawColor(
-        renderer,
-        hovered ? color_hoveredMenuOption : SDL_Color{220, 220, 220, 255});
-    SDL_RenderFillRect(renderer, &rect);
+    const char *filters[] = {"*.wav"};
 
-    SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
-    SDL_RenderDrawRect(renderer, &rect);
+    const char *path = tinyfd_openFileDialog(
+        "Select WAV file",
+        "",
+        1,
+        filters,
+        "WAV files",
+        0);
 
-    SDL_Texture *txt = renderText(renderer, font, label, color_black);
-    if (txt)
+    if (!path)
+        return "";
+
+    return std::string(path);
+}
+
+/* =========================================================
+   Import WAV into assets/sounds
+========================================================= */
+static void importWav(const std::string &srcPath)
+{
+    std::filesystem::path src(srcPath);
+    if (src.extension() != ".wav")
+        return;
+
+    char *base = SDL_GetBasePath();
+    if (!base)
+        return;
+
+    std::filesystem::path dstDir =
+        std::filesystem::path(base) / "../assets/sounds";
+
+    SDL_free(base);
+
+    std::filesystem::create_directories(dstDir);
+    std::filesystem::path dst = dstDir / src.filename();
+
+    try
     {
-        int w, h;
-        SDL_QueryTexture(txt, nullptr, nullptr, &w, &h);
-        SDL_Rect tr = {
-            rect.x + (rect.w - w) / 2,
-            rect.y + (rect.h - h) / 2,
-            w,
-            h};
-        SDL_RenderCopy(renderer, txt, nullptr, &tr);
-        SDL_DestroyTexture(txt);
+        std::filesystem::copy_file(
+            src, dst,
+            std::filesystem::copy_options::overwrite_existing);
+    }
+    catch (...)
+    {
+        return;
+    }
+
+    SoundAsset s;
+    s.name = dst.filename().string();
+    s.path = dst.string();
+
+    if (SDL_LoadWAV(s.path.c_str(), &s.spec, &s.buffer, &s.length))
+    {
+        sounds.push_back(s);
+        selectedSound = (int)sounds.size() - 1;
     }
 }
 
-/* -------------------------------------------------
-   Main Sound Editor UI
-------------------------------------------------- */
+/* =========================================================
+   Button helper
+========================================================= */
+static void drawButton(
+    SDL_Renderer *r,
+    TTF_Font *font,
+    const SDL_Rect &rect,
+    const char *text,
+    bool hovered)
+{
+    SDL_SetRenderDrawColor(
+        r,
+        hovered ? 200 : 220,
+        hovered ? 200 : 220,
+        hovered ? 255 : 220,
+        255);
+    SDL_RenderFillRect(r, &rect);
+    SDL_RenderDrawRect(r, &rect);
+
+    SDL_Texture *t = renderText(r, font, text, color_black);
+    if (t)
+    {
+        int w, h;
+        SDL_QueryTexture(t, nullptr, nullptr, &w, &h);
+        SDL_Rect tr{
+            rect.x + (rect.w - w) / 2,
+            rect.y + (rect.h - h) / 2,
+            w, h};
+        SDL_RenderCopy(r, t, nullptr, &tr);
+        SDL_DestroyTexture(t);
+    }
+}
+
+/* =========================================================
+   MAIN UI
+========================================================= */
 void drawSoundEditor(
     SDL_Renderer *renderer,
     TTF_Font *font,
@@ -182,177 +236,147 @@ void drawSoundEditor(
     scanSoundsOnce();
     loadWavsOnce();
 
-    const int TAB_BAR_HEIGHT = 30;
     const int SOUND_LIST_WIDTH = 180;
     const int BUTTON_HEIGHT = 32;
-    const int ITEM_HEIGHT = 28;
 
-    /* ✅ NON‑NEGOTIABLE GEOMETRY */
-    SDL_Rect editorArea = {
+    SDL_Rect editorArea{
         0,
-        MENUBAR_HEIGHT + TAB_BAR_HEIGHT,
+        MENUBAR_HEIGHT,
         MAIN_WINDOW_WIDTH - CANVAS_SCREEN_WIDTH,
-        MAIN_WINDOW_HEIGHT - MENUBAR_HEIGHT - TAB_BAR_HEIGHT};
+        MAIN_WINDOW_HEIGHT - MENUBAR_HEIGHT};
 
-    SDL_SetRenderDrawColor(renderer, color_menuDropbox);
+    SDL_SetRenderDrawColor(renderer, 235, 235, 235, 255);
     SDL_RenderFillRect(renderer, &editorArea);
 
-    /* ---------------------------
-       Sound list (LEFT)
-    --------------------------- */
-    SDL_Rect soundList = {
+    /* ---------- Sound List ---------- */
+    SDL_Rect list{
         editorArea.x,
         editorArea.y,
         SOUND_LIST_WIDTH,
         editorArea.h};
 
-    SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
-    SDL_RenderFillRect(renderer, &soundList);
-    SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
-    SDL_RenderDrawRect(renderer, &soundList);
+    SDL_SetRenderDrawColor(renderer, 245, 245, 245, 255);
+    SDL_RenderFillRect(renderer, &list);
+    SDL_RenderDrawRect(renderer, &list);
 
-    hoveredSound = -1;
-    int itemY = soundList.y + 20;
-
+    int y = list.y + 20;
     for (size_t i = 0; i < sounds.size(); ++i)
     {
-        SDL_Rect r = {
-            soundList.x + 5,
-            itemY,
-            soundList.w - 10,
-            ITEM_HEIGHT};
-
-        bool hovered = isPointInRect(mouseX, mouseY, r);
-        if (hovered)
-            hoveredSound = (int)i;
+        SDL_Rect r{list.x + 10, y, list.w - 20, 28};
+        bool hover = isPointInRect(mouseX, mouseY, r);
 
         SDL_SetRenderDrawColor(
             renderer,
-            (int)i == selectedSound
-                ? SDL_Color{200, 220, 255, 255}
-            : hovered ? color_hoveredMenuOption
-                      : SDL_Color{245, 245, 245, 255});
-
+            (int)i == selectedSound ? 190 : hover ? 210
+                                                  : 235,
+            210,
+            255,
+            255);
         SDL_RenderFillRect(renderer, &r);
 
         SDL_Texture *t =
             renderText(renderer, font, sounds[i].name.c_str(), color_black);
+
         if (t)
         {
             int w, h;
             SDL_QueryTexture(t, nullptr, nullptr, &w, &h);
-            SDL_Rect tr = {r.x + 10, r.y + (r.h - h) / 2, w, h};
+            SDL_Rect tr{r.x + 6, r.y + (r.h - h) / 2, w, h};
             SDL_RenderCopy(renderer, t, nullptr, &tr);
             SDL_DestroyTexture(t);
         }
 
-        if (hovered &&
+        if (hover &&
             (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
-        {
             selectedSound = (int)i;
-        }
 
-        itemY += ITEM_HEIGHT + 4;
+        y += 34;
     }
 
-    if (sounds.empty())
+    /* ---------- Upload Button ---------- */
+    SDL_Rect uploadBtn{
+        list.x + 10,
+        list.y + list.h - BUTTON_HEIGHT - 10,
+        list.w - 20,
+        BUTTON_HEIGHT};
+
+    bool uploadHover = isPointInRect(mouseX, mouseY, uploadBtn);
+    drawButton(renderer, font, uploadBtn, "Upload Sound", uploadHover);
+
+    if (uploadHover &&
+        (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+    {
+        std::string file = openWavFileDialog();
+        if (!file.empty())
+            importWav(file);
+    }
+
+    /* ---------- Editor ---------- */
+    if (selectedSound < 0)
         return;
 
-    /* ---------------------------
-       Editor (RIGHT)
-    --------------------------- */
-    SDL_Rect editor = {
-        soundList.x + soundList.w,
+    SDL_Rect editor{
+        list.x + list.w,
         editorArea.y,
-        editorArea.w - soundList.w,
+        editorArea.w - list.w,
         editorArea.h};
 
-    SDL_SetRenderDrawColor(renderer, color_white);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &editor);
-    SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
     SDL_RenderDrawRect(renderer, &editor);
 
     int cx = editor.x + editor.w / 2;
-    int my = editor.y + editor.h / 2 - 60;
+    int cy = editor.y + editor.h / 2;
 
-    /* File name */
-    SDL_Texture *nameText =
+    SDL_Texture *title =
         renderText(renderer, font, sounds[selectedSound].name.c_str(), color_black);
-    if (nameText)
+
+    if (title)
     {
         int w, h;
-        SDL_QueryTexture(nameText, nullptr, nullptr, &w, &h);
-        SDL_Rect tr = {cx - w / 2, my - h - 20, w, h};
-        SDL_RenderCopy(renderer, nameText, nullptr, &tr);
-        SDL_DestroyTexture(nameText);
+        SDL_QueryTexture(title, nullptr, nullptr, &w, &h);
+        SDL_Rect tr{cx - w / 2, cy - 120, w, h};
+        SDL_RenderCopy(renderer, title, nullptr, &tr);
+        SDL_DestroyTexture(title);
     }
 
     /* Play / Stop */
-    SDL_Rect playBtn = {cx - 120, my, 100, 44};
-    SDL_Rect stopBtn = {cx + 20, my, 100, 44};
+    SDL_Rect playBtn{cx - 120, cy - 60, 100, 40};
+    SDL_Rect stopBtn{cx + 20, cy - 60, 100, 40};
 
-    bool playHover = isPointInRect(mouseX, mouseY, playBtn);
-    bool stopHover = isPointInRect(mouseX, mouseY, stopBtn);
+    drawButton(renderer, font, playBtn, "Play",
+               isPointInRect(mouseX, mouseY, playBtn));
+    drawButton(renderer, font, stopBtn, "Stop",
+               isPointInRect(mouseX, mouseY, stopBtn));
 
-    drawButton(renderer, font, playBtn, "Play", playHover);
-    drawButton(renderer, font, stopBtn, "Stop", stopHover);
-
-    if (playHover &&
+    if (isPointInRect(mouseX, mouseY, playBtn) &&
         (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
-    {
         playSound(sounds[selectedSound]);
-    }
 
-    if (stopHover &&
+    if (isPointInRect(mouseX, mouseY, stopBtn) &&
         (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
-    {
         stopSound();
-    }
 
-    /* ---------------------------
-       Volume slider
-    --------------------------- */
-    int volY = my + 44 + 35;
+    /* Volume Slider */
+    SDL_Rect slider{cx - 150, cy + 10, 300, 6};
+    SDL_SetRenderDrawColor(renderer, 180, 180, 180, 255);
+    SDL_RenderFillRect(renderer, &slider);
 
-    SDL_Texture *volText =
-        renderText(renderer, font, "Volume", color_black);
-    if (volText)
-    {
-        int w, h;
-        SDL_QueryTexture(volText, nullptr, nullptr, &w, &h);
-        SDL_Rect tr = {cx - w / 2, volY, w, h};
-        SDL_RenderCopy(renderer, volText, nullptr, &tr);
-        SDL_DestroyTexture(volText);
-    }
+    int knobX =
+        slider.x + (sounds[selectedSound].volume * slider.w) / 100;
 
-    SDL_Rect sliderBar = {cx - 160, volY + 30, 320, 10};
+    SDL_Rect knob{knobX - 6, slider.y - 6, 12, 18};
+    SDL_SetRenderDrawColor(renderer, 100, 100, 255, 255);
+    SDL_RenderFillRect(renderer, &knob);
 
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-    SDL_RenderFillRect(renderer, &sliderBar);
-    SDL_SetRenderDrawColor(renderer, color_borderMenuDropbox);
-    SDL_RenderDrawRect(renderer, &sliderBar);
-
-    if (isPointInRect(mouseX, mouseY, sliderBar) &&
+    if (isPointInRect(mouseX, mouseY, slider) &&
         (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
     {
-        int rel = mouseX - sliderBar.x;
-        if (rel < 0)
-            rel = 0;
-        if (rel > sliderBar.w)
-            rel = sliderBar.w;
-
-        sounds[selectedSound].volume =
-            (rel * 100) / sliderBar.w;
+        int v = (mouseX - slider.x) * 100 / slider.w;
+        if (v < 0)
+            v = 0;
+        if (v > 100)
+            v = 100;
+        sounds[selectedSound].volume = v;
     }
-
-    SDL_Rect knob = {
-        sliderBar.x +
-            (sliderBar.w * sounds[selectedSound].volume) / 100 - 8,
-        sliderBar.y - 6,
-        16,
-        22};
-
-    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
-    SDL_RenderFillRect(renderer, &knob);
-    SDL_RenderDrawRect(renderer, &knob);
 }
