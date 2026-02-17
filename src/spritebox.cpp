@@ -444,6 +444,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     // Sprtie thumbnails
     const int thumbnailSize = 70;
     const int spacing = 10;
+    const int MAX_SPRITES_PER_ROW = 4;
     int StartX = spriteArea.x + spacing; 
     int StartY = spriteArea.y + spacing;
 
@@ -451,9 +452,13 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
     {
         SprintBody& sprite = aliveSprints[i];
 
+        // row and column for sprite thumbnails
+        int row = i / MAX_SPRITES_PER_ROW;
+        int col = i % MAX_SPRITES_PER_ROW;
+
         // position of thumbnail
-        int thumbnailX = StartX + i * (thumbnailSize + spacing);
-        int thumbnailY = StartY;
+        int thumbnailX = StartX + col * (thumbnailSize + spacing);
+        int thumbnailY = StartY + row * ( thumbnailSize + spacing + 20 ); // 20 pixels for text ( name ) of the thumbnail
 
         // Draw thumbnail
         SDL_Rect thumbRect = {thumbnailX , thumbnailY, thumbnailSize, thumbnailSize};
@@ -580,6 +585,7 @@ void SpriteBoxClick(const int mouseX , const int mouseY )
 
     int thumbnailSize = 70;
     int spacing = 10;
+    const int MAX_SPRITES_PER_ROW = 4;
 
     SDL_Rect spriteArea = { SPRITE_BOX.x, SPRITE_BOX.y + 100, SPRITE_BOX.w, SPRITE_BOX.h - 100 };
 
@@ -589,8 +595,11 @@ void SpriteBoxClick(const int mouseX , const int mouseY )
     // checking each thumbnail 
     for ( int i = 0; i < aliveSprints.size(); i++ ){
 
-        int thumbnailX = startX + i * (thumbnailSize + spacing);
-        int thumbnailY = startY;
+        int row = i / MAX_SPRITES_PER_ROW;
+        int col = i % MAX_SPRITES_PER_ROW;
+
+        int thumbnailX = startX + col * (thumbnailSize + spacing);
+        int thumbnailY = startY + row * ( thumbnailSize + spacing + 20 ); // 20 pixels for text ( name ) of the thumbnail
 
         SDL_Rect thumbRect = {thumbnailX , thumbnailY, thumbnailSize, thumbnailSize};
 
@@ -801,3 +810,4 @@ bool HandleSpritePickerClick(SDL_Renderer* renderer, const int mouseX, const int
         }
     }
 }
+
