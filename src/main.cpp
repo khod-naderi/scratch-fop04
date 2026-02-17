@@ -135,7 +135,12 @@ int main(int argc, char *argv[])
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
+                    if ( currentState == State_MainEditor ){
                     SpriteBoxClick(mouseX, mouseY);
+                }
+                    else if ( currentState == State_Sprite_Picker ) {
+                        HandleSpritePickerClick(renderer, mouseX, mouseY);
+                    }
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
                 }

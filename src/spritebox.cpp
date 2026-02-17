@@ -611,6 +611,7 @@ This function is for drawing sprite picker screen when clicking on choose a spri
 */
 
 void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY ) {
+
     // 1. drawing the screen text at top 
     const char* title = "Choose a Sprite";
     SDL_Color titleColor = color_black;
@@ -745,4 +746,58 @@ void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mo
         }
     
 
+}
+
+/*
+----------------------------------------------------
+This function is for handling clicks on sprite picker screen
+if clicked on back button, return to main editor screen
+if clicked on a sprite option, add that sprite to screen and return to main editor screen
+----------------------------------------------------
+*/
+
+bool HandleSpritePickerClick(SDL_Renderer* renderer, const int mouseX, const int mouseY ) {
+    const int Left_Bar_Width = CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 150;
+    SDL_Rect PickerArea = { Left_Bar_Width, 0, MAIN_WINDOW_WIDTH - Left_Bar_Width, MAIN_WINDOW_HEIGHT };
+
+    // 1. check if clicked on back button
+    SDL_Rect backButtonRect = { CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 100 , 55, 80, 30 };
+    if ( mouseX >= backButtonRect.x && mouseX <= backButtonRect.x + backButtonRect.w &&
+         mouseY >= backButtonRect.y && mouseY <= backButtonRect.y + backButtonRect.h) {
+            currentState = State_MainEditor; // return to main editor screen
+            return true;    
+        }
+    
+    // 2. check if clicked on any sprite option
+    const int SPRITE_THUMBNAIL_SIZE = 80;
+    const int spacing = 50;
+    const int SPRITES_PER_ROW = 9;
+    int separatorY = backButtonRect.y + backButtonRect.h + 20;
+    int GridStartX = CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 150;
+    int GridStartY = separatorY + 30;
+    
+    for ( int i = 0; i < AVAILABLE_SPRITES_COUNT; i++ ) {
+        int row = i / SPRITES_PER_ROW;
+        int col = i % SPRITES_PER_ROW;
+
+        int SpriteX = GridStartX + col * (SPRITE_THUMBNAIL_SIZE + spacing);
+        int SpriteY = GridStartY + row * (SPRITE_THUMBNAIL_SIZE + spacing);
+
+        SDL_Rect thumbRect = { SpriteX , SpriteY , SPRITE_THUMBNAIL_SIZE, SPRITE_THUMBNAIL_SIZE };
+
+        if ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+             mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h) 
+        {
+            int newID = addSprintToScreen(renderer, availableSprites[i].name, availableSprites[i].imagePath.c_str());
+            if ( newID >= 0 ) {
+                SelectedSpriteID = newID; // set the newly added sprite as selected
+                currentState = State_MainEditor; // return to main editor screen
+                return true;
+            }
+            else {
+                std::cerr << "Failed to add sprite to screen." << std::endl;
+                return false;
+            }
+        }
+    }
 }
