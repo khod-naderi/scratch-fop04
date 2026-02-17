@@ -518,7 +518,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
         // draw trash icon on top right corner of thumbnail when selected
         if ( isSelected && TrashIcon ) {
-            const int TRASH_SIZE = 20;
+            const int TRASH_SIZE = 24;
 
             int trashX = thumbRect.x + thumbRect.w - TRASH_SIZE - 4; 
             int trashY = thumbRect.y + 4;
@@ -629,6 +629,20 @@ void SpriteBoxClick(const int mouseX , const int mouseY )
         if ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
              mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h) 
         {
+            if ( SelectedSpriteID == aliveSprints[i].id ) {
+
+                const int TRASH_SIZE = 24;
+                int trashX = thumbRect.x + thumbRect.w - TRASH_SIZE - 4;
+                int trashY = thumbRect.y + 4;
+
+                if ( mouseX >= trashX && mouseX <= trashX + TRASH_SIZE &&
+                     mouseY >= trashY && mouseY <= trashY + TRASH_SIZE) {
+                        // clicked on trash icon, delete this sprite
+                        aliveSprints.erase(aliveSprints.begin() + i);
+                        SelectedSpriteID = -1; // reset selected sprite id 
+                        return;
+                }
+            }
             SelectedSpriteID = aliveSprints[i].id; // set selected sprite id
             break; 
         }
