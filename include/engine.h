@@ -27,12 +27,17 @@ struct Proccess
 
 extern std::vector<Proccess> programCounters;
 
-void engineRunStep(int pid);
-int enginePushProcess();
+// proccess routins
 void engineEndProcess(int pid);
+int enginePushProcess(ExecutionContext *ctx, BlockInstance *nowInst);
 void enginePauseProcess(int pid);
 void engineRemuseProcess(int pid);
+Proccess *getProccessById(int pid);
+
+// engine routins
+void engineRunStep(int pid);
+void engineRun();
+
+// engine event handlers
 void engineMouseEvent(int mouseX, int mouseY);
 void engineKeyboardEvents(SDL_Keysym &key);
-void engineRun();
-Proccess *getProccessById(int pid);
