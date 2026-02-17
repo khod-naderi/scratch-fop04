@@ -29,6 +29,7 @@ SDL_Texture* paintIcon = nullptr;
 SDL_Texture* uploadIcon = nullptr;
 SDL_Texture* randomIcon = nullptr;
 SDL_Texture* searchIcon = nullptr;
+SDL_Texture* TrashIcon = nullptr;
 
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
@@ -492,6 +493,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             SDL_RenderDrawRect(renderer, &border4);
             SDL_Rect border5 = { thumbRect.x - 4, thumbRect.y - 4, thumbRect.w + 8, thumbRect.h + 8 };
             SDL_RenderDrawRect(renderer, &border5); 
+
         }
         else if (ishovered) {
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -514,6 +516,30 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
             SDL_RenderDrawRect(renderer, &thumbRect);
         }
 
+        // draw trash icon on top right corner of thumbnail when selected
+        if ( isSelected ) {
+            const char* trashIconPath = "🗑️";
+            SDL_Color textColor = { 200, 50, 50, 255 };
+
+            SDL_Surface* trashSurface = TTF_RenderText_Solid(font, trashIconPath, textColor);
+            if ( trashSurface ) {
+                SDL_Texture* trashTexture = SDL_CreateTextureFromSurface(renderer, trashSurface );
+                // position of trash icon
+                int trashX = thumbRect.x + thumbRect.w - trashSurface->w - 5;
+                int trashY = thumbRect.y + 2;
+
+                SDL_Rect trashRect = { trashX, trashY, trashSurface->w, trashSurface->h };
+                SDL_SetRenderDrawColor (renderer, 255, 255, 255, 200); 
+                SDL_Rect trashBackground = { trashRect.x - 2, trashRect.y - 2, trashRect.w + 4, trashRect.h + 4 };
+                SDL_RenderFillRect(renderer, &trashBackground);
+                SDL_RenderCopy(renderer, trashTexture, nullptr, &trashRect);
+                SDL_FreeSurface(trashSurface);
+                SDL_DestroyTexture(trashTexture);
+
+            }
+
+        } 
+
         // drawing sprite name 
         SDL_Color textColor = color_black;
         SDL_Surface* textSurface = TTF_RenderText_Blended(font, sprite.name.c_str(), textColor);
@@ -531,6 +557,7 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 
     }
 }
+
 /*
 ----------------------------------------------------
 this function is for loading all UI icons for sprite box menu
@@ -544,8 +571,9 @@ bool loadSpriteBoxMenuIcons(SDL_Renderer* renderer) {
     uploadIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteUploadIcon.png");
     randomIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteRandomIcon.png");
     searchIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteChooseIcon.png");
+    TrashIcon = renderImage(renderer, "assets/icons/SpriteBox/TrashIcon.png");
 
-    if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon) {
+    if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon || !TrashIcon) {
         std::cerr << "Failed to load one or more sprite box menu icons." << std::endl;
         return false;
     }
