@@ -45,9 +45,14 @@ struct MenuOption {
     bool isHovered; 
 };
 
-// new sprite list
-struct SpriteList {
-    std::string id;
+/*
+----------------------------------------------------
+this part is for handling sprite choosing screen.
+----------------------------------------------------
+*/
+const int AVAILABLE_SPRITES_COUNT = 9; 
+struct availableSprite {
+    //std::string id;
     std::string name;
     std::string imagePath;
     SDL_Texture* texture;

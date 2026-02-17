@@ -44,6 +44,22 @@ bool isHoveringAddSpriteButton = false;
 
 /*
 -------------------------------------------------
+these variables are for picker screen
+-------------------------------------------------
+*/
+availableSprite availableSprites[AVAILABLE_SPRITES_COUNT] = {
+    {"Block", "assets/icons/Sprites/SpriteBlock.jpg", nullptr},
+    {"Dog", "assets/icons/Sprites/SpriteDog.jpg", nullptr},
+    {"Enemy", "assets/icons/Sprites/SpriteEnemy.jpg", nullptr},
+    {"Flag1", "assets/icons/Sprites/SpriteFlag1.jpg", nullptr},
+    {"Flag2", "assets/icons/Sprites/SpriteFlag2.jpg", nullptr},
+    {"Pad", "assets/icons/Sprites/SpritePad.jpg", nullptr},
+    {"Robot", "assets/icons/Sprites/SpriteRobot.png", nullptr},
+    {"Setting", "assets/icons/Sprites/SpriteSetting.jpg", nullptr},
+    {"Star", "assets/icons/Sprites/SpriteStar.jpg", nullptr}
+};
+/*
+-------------------------------------------------
 This function is for adding and initializeing top bar of sprite box
 this function will run only one time.
 -------------------------------------------------
@@ -649,6 +665,84 @@ void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mo
     SDL_RenderDrawLine(renderer, CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 50, SepratorY, MAIN_WINDOW_WIDTH, SepratorY);
 
     // 7. drawing sprite options
+    const int SPRITE_THUMBNAIL_SIZE = 80;
+    const int spacing = 50;
+    const int SPRITES_PER_ROW = 9;
+    int GridStartX = CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 150;
+    int GridStartY = SepratorY + 30;
+
+    // loading textures
+    static bool TexturesLoaded = false;
+    
+    if ( !TexturesLoaded ) {
+        // loading textures for sprite options
+        for ( int i = 0; i < AVAILABLE_SPRITES_COUNT; i++ ) {
+            availableSprites[i].texture = renderImage(renderer, availableSprites[i].imagePath.c_str());
+            if ( !availableSprites[i].texture ) {
+                std::cerr << "Failed to load texture for sprite: " << availableSprites[i].name << std::endl;
+            }
+        }
+
+        TexturesLoaded = true;
+    }
+
+        for ( int i = 0; i < AVAILABLE_SPRITES_COUNT; i++ ) {
+            int row = i / SPRITES_PER_ROW;
+            int col = i % SPRITES_PER_ROW;
+
+            int SpriteX = GridStartX + col * (SPRITE_THUMBNAIL_SIZE + spacing);
+            int SpriteY = GridStartY + row * (SPRITE_THUMBNAIL_SIZE + spacing);
+
+            SDL_Rect thumbRect = { SpriteX, SpriteY, SPRITE_THUMBNAIL_SIZE, SPRITE_THUMBNAIL_SIZE };
+
+            // check hover 
+            bool isSpriteHovered = ( mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+                                  mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h);                 
+
+            // 1. draw background for hovered sprite
+            if ( isSpriteHovered ) {
+                SDL_SetRenderDrawColor ( renderer, 100, 150, 255, 80); // blue with some transparency
+            }
+            else {
+                SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255); // normal background color
+            }
+            SDL_RenderFillRect(renderer, &thumbRect);
+
+            // 2. draw sprite image
+            if ( availableSprites[i].texture ) {
+                SDL_RenderCopy(renderer, availableSprites[i].texture, nullptr, &thumbRect);
+            }   
+            
+            // 3. hover effect layer
+            if ( isSpriteHovered ) {
+                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+                SDL_SetRenderDrawColor(renderer, 100, 150, 255, 80); // blue with some transparency
+                SDL_RenderFillRect(renderer, &thumbRect);
+                SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+            }
+
+            // 4. draw border
+            if ( isSpriteHovered ) {
+                SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // blue for hovered sprite
+            }
+            else {
+                SDL_SetRenderDrawColor(renderer, color_black); 
+            }
+            SDL_RenderDrawRect(renderer, &thumbRect);
+
+            // Draw Sprite name below
+            SDL_Color nameColor = color_black;
+            SDL_Surface* nameSurface = TTF_RenderText_Solid(font, availableSprites[i].name.c_str(), nameColor);
+            if ( nameSurface ) {
+                SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(renderer, nameSurface);
+                int nameX = SpriteX + SPRITE_THUMBNAIL_SIZE / 2 - nameSurface->w / 2;
+                int nameY = SpriteY + SPRITE_THUMBNAIL_SIZE + 5;
+                SDL_Rect nameRect = { nameX, nameY, nameSurface->w, nameSurface->h };
+                SDL_RenderCopy(renderer, nameTexture, nullptr, &nameRect); 
+                SDL_FreeSurface(nameSurface);
+                SDL_DestroyTexture(nameTexture);
+            }
+        }
     
 
 }
