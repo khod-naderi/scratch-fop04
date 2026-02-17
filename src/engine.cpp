@@ -1,6 +1,8 @@
 #include "engine.h"
+#include "workspace.h"
 
 int lastProccessId = 0;
+std::vector<Proccess> programCounters;
 
 /*
 This function will return pointer to proccess that have same pid
@@ -61,4 +63,31 @@ int enginePushProcess(ExecutionContext *ctx, BlockInstance *nowInst)
     programCounters.push_back(newP);
 
     return newP.id;
+}
+
+void engineRunStep(Proccess *p)
+{
+
+    // prepare for next step
+    p->nowInst = findBlockInstanceById(p->nowInst->nextId);
+    if (!p->nowInst)
+        engineEndProcess(p->id);
+}
+
+void engineRunStep(int pid)
+{
+    Proccess *p = getProccessById(pid);
+    engineRunStep(p);
+}
+
+/*
+this fucntion will run every frame and run each running procces one step
+*/
+void engineRun()
+{
+    for (Proccess &p : programCounters)
+    {
+        if (p.isRunning)
+            engineRunStep(&p);
+    }
 }

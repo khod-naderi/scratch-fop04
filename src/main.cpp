@@ -14,6 +14,7 @@
 #include "workspace.h"
 #include "saveload.h"
 #include "logger.h"
+#include "engine.h"
 
 int main(int argc, char *argv[])
 {
@@ -193,6 +194,9 @@ int main(int argc, char *argv[])
         //  Logger rendering goes HERE
         // (call the real function that exists in logger.cpp, not assumed methods)
         render_logger(renderer, font);
+
+        // Run the engine
+        engineRun();
 
         // show next frame
         SDL_RenderPresent(renderer);

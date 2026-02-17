@@ -36,6 +36,7 @@ Proccess *getProccessById(int pid);
 
 // engine routins
 void engineRunStep(int pid);
+void engineRunStep(Proccess *p);
 void engineRun();
 
 // engine event handlers
