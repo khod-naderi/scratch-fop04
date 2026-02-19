@@ -120,6 +120,24 @@ void engineEventHandler(SDL_Event &event)
         executionContextSetVariable(ctx, "_mouseY", fromNumber(event.motion.y));
         executionContextSetVariable(ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
 
+        EventType eventType;
+        if (event.type == SDL_MOUSEMOTION)
+        {
+            eventType = MOUSE_MOTION;
+        }
+        else if (event.type == SDL_MOUSEBUTTONDOWN)
+        {
+            if (event.button.button == SDL_BUTTON_LEFT)
+            {
+                eventType = MOUSE_BTN_LEFT_CLICK;
+            }
+        }
+        else if (event.type == SDL_KEYDOWN)
+        {
+            eventType = KEYBOARD_KEYHIT;
+        }
+        executionContextSetVariable(ctx, "_eventType", fromNumber((int)eventType));
+
         def->execute(ctx, nullptr, 0);
     }
 }

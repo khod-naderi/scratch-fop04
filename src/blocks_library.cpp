@@ -6,6 +6,9 @@
 #include "value.h"
 #include "blocks_library.h"
 #include "execution_context.h"
+#include "logger.h"
+#include "ui.h"
+#include "engine.h"
 
 Value execMoveSteps(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
@@ -27,8 +30,17 @@ Value execTurnAngleDegree(ExecutionContext &ctx, Value inputs[], int inputCount)
 Value execGreenflag(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     // event triggerer
-    // no runtime action
-    return Value();
+    int mouseX = executionContextGetVariable(ctx, "_mouseX")->asNumber();
+    int mouseY = executionContextGetVariable(ctx, "_mouseY")->asNumber();
+    EventType eventType = (EventType)executionContextGetVariable(ctx, "_eventType")->asNumber();
+
+    if (eventType == MOUSE_BTN_LEFT_CLICK && isPointInRect(mouseX, mouseY, GREENFLAG_BTN))
+    {
+        logger_log("Green flag clicked");
+        return fromBool(true);
+    }
+
+    return fromBool(false);
 }
 
 Value execRepeat(ExecutionContext &ctx, Value inputs[], int inputCount)

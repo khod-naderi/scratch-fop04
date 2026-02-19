@@ -10,6 +10,14 @@ this will handle events and will run code blocks
 #include "execution_context.h"
 #include "block_instance.h"
 
+enum EventType
+{
+    MOUSE_BTN_LEFT_CLICK,
+    MOUSE_BTN_RIGHT_CLICK,
+    MOUSE_MOTION,
+    KEYBOARD_KEYHIT,
+};
+
 struct Proccess
 {
     // identifier
