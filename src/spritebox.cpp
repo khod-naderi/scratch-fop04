@@ -4,9 +4,12 @@ This header file is for managing custome and backgorund setting area named sprit
 -------------------------------------------
 */
 
-// most of functions are called in the function : dawSpriteBoxScreen,
-// which is called in main loop to render sprite box every frame.
-
+/*
+----------------------------------------------
+most of functions are called in the function : dawSpriteBoxScreen,
+which is called in main loop to render sprite box every frame.
+----------------------------------------------
+*/
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
