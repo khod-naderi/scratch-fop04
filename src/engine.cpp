@@ -1,5 +1,7 @@
 #include "engine.h"
 #include "workspace.h"
+#include "blocks_library.h"
+#include "canvas.h"
 
 int lastProccessId = 0;
 std::vector<Proccess> programCounters;
@@ -89,5 +91,35 @@ void engineRun()
     {
         if (p.isRunning)
             engineRunStep(&p);
+    }
+}
+
+/*
+this function will handle events to run related proccess
+*/
+void engineEventHandler(SDL_Event &event)
+{
+    CodeSpace *cs = &workspaceCodeSpace; // TODO: get it dynamicly
+    for (int i = 0; i < cs->nextInstanceId; i++)
+    {
+        if (!cs->instanceUsed[i])
+            continue;
+
+        const Block *def = &blocksLibrary[cs->instances[i].defenitionId];
+
+        if (def->type != BLOCK_EVENT)
+            continue;
+
+        ExecutionContext ctx;
+
+        SprintBody *spt = &aliveSprints[0]; // TODO: get it dynamicly
+
+        ctx.sprite = spt;
+
+        executionContextSetVariable(ctx, "_mouseX", fromNumber(event.motion.x));
+        executionContextSetVariable(ctx, "_mouseY", fromNumber(event.motion.y));
+        executionContextSetVariable(ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
+
+        def->execute(ctx, nullptr, 0);
     }
 }

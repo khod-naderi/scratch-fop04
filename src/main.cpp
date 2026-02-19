@@ -156,6 +156,9 @@ int main(int argc, char *argv[])
             {
                 controlUiElementKeyboardHit(eventSDL.key.keysym);
             }
+
+            // pass to engine event handler
+            engineEventHandler(eventSDL);
         }
 
         /*

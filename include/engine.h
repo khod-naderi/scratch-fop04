@@ -39,6 +39,5 @@ void engineRunStep(int pid);
 void engineRunStep(Proccess *p);
 void engineRun();
 
-// engine event handlers
-void engineMouseEvent(int mouseX, int mouseY);
-void engineKeyboardEvents(SDL_Keysym &key);
+// engine event handler
+void engineEventHandler(SDL_Event &event);
