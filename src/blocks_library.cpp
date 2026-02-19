@@ -10,17 +10,17 @@
 Value execMoveSteps(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     double steps = inputs[0].asNumber();
-    ctx.spriteX += steps * SDL_cos(ctx.spriteAngle);
-    ctx.spriteY += steps * SDL_sin(ctx.spriteAngle);
+    ctx.sprite->posX += steps * SDL_cos(ctx.sprite->angleRotation);
+    ctx.sprite->posY += steps * SDL_sin(ctx.sprite->angleRotation);
     return Value();
 }
 
 Value execTurnAngleDegree(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     double angle = inputs[0].asNumber();
-    ctx.spriteAngle += angle;
-    if (ctx.spriteAngle > 360)
-        ctx.spriteAngle -= 360;
+    ctx.sprite->angleRotation += angle;
+    if (ctx.sprite->angleRotation > 360)
+        ctx.sprite->angleRotation -= 360;
     return Value();
 }
 
