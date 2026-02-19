@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_audio.h>
 #include <iostream>
 #include <string>
 #include "generaldef.h"
@@ -11,6 +13,7 @@
 #include "spritebox.h"
 #include "workspace.h"
 #include "saveload.h"
+#include "logger.h"
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +45,7 @@ int main(int argc, char *argv[])
         std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
         return SDL_FONT_NOT_FOUND;
     }
+    DEFAULT_FONT = font;
 
     
     // loading JPG image support
@@ -99,6 +103,7 @@ int main(int argc, char *argv[])
     SDL_bool running = SDL_TRUE; // this is root app running indenticator
 
     SDL_Event eventSDL;
+    logger_log("Scratch is ready!", INFO);
 
     /*
     ---------------------------------------------
@@ -143,6 +148,7 @@ int main(int argc, char *argv[])
                     }
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
+                    controlUiElementClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEBUTTONUP)
@@ -159,6 +165,10 @@ int main(int argc, char *argv[])
                 if (eventSDL.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                     direction = 1;
                 controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
+            }
+            else if (eventSDL.type == SDL_KEYDOWN)
+            {
+                controlUiElementKeyboardHit(eventSDL.key.keysym);
             }
         }
 
@@ -191,6 +201,7 @@ int main(int argc, char *argv[])
         drawBlockColumn(renderer, font, mouseX, mouseY);
 
         drawMenubar(renderer, font, mouseX, mouseY);
+
         if (isOnLoadScreen)
         {
             drawLoadScreen(renderer, font, mouseX, mouseY);
@@ -199,6 +210,10 @@ int main(int argc, char *argv[])
         {
             drawSaveScreen(renderer, font, mouseX, mouseY);
         }
+
+        //  Logger rendering goes HERE
+        // (call the real function that exists in logger.cpp, not assumed methods)
+        render_logger(renderer, font);
 
         // show next frame
         SDL_RenderPresent(renderer);
