@@ -150,6 +150,14 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderDrawRect(renderer, &xBox);
 
     // position of text box for X position
+    if ( SelectedSpriteID != -1 ){
+        for ( const SprintBody& s : aliveSprints ){
+            if ( s.id == SelectedSpriteID ) {
+                xTextBox->setStr(std::to_string(s.posX));
+                break;
+            }
+        } 
+    }
     xTextBox->posX = xBox.x + 5;
     xTextBox->posY = xBox.y + 5;
     xTextBox->draw(renderer);

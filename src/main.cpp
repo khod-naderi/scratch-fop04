@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     if ( currentState == State_MainEditor ){
-                    SpriteBoxClick(mouseX, mouseY);
-                }
+                        SpriteBoxClick(mouseX, mouseY);
+                    }
                     else if ( currentState == State_Sprite_Picker ) {
                         HandleSpritePickerClick(renderer, mouseX, mouseY);
                     }
