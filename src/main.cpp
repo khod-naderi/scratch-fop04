@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#if !defined(__APPLE__)
 #include <SDL2/SDL2_gfxPrimitives.h>
+#endif
 #include <SDL2/SDL_audio.h>
 #include <iostream>
 #include <string>

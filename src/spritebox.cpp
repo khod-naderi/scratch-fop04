@@ -845,5 +845,7 @@ bool HandleSpritePickerClick(SDL_Renderer* renderer, const int mouseX, const int
             }
         }
     }
+
+    return false;
 }
 
