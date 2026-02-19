@@ -19,12 +19,18 @@ which is called in main loop to render sprite box every frame.
 #include "generaldef.h"
 #include <iostream>
 #include "canvas.h"
+#include <cstdlib> 
+#include <ctime> 
 
 // selected sprite id in sprite box
 int SelectedSpriteID = -1;
 
 // state of the screen
 ScreenState currentState = State_MainEditor;
+
+// managing random option
+static bool randomSeeded = false;
+static bool requestRandomSprite = false;
 
 // these are for adding png icons for add sprite menu
 SDL_Texture* catIcon = nullptr;
@@ -283,7 +289,7 @@ bool HandleAddSpriteClick( const int mouseX, const int mouseY ) {
                     // calling the function for uploading a new sprite from local files.
                     break;
                     case 3: // random
-                    // calling the function for adding a random sprite.
+                    requestRandomSprite = true; // this case is handled in the void function drawSpriteBoxScreen.
                     break;
                 }
                 addSpriteMenuState = Menu_Closed; // close menu after clicking on an option / choosing one sprite option
@@ -417,6 +423,12 @@ this function will run on every frame.
 
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
+    // handling random option of cat icon
+    if ( requestRandomSprite ) {
+        int index = std::rand() % AVAILABLE_SPRITES_COUNT;
+        SelectedSpriteID = addSprintToScreen( renderer, availableSprites[index].name, availableSprites[index].imagePath.c_str());
+        requestRandomSprite = false;
+    }
     // Draw backgound color
     SDL_SetRenderDrawColor(renderer, color_spriteBoxBackground);
     SDL_RenderFillRect(renderer, &SPRITE_BOX);
