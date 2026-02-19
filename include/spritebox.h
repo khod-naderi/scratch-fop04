@@ -69,6 +69,10 @@ extern ScreenState currentState; // this variable will save current screen state
 #define SPRINT_IMG_WITDH 100
 #define SPRINT_IMG_HEIGHT 100
 
+// making sprite top bar text boxes 
+
+//--------------------------------
+
 int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font);
 int addSprintToScreen(SDL_Renderer *renderer, std::string name, const char *imgPath);
 void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);

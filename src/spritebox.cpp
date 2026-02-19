@@ -40,6 +40,9 @@ SDL_Texture* randomIcon = nullptr;
 SDL_Texture* searchIcon = nullptr;
 SDL_Texture* TrashIcon = nullptr;
 
+// variables for handling text box of top bar 
+TextBox* xTextBox = nullptr;
+
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
 SDL_Rect AddSpriteButtonRect ;
@@ -145,6 +148,11 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderFillRect(renderer, &xBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &xBox);
+
+    // position of text box for X position
+    xTextBox->posX = xBox.x + 5;
+    xTextBox->posY = xBox.y + 5;
+    xTextBox->draw(renderer);
 
     // 3. drawing Y position
     int yLabelX = xBox.x + xBox.w + 20;
@@ -647,6 +655,10 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
     if (!loadSpriteBoxMenuIcons(renderer)) {
         std::cerr << "Failed to load sprite box menu icons." << std::endl;
     }    
+
+    // Creat text box for X position in top bar
+    xTextBox = new TextBox(font);
+    xTextBox->setStr("0");
 
     return 0;
 }
