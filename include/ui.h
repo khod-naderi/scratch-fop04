@@ -32,6 +32,7 @@ extern const SDL_Rect CANVAS_BOX;
 extern const SDL_Rect SPRITE_BOX;
 extern const SDL_Rect SAVELOAD_BOX;
 extern const SDL_Rect LOGGER_Box;
+extern const SDL_Rect GREENFLAG_BTN;
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color);
 SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath);
 bool isPointInRect(int x, int y, const SDL_Rect &rect);
