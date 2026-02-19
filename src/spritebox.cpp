@@ -76,6 +76,11 @@ this function will run only one time.
 */
 
 void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar) {
+
+    if ( !renderer || !font ){
+        return;
+    }
+
     SDL_Color textColor = color_black;
 
     // 1. drawing "Sprite Label" text on top bar
@@ -94,6 +99,36 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderFillRect(renderer, &nameBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &nameBox);
+
+    // writing name of selected sprite in sprite rectangle on top bar.
+    std::string selectedName = "";
+
+    for ( const SprintBody & s : aliveSprints ) {
+        if ( s.id == SelectedSpriteID ) {
+            selectedName = s.name ;
+            break;
+        }
+    }
+        if ( !selectedName.empty() ) {
+            SDL_Surface* nameSurface = TTF_RenderText_Blended(font, selectedName.c_str() , textColor);
+            if ( nameSurface ) {
+                 SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(renderer, nameSurface);
+                 
+                 if ( nameTexture ) {
+                    SDL_Rect nameTextRect = {
+                        nameBox.x + 6,
+                        nameBox.y + ( nameBox.h - nameSurface->h )/ 2,
+                        nameSurface->w,
+                        nameSurface->h
+                    };
+
+                    SDL_RenderCopy(renderer, nameTexture , nullptr , &nameTextRect );
+                    SDL_DestroyTexture ( nameTexture );
+                 }
+                 SDL_FreeSurface(nameSurface);
+        }
+    }
+
 
     // 2. drawing X position 
     int xLabelX = labelX + textSurface->w + 10 + 150 + 20;
@@ -178,9 +213,16 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_FreeSurface(textSurface);
     SDL_FreeSurface(xLabelSurface);
     SDL_FreeSurface(yLabelSurface);
+    SDL_FreeSurface(showLabelSurface);
+    SDL_FreeSurface(sizeLabelSurface);
+    SDL_FreeSurface(rotationLabelSurface);
+
     SDL_DestroyTexture(textTexture);
     SDL_DestroyTexture(xLabelTexture);
     SDL_DestroyTexture(yLabelTexture);
+    SDL_DestroyTexture(showLabelTexture);
+    SDL_DestroyTexture(sizeLabelTexture);
+    SDL_DestroyTexture(rotationLabelTexture);
 }
 
 /*
