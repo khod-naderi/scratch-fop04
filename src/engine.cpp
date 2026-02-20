@@ -2,6 +2,8 @@
 #include "workspace.h"
 #include "blocks_library.h"
 #include "canvas.h"
+#include "logger.h"
+#include <iostream>
 
 int lastProccessId = 0;
 std::vector<Proccess> programCounters;
@@ -47,8 +49,13 @@ void engineEndProcess(int pid)
         return;
 
     for (auto it = programCounters.begin(); it != programCounters.end(); ++it)
+    {
         if (it->id == pid)
+        {
             programCounters.erase(it);
+            break;
+        }
+    }
 }
 
 /*
@@ -67,8 +74,35 @@ int enginePushProcess(ExecutionContext *ctx, BlockInstance *nowInst)
     return newP.id;
 }
 
+Value *getValueArray(BlockInstance *inst)
+{
+    Value *out = new Value[inst->inputCount];
+
+    for (int i = 0; i < inst->inputCount; i++)
+    {
+        if (inst->inputs[i].isBlock)
+        {
+            const BlockInstance *inst = findBlockInstanceById(inst->inputs[i].blockInstanceId);
+            out[i] = inst->inputs[i].literal;
+            // TODO: make it recursively work
+        }
+        else
+        {
+            out[i] = inst->inputs[i].literal;
+        }
+    }
+
+    return out;
+}
+
 void engineRunStep(Proccess *p)
 {
+    if (!p || !p->nowInst)
+        return;
+
+    const Block *def = &blocksLibrary[p->nowInst->defenitionId];
+    Value *inputs = getValueArray(p->nowInst);
+    def->execute(*p->ctx, inputs, p->nowInst->inputCount);
 
     // prepare for next step
     p->nowInst = findBlockInstanceById(p->nowInst->nextId);
@@ -79,7 +113,8 @@ void engineRunStep(Proccess *p)
 void engineRunStep(int pid)
 {
     Proccess *p = getProccessById(pid);
-    engineRunStep(p);
+    if (p)
+        engineRunStep(p);
 }
 
 /*
@@ -110,15 +145,15 @@ void engineEventHandler(SDL_Event &event)
         if (def->type != BLOCK_EVENT)
             continue;
 
-        ExecutionContext ctx;
+        ExecutionContext *ctx = new ExecutionContext();
 
         SprintBody *spt = &aliveSprints[0]; // TODO: get it dynamicly
 
-        ctx.sprite = spt;
+        ctx->sprite = spt;
 
-        executionContextSetVariable(ctx, "_mouseX", fromNumber(event.motion.x));
-        executionContextSetVariable(ctx, "_mouseY", fromNumber(event.motion.y));
-        executionContextSetVariable(ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
+        executionContextSetVariable(*ctx, "_mouseX", fromNumber(event.motion.x));
+        executionContextSetVariable(*ctx, "_mouseY", fromNumber(event.motion.y));
+        executionContextSetVariable(*ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
 
         EventType eventType;
         if (event.type == SDL_MOUSEMOTION)
@@ -136,8 +171,13 @@ void engineEventHandler(SDL_Event &event)
         {
             eventType = KEYBOARD_KEYHIT;
         }
-        executionContextSetVariable(ctx, "_eventType", fromNumber((int)eventType));
+        executionContextSetVariable(*ctx, "_eventType", fromNumber((int)eventType));
 
-        def->execute(ctx, nullptr, 0);
+        bool isTrigered = def->execute(*ctx, nullptr, 0).asBool();
+        if (isTrigered)
+        {
+            enginePushProcess(ctx, findBlockInstanceById(cs->instances[i].nextId));
+            std::cout << "New proccess pushed." << std::endl;
+        }
     }
 }
