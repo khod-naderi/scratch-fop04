@@ -45,6 +45,7 @@ TextBox* xTextBox = nullptr;
 TextBox* yTextBox = nullptr;
 TextBox* sizeTextBox = nullptr;
 TextBox* rotationTextBox = nullptr;
+SDL_Rect showBox = {0, 0, 0, 0};
 
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
@@ -230,11 +231,26 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderCopy(renderer, showLabelTexture, nullptr, &showLabelRect);
 
     // visibility box
-    SDL_Rect showBox = { showLabelX + showLabelRect.w + 10 , showLabelRect.y - 6, 50, 30 };
+    showBox = { showLabelX + showLabelRect.w + 10 , showLabelRect.y - 6, 70, 30 };
     SDL_SetRenderDrawColor(renderer, color_white);
     SDL_RenderFillRect(renderer, &showBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &showBox);
+
+    // showing texts for visible/invisible
+    std::string visText = "visible";
+    for ( const SprintBody& s : aliveSprints ) {
+        if ( s.id == SelectedSpriteID ) {
+            visText = s.isVisible ? "visible" : "invisible" ; 
+            break;
+        }
+    }
+
+    SDL_Surface* visSurface = TTF_RenderText_Solid ( font , visText.c_str(), textColor );
+
+    SDL_Texture* visTexture = SDL_CreateTextureFromSurface ( renderer, visSurface );
+    SDL_Rect visRect = { showBox.x + 5, showBox.y + 7, visSurface->w, visSurface->h };
+    SDL_RenderCopy(renderer, visTexture, nullptr, &visRect);
 
     // 5. size box ( scale)
 
@@ -832,7 +848,18 @@ void SpriteBoxClick(const int mouseX , const int mouseY )
             SelectedSpriteID = aliveSprints[i].id; // set selected sprite id
             break; 
         }
-    } 
+    }
+    
+    // visiblilty box in top bar 
+    if ( SelectedSpriteID != -1 && isPointInRect(mouseX, mouseY, showBox )) {
+        for ( SprintBody& s : aliveSprints ) {
+            if ( s.id == SelectedSpriteID ){
+                s.isVisible = !s.isVisible;
+                break;
+            }
+        }
+    }
+
 }
 
 /*

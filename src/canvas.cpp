@@ -33,6 +33,8 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
     ------------------
     */
     for ( const SprintBody &thisSprint : aliveSprints ){
+        // visibility box 
+        if ( !thisSprint.isVisible ) continue;
         // calculate scale size 
         int scaledW = SPRINT_IMG_WITDH * thisSprint.scale / 100;
         int scaledH = SPRINT_IMG_HEIGHT * thisSprint.scale / 100;
