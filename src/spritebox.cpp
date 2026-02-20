@@ -42,6 +42,7 @@ SDL_Texture* TrashIcon = nullptr;
 
 // variables for handling text box of top bar 
 TextBox* xTextBox = nullptr;
+TextBox* yTextBox = nullptr;
 
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
@@ -74,7 +75,7 @@ availableSprite availableSprites[AVAILABLE_SPRITES_COUNT] = {
 /*
 -------------------------------------------------
 This function is for adding and initializeing top bar of sprite box
-this function will run only one time.
+this function will run on every frame.
 -------------------------------------------------
 */
 
@@ -158,7 +159,7 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
             }
         } 
     }
-    // applying position for X text box
+    
     if ( SelectedSpriteID != -1 && xTextBox->isFucused ) {
         std::string xStr = xTextBox->getStr();
         if ( !xStr.empty() ) {
@@ -189,6 +190,33 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderFillRect(renderer, &yBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &yBox);
+
+    // creating text box for Y position
+    if ( SelectedSpriteID != -1 && !yTextBox->isFucused ){
+        for ( const SprintBody& s : aliveSprints ){
+            if ( s.id == SelectedSpriteID ) {
+                yTextBox->setStr(std::to_string(s.posY));
+                break;
+            }
+        } 
+    }
+
+    yTextBox->posX = yBox.x + 5;
+    yTextBox->posY = yBox.y + 5;
+    yTextBox->draw(renderer);
+
+    if ( SelectedSpriteID != -1 && yTextBox->isFucused ) {
+        std::string yStr = yTextBox->getStr();
+        if ( !yStr.empty() ) {
+            int yValue = std::stoi(yStr);
+            for ( SprintBody& s : aliveSprints ) {
+                if ( s.id == SelectedSpriteID ) {
+                    s.posY = yValue;
+                    break;
+                }
+            }
+        }
+    }
 
     // 4. visibility box 
     int showLabelX = topBar.x + 20;
@@ -680,6 +708,10 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
     // Creat text box for X position in top bar
     xTextBox = new TextBox(font);
     xTextBox->setStr("0");
+
+    // Create text box for Y position in top bar 
+    yTextBox = new TextBox(font);
+    yTextBox->setStr("0");
 
     return 0;
 }
