@@ -231,8 +231,16 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderCopy(renderer, showLabelTexture, nullptr, &showLabelRect);
 
     // visibility box
+    int mx, my; 
+    SDL_GetMouseState(&mx, &my);
     showBox = { showLabelX + showLabelRect.w + 10 , showLabelRect.y - 6, 70, 30 };
-    SDL_SetRenderDrawColor(renderer, color_white);
+    bool hoverVis = isPointInRect(mx, my, showBox);
+    // ----------------
+    if ( hoverVis ) {
+    SDL_SetRenderDrawColor(renderer, 210, 210, 210, 255);
+    }
+    else SDL_SetRenderDrawColor(renderer, color_white);
+    //-----------------
     SDL_RenderFillRect(renderer, &showBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &showBox);
