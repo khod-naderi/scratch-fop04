@@ -43,6 +43,7 @@ SDL_Texture* TrashIcon = nullptr;
 // variables for handling text box of top bar 
 TextBox* xTextBox = nullptr;
 TextBox* yTextBox = nullptr;
+TextBox* sizeTextBox = nullptr;
 
 // these global variables are for handling add sprite button and menu
 AddSpriteMenuState addSpriteMenuState = Menu_Closed;
@@ -249,6 +250,32 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderFillRect(renderer, &sizeBox);
     SDL_SetRenderDrawColor(renderer, color_black);
     SDL_RenderDrawRect(renderer, &sizeBox);
+
+    // creating text box for size box 
+    if ( SelectedSpriteID != -1 && !sizeTextBox->isFucused ) {
+        for ( const SprintBody& s : aliveSprints ){
+            if ( s.id == SelectedSpriteID ) {
+                sizeTextBox->setStr(std::to_string(s.scale));
+                break;
+            }
+        }
+    }
+
+    if ( SelectedSpriteID != -1 && !sizeTextBox->isFucused ) {
+        std::string sizeStr = sizeTextBox->getStr();
+        if ( !sizeStr.empty() ) {
+            for ( SprintBody& s : aliveSprints ) {
+                if ( s.id == SelectedSpriteID ) {
+                    s.scale = std::stoi(sizeStr);
+                    break;
+                }
+            }
+        }
+    }
+
+    sizeTextBox->posX = sizeBox.x + 5;
+    sizeTextBox->posY = sizeBox.y + 5;
+    sizeTextBox->draw(renderer);
 
     // 6. rotation box
     int rotationLabelX = sizeLabelX + sizeBox.w + 30 + 50 + 10;
@@ -712,6 +739,10 @@ int sprintBoxInit(SDL_Renderer *renderer, TTF_Font *font)
     // Create text box for Y position in top bar 
     yTextBox = new TextBox(font);
     yTextBox->setStr("0");
+
+    // Create text box for size in top bar 
+    sizeTextBox = new TextBox(font);
+    sizeTextBox->setStr("100");
 
     return 0;
 }
