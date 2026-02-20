@@ -32,14 +32,23 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
     Draw Sprints on screen
     ------------------
     */
-    for (const SprintBody &thisSprint : aliveSprints)
-    {
+    for ( const SprintBody &thisSprint : aliveSprints ){
+        // calculate scale size 
+        int scaledW = SPRINT_IMG_WITDH * thisSprint.scale / 100;
+        int scaledH = SPRINT_IMG_HEIGHT * thisSprint.scale / 100;
+
+        if ( scaledW > CANVAS_BOX.w ) scaledW = CANVAS_BOX.w;
+        if ( scaledH > CANVAS_BOX.h ) scaledH = CANVAS_BOX.h;
+
+        scaledW = std::min(scaledW , CANVAS_BOX.w);
+        scaledH = std::min(scaledH, CANVAS_BOX.h);
+
         SDL_Rect imageRect = {
-            CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
-            CANVAS_BOX.y + (thisSprint.posY - (SPRINT_IMG_HEIGHT / 2)),
-            SPRINT_IMG_WITDH,
-            SPRINT_IMG_HEIGHT,
+            CANVAS_BOX.x + (thisSprint.posX - (scaledW / 2 ) ),
+            CANVAS_BOX.y + (thisSprint.posY - (scaledH / 2 ) ),
+            scaledW,
+            scaledH,
         };
-        SDL_RenderCopyEx(renderer, thisSprint.nowCustome, NULL, &imageRect, thisSprint.angleRotation, NULL, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, thisSprint.nowCustome , NULL, &imageRect, thisSprint.angleRotation, NULL, SDL_FLIP_NONE );
     }
 }

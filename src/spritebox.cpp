@@ -252,7 +252,8 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
     SDL_RenderDrawRect(renderer, &sizeBox);
 
     // creating text box for size box 
-    if ( SelectedSpriteID != -1 && !sizeTextBox->isFucused ) {
+    if ( SelectedSpriteID != -1 ) {
+        if ( !sizeTextBox->isFucused ) {
         for ( const SprintBody& s : aliveSprints ){
             if ( s.id == SelectedSpriteID ) {
                 sizeTextBox->setStr(std::to_string(s.scale));
@@ -260,22 +261,26 @@ void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topB
             }
         }
     }
-
-    if ( SelectedSpriteID != -1 && !sizeTextBox->isFucused ) {
-        std::string sizeStr = sizeTextBox->getStr();
-        if ( !sizeStr.empty() ) {
-            for ( SprintBody& s : aliveSprints ) {
-                if ( s.id == SelectedSpriteID ) {
-                    s.scale = std::stoi(sizeStr);
-                    break;
-                }
-            }
-        }
     }
 
     sizeTextBox->posX = sizeBox.x + 5;
     sizeTextBox->posY = sizeBox.y + 5;
     sizeTextBox->draw(renderer);
+
+    if ( SelectedSpriteID != -1 && sizeTextBox->isFucused ) {
+        std::string sizeStr = sizeTextBox->getStr();
+        if ( !sizeStr.empty() ) {
+            int newScale = std::stoi(sizeStr);
+            for ( SprintBody& s : aliveSprints ) {
+                if ( s.id == SelectedSpriteID ) {
+                    if ( s.scale != newScale ) {
+                        s.scale = newScale ;
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
     // 6. rotation box
     int rotationLabelX = sizeLabelX + sizeBox.w + 30 + 50 + 10;
