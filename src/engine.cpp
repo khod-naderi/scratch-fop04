@@ -76,6 +76,7 @@ int enginePushProcess(ExecutionContext *ctx, BlockInstance *nowInst)
 
 Value *getValueArray(BlockInstance *inst)
 {
+    updateBlockInstanceInputValues(*inst);
     Value *out = new Value[inst->inputCount];
 
     for (int i = 0; i < inst->inputCount; i++)

@@ -13,8 +13,8 @@
 Value execMoveSteps(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     double steps = inputs[0].asNumber();
-    ctx.sprite->posX += steps * SDL_cos(ctx.sprite->angleRotation);
-    ctx.sprite->posY += steps * SDL_sin(ctx.sprite->angleRotation);
+    ctx.sprite->posX += steps * SDL_cos(ctx.sprite->angleRotation * (M_PI / 180));
+    ctx.sprite->posY += steps * SDL_sin(ctx.sprite->angleRotation * (M_PI / 180));
     return Value();
 }
 
