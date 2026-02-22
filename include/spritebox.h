@@ -61,6 +61,7 @@ struct availableSprite {
 enum ScreenState {
     State_MainEditor,
     State_Sprite_Picker,
+    State_Background_Screen, 
 };
 
 extern ScreenState currentState; // this variable will save current screen state, like main editor or sprite picker

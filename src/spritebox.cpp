@@ -39,6 +39,10 @@ SDL_Texture* uploadIcon = nullptr;
 SDL_Texture* randomIcon = nullptr;
 SDL_Texture* searchIcon = nullptr;
 SDL_Texture* TrashIcon = nullptr;
+SDL_Texture* backgroundIcon = nullptr; 
+
+SDL_Rect BackgroundButtonRect;
+bool isHoveringBackgroundButton = false;
 
 // variables for handling text box of top bar 
 TextBox* xTextBox = nullptr;
