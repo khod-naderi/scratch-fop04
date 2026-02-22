@@ -191,17 +191,16 @@ int main(int argc, char *argv[])
         SDL_RenderClear(renderer);
 
         // Draw each part of screen
-        drawWorkspaceScreen(renderer, font, mouseX, mouseY);
         drawCatagoryColumn(renderer, font, mouseX, mouseY);
         if ( currentState == State_MainEditor ){ 
-        drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
-        drawCanvasScreen(renderer, font, mouseX, mouseY);
+            drawWorkspaceScreen(renderer, font, mouseX, mouseY);
+            drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
+            drawCanvasScreen(renderer, font, mouseX, mouseY);
         }
         else if ( currentState == State_Sprite_Picker ) {
             DrawSpritePickerScreen(renderer, font, mouseX, mouseY);
         }
         drawBlockColumn(renderer, font, mouseX, mouseY);
-
         drawMenubar(renderer, font, mouseX, mouseY);
 
         if (isOnLoadScreen)
