@@ -51,3 +51,27 @@ SDL_Color colorDim(SDL_Color color)
 
     return color_new;
 }
+
+SDL_Color colorLight(SDL_Color color)
+{
+    SDL_Color color_new;
+
+    if (color.r > 255 - COLOR_DIM_SCALE)
+        color_new.r = 255;
+    else
+        color_new.r = (color.r + COLOR_DIM_SCALE);
+
+    if (color.b > 255 - COLOR_DIM_SCALE)
+        color_new.b = 255;
+    else
+        color_new.b = (color.b + COLOR_DIM_SCALE);
+
+    if (color.g > 255 - COLOR_DIM_SCALE)
+        color_new.g = 255;
+    else
+        color_new.g = (color.g + COLOR_DIM_SCALE);
+
+    color_new.a = color.a;
+
+    return color_new;
+}

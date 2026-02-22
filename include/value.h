@@ -4,6 +4,8 @@
 --------------------------------------
 */
 #include <string>
+#include <iomanip>
+#include <sstream>
 
 #ifndef VALUE_HEADER
 #define VALUE_HEADER
@@ -69,10 +71,12 @@ struct Value
 
     std::string asString() const
     {
+        std::stringstream ss;
         switch (type)
         {
         case VALUE_NUMBER:
-            return std::to_string(number);
+            ss << std::fixed << std::setprecision(0) << number;
+            return ss.str();
             break;
         case VALUE_BOOLEAN:
             return boolean ? "true" : "false";
