@@ -12,8 +12,30 @@ This CPP file is for managing stage view named canvas
 #include "ui.h"
 #include "spritebox.h"
 #include <vector>
+#include <string>
 
 std::vector<SprintBody> aliveSprints;
+
+// ------------
+SDL_Texture* currentBackgroundTexture = nullptr;
+std::string currentBackgroundPath = "";
+
+/*
+-------------------------------------------------
+This function is for drawing Canvas Background.
+-------------------------------------------------
+*/
+
+void setBackground(SDL_Renderer* renderer, const std::string& imagePath) {
+    // Free old background
+    if (currentBackgroundTexture) {
+        SDL_DestroyTexture(currentBackgroundTexture);
+    }
+    
+    // Load new background
+    currentBackgroundTexture = renderImage(renderer, imagePath.c_str());
+    currentBackgroundPath = imagePath;
+}
 
 /*
 -------------------------------------------------

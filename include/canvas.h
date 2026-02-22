@@ -17,4 +17,5 @@ This header file is for managing stage view named canvas
 extern std::vector<SprintBody> aliveSprints;
 
 void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
+void setBackground(SDL_Renderer* renderer, const std::string& imagePath);
 #endif
