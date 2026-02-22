@@ -35,6 +35,27 @@ int blockColumnInit(SDL_Renderer *renderer, TTF_Font *font)
 
 int blocksScrollLimit = 0;
 
+std::string lprintf(const char *format, const SlotDefinition slots[])
+{
+    std::string out = "";
+    int j = 0;
+    for (size_t i = 0; i < strlen(format); i++)
+    {
+        if (format[i] == '%')
+        {
+            i++;
+            if (format[i] == 's')
+            {
+                out += slots[j].defaultValue.asString();
+                j++;
+                continue;
+            }
+        }
+        out.push_back(format[i]);
+    }
+    return out;
+}
+
 void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY)
 {
     // Draw background of Block column with it's border
@@ -83,7 +104,8 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
 
             // text
             int tw, th;
-            SDL_Texture *texture = renderText(renderer, font, blocksLibrary[i].label, color_white);
+            std::string labelBuffer = lprintf(blocksLibrary[i].label, blocksLibrary[i].slots);
+            SDL_Texture *texture = renderText(renderer, font, labelBuffer.c_str(), color_white);
             SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
             SDL_Rect textRect = {
                 itemRect.x + (itemRect.w - tw) / 2,
@@ -117,7 +139,8 @@ void drawBlockColumn(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, c
 
         // item text
         int tw, th;
-        SDL_Texture *texture = renderText(renderer, font, blocksLibrary[dragedBlockIndex].label, color_white);
+        std::string labelBuffer = lprintf(blocksLibrary[dragedBlockIndex].label, blocksLibrary[dragedBlockIndex].slots);
+        SDL_Texture *texture = renderText(renderer, font, labelBuffer.c_str(), color_white);
         SDL_QueryTexture(texture, NULL, NULL, &tw, &th);
         SDL_Rect textRect = {
             dragedItemRect.x + (dragedItemRect.w - tw) / 2,

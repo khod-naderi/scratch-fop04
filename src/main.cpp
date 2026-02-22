@@ -15,6 +15,7 @@
 #include "saveload.h"
 #include "logger.h"
 #include "sound_ui.h"
+#include "engine.h"
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
         std::cerr << "Failed to Load font: no such file assets/fonts/Sans_Serif.ttf" << std::endl;
         return SDL_FONT_NOT_FOUND;
     }
+    DEFAULT_FONT = font;
 
     // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(
@@ -134,6 +136,7 @@ int main(int argc, char *argv[])
                     controlCategoryColumnClickDown(mouseX, mouseY);
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
+                    controlUiElementClickDown(mouseX, mouseY);
                 }
             }
             else if (eventSDL.type == SDL_MOUSEBUTTONUP)
@@ -151,6 +154,13 @@ int main(int argc, char *argv[])
                     direction = 1;
                 controlBlockColumnMouseScroll(mouseX, mouseY, eventSDL.wheel.y * direction);
             }
+            else if (eventSDL.type == SDL_KEYDOWN)
+            {
+                controlUiElementKeyboardHit(eventSDL.key.keysym);
+            }
+
+            // pass to engine event handler
+            engineEventHandler(eventSDL);
         }
 
         /*
@@ -197,6 +207,13 @@ int main(int argc, char *argv[])
         {
             drawSaveScreen(renderer, font, mouseX, mouseY);
         }
+
+        //  Logger rendering goes HERE
+        // (call the real function that exists in logger.cpp, not assumed methods)
+        render_logger(renderer, font);
+
+        // Run the engine
+        engineRun();
 
         // show next frame
         SDL_RenderPresent(renderer);
