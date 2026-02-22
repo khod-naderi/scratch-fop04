@@ -14,6 +14,7 @@
 #include "workspace.h"
 #include "saveload.h"
 #include "logger.h"
+#include "sound_ui.h"
 #include "engine.h"
 
 int main(int argc, char *argv[])
@@ -129,6 +130,7 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
+                    controlEditorTabClick(mouseX, mouseY);
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
@@ -178,11 +180,23 @@ int main(int argc, char *argv[])
         SDL_RenderClear(renderer);
 
         // Draw each part of screen
-        drawWorkspaceScreen(renderer, font, mouseX, mouseY);
-        drawCatagoryColumn(renderer, font, mouseX, mouseY);
+        drawEditorTabs(renderer, font, mouseX, mouseY);
+
+        if (currentTab == TAB_CODE)
+        {
+            drawCatagoryColumn(renderer, font, mouseX, mouseY);
+            drawBlockColumn(renderer, font, mouseX, mouseY);
+            drawWorkspaceScreen(renderer, font, mouseX, mouseY);
+            render_logger(renderer, font);
+        }
+        else if (currentTab == TAB_SOUND)
+        {
+            drawSoundEditor(renderer, font, mouseX, mouseY);
+        }
+
+        // always visible
         drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
         drawCanvasScreen(renderer, font, mouseX, mouseY);
-        drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
 
         if (isOnLoadScreen)
