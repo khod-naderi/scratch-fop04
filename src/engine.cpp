@@ -74,7 +74,7 @@ int enginePushProcess(ExecutionContext *ctx, BlockInstance *nowInst)
     return newP.id;
 }
 
-Value *getValueArray(BlockInstance *inst)
+Value *getValueArray(BlockInstance *inst, ExecutionContext &ctx)
 {
     updateBlockInstanceInputValues(*inst);
     Value *out = new Value[inst->inputCount];
@@ -83,9 +83,24 @@ Value *getValueArray(BlockInstance *inst)
     {
         if (inst->inputs[i].isBlock)
         {
-            const BlockInstance *inst = findBlockInstanceById(inst->inputs[i].blockInstanceId);
-            out[i] = inst->inputs[i].literal;
-            // TODO: make it recursively work
+            // Get the block instance that provides the value
+            BlockInstance *inputBlockInst = findBlockInstanceById(inst->inputs[i].blockInstanceId);
+            if (inputBlockInst)
+            {
+                // Recursively evaluate the input block to get its value
+                const Block *inputBlockDef = &blocksLibrary[inputBlockInst->defenitionId];
+                Value *nestedInputs = getValueArray(inputBlockInst, ctx);
+
+                // Execute the input block to get its return value
+                out[i] = inputBlockDef->execute(ctx, nestedInputs, inputBlockInst->inputCount);
+
+                delete[] nestedInputs;
+            }
+            else
+            {
+                // Fallback to literal if block not found
+                out[i] = inst->inputs[i].literal;
+            }
         }
         else
         {
@@ -102,8 +117,133 @@ void engineRunStep(Proccess *p)
         return;
 
     const Block *def = &blocksLibrary[p->nowInst->defenitionId];
-    Value *inputs = getValueArray(p->nowInst);
-    def->execute(*p->ctx, inputs, p->nowInst->inputCount);
+    Value *inputs = getValueArray(p->nowInst, *p->ctx);
+    Value result = def->execute(*p->ctx, inputs, p->nowInst->inputCount);
+
+    delete[] inputs;
+
+    // Handle blocks with bodies (loops, if-else, etc.)
+    if (def->type == BLOCK_STATEMENT && p->nowInst->bodyCount > 0)
+    {
+        if (def->id == 3) // Repeat block
+        {
+            // Check if we're already in a loop for this block
+            bool inLoop = false;
+            if (!p->callStack.empty() && p->callStack.top().blockInst == p->nowInst)
+            {
+                inLoop = true;
+            }
+
+            if (!inLoop)
+            {
+                // First time entering this repeat block
+                int repeatCount = result.asNumber();
+                if (repeatCount > 0 && p->nowInst->bodies[0] != -1)
+                {
+                    // Push a new stack frame for this loop
+                    StackFrame frame;
+                    frame.blockInst = p->nowInst;
+                    frame.loopCounter = 0;
+                    frame.loopMax = repeatCount;
+                    frame.bodyIndex = 0;
+                    p->callStack.push(frame);
+
+                    // Enter the body
+                    p->nowInst = findBlockInstanceById(p->nowInst->bodies[0]);
+                    return;
+                }
+            }
+            else
+            {
+                // We're returning from the body, check if we need to loop again
+                StackFrame &frame = p->callStack.top();
+                frame.loopCounter++;
+
+                if (frame.loopCounter < frame.loopMax)
+                {
+                    // Loop again
+                    p->nowInst = findBlockInstanceById(frame.blockInst->bodies[0]);
+                    return;
+                }
+                else
+                {
+                    // Loop finished, pop the stack frame
+                    BlockInstance *loopBlock = frame.blockInst;
+                    p->callStack.pop();
+
+                    // Continue after the loop block
+                    p->nowInst = findBlockInstanceById(loopBlock->nextId);
+                    if (!p->nowInst)
+                        engineEndProcess(p->id);
+                    return;
+                }
+            }
+        }
+        else if (def->id == 5) // If-else block
+        {
+            // The condition is in the result
+            bool condition = result.asBool();
+
+            if (condition && p->nowInst->bodies[0] != -1)
+            {
+                // Enter the "if" body (body 0)
+                StackFrame frame;
+                frame.blockInst = p->nowInst;
+                frame.loopCounter = 0;
+                frame.loopMax = 1;
+                frame.bodyIndex = 0;
+                p->callStack.push(frame);
+
+                p->nowInst = findBlockInstanceById(p->nowInst->bodies[0]);
+                return;
+            }
+            else if (!condition && p->nowInst->bodyCount > 1 && p->nowInst->bodies[1] != -1)
+            {
+                // Enter the "else" body (body 1)
+                StackFrame frame;
+                frame.blockInst = p->nowInst;
+                frame.loopCounter = 0;
+                frame.loopMax = 1;
+                frame.bodyIndex = 1;
+                p->callStack.push(frame);
+
+                p->nowInst = findBlockInstanceById(p->nowInst->bodies[1]);
+                return;
+            }
+        }
+    }
+
+    // Check if we're at the end of a body and need to return to parent
+    if (!p->callStack.empty())
+    {
+        // We've reached the end of a body (no nextId)
+        if (p->nowInst->nextId == -1)
+        {
+            StackFrame &frame = p->callStack.top();
+
+            // For repeat blocks, we need to check if we should loop
+            const Block *parentDef = &blocksLibrary[frame.blockInst->defenitionId];
+            if (parentDef->id == 3) // Repeat block
+            {
+                frame.loopCounter++;
+                if (frame.loopCounter < frame.loopMax)
+                {
+                    // Loop again
+                    p->nowInst = findBlockInstanceById(frame.blockInst->bodies[0]);
+                    return;
+                }
+            }
+
+            // Pop the frame and continue after the parent block
+            BlockInstance *parentBlock = frame.blockInst;
+            p->callStack.pop();
+            p->nowInst = findBlockInstanceById(parentBlock->nextId);
+
+            if (!p->nowInst)
+                engineEndProcess(p->id);
+            return;
+        }
+    }
 
     // prepare for next step
     p->nowInst = findBlockInstanceById(p->nowInst->nextId);
