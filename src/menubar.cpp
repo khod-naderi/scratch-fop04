@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
 #include "menubar.h"
 #include "ui.h"
 #include "color.h"
@@ -241,6 +242,9 @@ void drawMenubar(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const
             }
         }
     }
+
+    // draw green flag
+    filledTrigonRGBA(renderer, GREENFLAG_BTN.x, GREENFLAG_BTN.y, GREENFLAG_BTN.x, GREENFLAG_BTN.y + GREENFLAG_BTN.h, GREENFLAG_BTN.x + GREENFLAG_BTN.w, GREENFLAG_BTN.y + GREENFLAG_BTN.h / 2, 0, 255, 0, 255);
 }
 
 /*
