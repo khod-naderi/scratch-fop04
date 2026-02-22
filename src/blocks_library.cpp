@@ -59,6 +59,17 @@ Value execAdd(ExecutionContext &ctx, Value inputs[], int inputCount)
     return fromNumber(inputs[0].asNumber() + inputs[1].asNumber());
 }
 
+Value execGotoMousePointer(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execGotoRandomPoint(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execGotoXY(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execPointToAngle(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execPointToMousePointer(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execChangeXby(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execSetXto(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execChangeYby(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execSetYto(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+Value execLog(ExecutionContext &ctx, Value inputs[], int inputCount) { return Value(); }
+
 Block blocksLibrary[] = {
     // [0] move %s steps
     {
@@ -153,7 +164,7 @@ Block blocksLibrary[] = {
     },
     // [5] if-else statement
     {
-        3,
+        5,
         "if-else %s",
         CATEGORY_CONTROL,
         BLOCK_STATEMENT,
@@ -169,6 +180,188 @@ Block blocksLibrary[] = {
         150,
         40,
     },
+    // [6] goto mouse pointer
+    {
+        6,                    // id
+        "goto mouse pointer", // label
+        CATEGORY_MOTION,      // category id
+        BLOCK_COMMAND,        // type
+        {
+
+        },
+        0,                    // slotCount
+        VALUE_NUMBER,         // output tyep
+        true,                 // canHaveTopConnection
+        true,                 // canHaveBottomConnection
+        0,                    // body count
+        execGotoMousePointer, // execution
+        150,                  // base width
+        40,                   // base height
+    },
+    // [7] goto random point
+    {
+        7,                   // id
+        "goto random point", // label
+        CATEGORY_MOTION,     // category id
+        BLOCK_COMMAND,       // type
+        {
+
+        },
+        0,                   // slotCount
+        VALUE_NUMBER,        // output tyep
+        true,                // canHaveTopConnection
+        true,                // canHaveBottomConnection
+        0,                   // body count
+        execGotoRandomPoint, // execution
+        150,                 // base width
+        40,                  // base height
+    },
+    // [8] goto x: %s y: %s
+    {
+        8,                  // id
+        "goto x: %s y: %s", // label
+        CATEGORY_MOTION,    // category id
+        BLOCK_COMMAND,      // type
+        {
+            {"x", VALUE_NUMBER, fromNumber(0)},
+            {"y", VALUE_NUMBER, fromNumber(0)},
+        },
+        2,            // slotCount
+        VALUE_NUMBER, // output tyep
+        true,         // canHaveTopConnection
+        true,         // canHaveBottomConnection
+        0,            // body count
+        execGotoXY,   // execution
+        150,          // base width
+        40,           // base height
+    },
+    // [9] point in direction %s
+    {
+        9,                       // id
+        "point in direction %s", // label
+        CATEGORY_MOTION,         // category id
+        BLOCK_COMMAND,           // type
+        {
+            {"theta", VALUE_NUMBER, fromNumber(0)},
+        },
+        1,                // slotCount
+        VALUE_NUMBER,     // output tyep
+        true,             // canHaveTopConnection
+        true,             // canHaveBottomConnection
+        0,                // body count
+        execPointToAngle, // execution
+        150,              // base width
+        40,               // base height
+    },
+    // [10] point toward mouse pointer
+    {
+        10,                           // id
+        "point toward mouse pointer", // label
+        CATEGORY_MOTION,              // category id
+        BLOCK_COMMAND,                // type
+        {
+
+        },
+        0,                       // slotCount
+        VALUE_NUMBER,            // output tyep
+        true,                    // canHaveTopConnection
+        true,                    // canHaveBottomConnection
+        0,                       // body count
+        execPointToMousePointer, // execution
+        150,                     // base width
+        40,                      // base height
+    },
+    // [11] change x by %s
+    {
+        11,               // id
+        "change x by %s", // label
+        CATEGORY_MOTION,  // category id
+        BLOCK_COMMAND,    // type
+        {
+            {"deltaX", VALUE_NUMBER, fromNumber(0)},
+        },
+        1,             // slotCount
+        VALUE_NUMBER,  // output tyep
+        true,          // canHaveTopConnection
+        true,          // canHaveBottomConnection
+        0,             // body count
+        execChangeXby, // execution
+        150,           // base width
+        40,            // base height
+    },
+    // [12] change y by %s
+    {
+        12,               // id
+        "change y by %s", // label
+        CATEGORY_MOTION,  // category id
+        BLOCK_COMMAND,    // type
+        {
+            {"deltaY", VALUE_NUMBER, fromNumber(0)},
+        },
+        1,             // slotCount
+        VALUE_NUMBER,  // output tyep
+        true,          // canHaveTopConnection
+        true,          // canHaveBottomConnection
+        0,             // body count
+        execChangeYby, // execution
+        150,           // base width
+        40,            // base height
+    },
+    // [13] set x to %s
+    {
+        13,              // id
+        "set x to %s",   // label
+        CATEGORY_MOTION, // category id
+        BLOCK_COMMAND,   // type
+        {
+            {"setX", VALUE_NUMBER, fromNumber(0)},
+        },
+        1,            // slotCount
+        VALUE_NUMBER, // output tyep
+        true,         // canHaveTopConnection
+        true,         // canHaveBottomConnection
+        0,            // body count
+        execSetXto,   // execution
+        150,          // base width
+        40,           // base height
+    },
+    // [14] set x to %s
+    {
+        14,              // id
+        "set y to %s",   // label
+        CATEGORY_MOTION, // category id
+        BLOCK_COMMAND,   // type
+        {
+            {"setY", VALUE_NUMBER, fromNumber(0)},
+        },
+        1,            // slotCount
+        VALUE_NUMBER, // output tyep
+        true,         // canHaveTopConnection
+        true,         // canHaveBottomConnection
+        0,            // body count
+        execSetYto,   // execution
+        150,          // base width
+        40,           // base height
+    },
+    // [15] log %s
+    {
+        15,              // id
+        "log %s",        // label
+        CATEGORY_MOTION, // category id
+        BLOCK_COMMAND,   // type
+        {
+            {"str", VALUE_STRING, fromString("-")},
+        },
+        1,            // slotCount
+        VALUE_NUMBER, // output tyep
+        true,         // canHaveTopConnection
+        true,         // canHaveBottomConnection
+        0,            // body count
+        execLog,      // execution
+        150,          // base width
+        40,           // base height
+    },
+
 };
 
 int blocksLibraryCount = sizeof(blocksLibrary) / sizeof(blocksLibrary[0]);
