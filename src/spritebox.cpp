@@ -87,7 +87,7 @@ these variables are for background screen
 const int Available_Backgrounds_Count = 2;
 availableSprite availableBackgrounds[Available_Backgrounds_Count] = {
     {"Basketball" , "assets/Backgrounds/backgrounds/BackgroundBasketball.jpg", nullptr },
-    {"Nature" , "assets/Backgrounds/backgrounds/BackgroundNature.jpf" , nullptr },
+    {"Nature" , "assets/Backgrounds/backgrounds/BackgroundNature.jpg" , nullptr },
 };
 
 /*
@@ -851,6 +851,11 @@ This function is for handling selection on sprite thumbnails
 */
 void SpriteBoxClick(const int mouseX , const int mouseY ) 
 {
+    if (mouseX >= BackgroundButtonRect.x && mouseX <= BackgroundButtonRect.x + BackgroundButtonRect.w &&
+    mouseY >= BackgroundButtonRect.y && mouseY <= BackgroundButtonRect.y + BackgroundButtonRect.h) {
+    currentState = State_Background_Picker;
+    return;
+    }
     if (HandleAddSpriteClick(mouseX, mouseY)) {
         return;
     }
@@ -1053,6 +1058,128 @@ void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mo
     
 
 }
+/*
+----------------------------------------------------
+This function is for drawing background picker screen when clicking on background option in add sprite menu
+----------------------------------------------------
+*/
+
+void DrawBackgroundPickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY) {
+    // label 
+    const char* title = "Choose a Background";
+    SDL_Color titleColor = color_black;
+    SDL_Surface* titleSurface = TTF_RenderText_Solid(font, title, titleColor);
+
+    if (titleSurface) {
+        SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
+        int titleX = CATEGORY_COLUMN_WIDTH + MAIN_WINDOW_WIDTH / 2 - titleSurface->w / 2;
+        int titleY = 55;
+        SDL_Rect titleRect = { titleX, titleY, titleSurface->w, titleSurface->h };
+        SDL_RenderCopy(renderer, titleTexture, nullptr, &titleRect);
+        SDL_DestroyTexture(titleTexture);
+        SDL_FreeSurface(titleSurface);
+    }
+
+    // Back button
+    SDL_Rect backButtonRect = { CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 100, 55, 80, 30 };
+    bool isHoveringBackButton = (mouseX >= backButtonRect.x && mouseX <= backButtonRect.x + backButtonRect.w &&
+                                 mouseY >= backButtonRect.y && mouseY <= backButtonRect.y + backButtonRect.h);
+    
+    if (isHoveringBackButton) {
+        SDL_SetRenderDrawColor(renderer, 201, 201, 201, 255);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255);
+    }
+    SDL_RenderFillRect(renderer, &backButtonRect);
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawRect(renderer, &backButtonRect);
+
+    // Back button text
+    SDL_Surface* backTextSurface = TTF_RenderText_Solid(font, "< back", titleColor);
+    if (backTextSurface) {
+        SDL_Texture* backTextTexture = SDL_CreateTextureFromSurface(renderer, backTextSurface);
+        int textX = backButtonRect.x + 15;
+        int textY = backButtonRect.y + (backButtonRect.h - backTextSurface->h) / 2;
+        SDL_Rect textRect = {textX, textY, backTextSurface->w, backTextSurface->h};
+        SDL_RenderCopy(renderer, backTextTexture, nullptr, &textRect);
+        SDL_DestroyTexture(backTextTexture);
+        SDL_FreeSurface(backTextSurface);
+    }
+
+    // Separator line
+    int separatorY = backButtonRect.y + backButtonRect.h + 20;
+    SDL_SetRenderDrawColor(renderer, color_black);
+    SDL_RenderDrawLine(renderer, CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 50, separatorY, 
+                       MAIN_WINDOW_WIDTH, separatorY);
+
+        // Background thumbnails grid
+    const int BG_THUMBNAIL_SIZE = 120;
+    const int spacing = 40;
+    const int BG_PER_ROW = 6;
+    int SeparatorY = 105; // Same as calculated above
+    int gridStartX = CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 150;
+    int gridStartY = separatorY + 30;
+
+    // Load textures once
+    static bool bgTexturesLoaded = false;
+    if (!bgTexturesLoaded) {
+        for (int i = 0; i < Available_Backgrounds_Count; i++) {
+            availableBackgrounds[i].texture = renderImage(renderer, availableBackgrounds[i].imagePath.c_str());
+        }
+        bgTexturesLoaded = true;
+    }
+
+    for (int i = 0; i < Available_Backgrounds_Count; i++) {
+        int row = i / BG_PER_ROW;
+        int col = i % BG_PER_ROW;
+
+        int bgX = gridStartX + col * (BG_THUMBNAIL_SIZE + spacing);
+        int bgY = gridStartY + row * (BG_THUMBNAIL_SIZE + spacing + 20);
+
+        SDL_Rect thumbRect = { bgX, bgY, BG_THUMBNAIL_SIZE, BG_THUMBNAIL_SIZE };
+
+        // Check hover
+        bool isBgHovered = (mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+                           mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h);
+
+        // Background
+        if (isBgHovered) {
+            SDL_SetRenderDrawColor(renderer, 100, 200, 100, 80);
+        } else {
+            SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
+        }
+        SDL_RenderFillRect(renderer, &thumbRect);
+
+        // Image
+        if (availableBackgrounds[i].texture) {
+            SDL_RenderCopy(renderer, availableBackgrounds[i].texture, nullptr, &thumbRect);
+        }
+
+        // Hover overlay
+        if (isBgHovered) {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 100, 200, 100, 100);
+            SDL_RenderFillRect(renderer, &thumbRect);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        }
+
+        // Border
+        SDL_SetRenderDrawColor(renderer, isBgHovered ? 100 : 0, isBgHovered ? 200 : 0, isBgHovered ? 100 : 0, 255);
+        SDL_RenderDrawRect(renderer, &thumbRect);
+
+        // Name
+        SDL_Surface* nameSurface = TTF_RenderText_Solid(font, availableBackgrounds[i].name.c_str(), titleColor);
+        if (nameSurface) {
+            SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(renderer, nameSurface);
+            int nameX = bgX + BG_THUMBNAIL_SIZE / 2 - nameSurface->w / 2;
+            int nameY = bgY + BG_THUMBNAIL_SIZE + 5;
+            SDL_Rect nameRect = { nameX, nameY, nameSurface->w, nameSurface->h };
+            SDL_RenderCopy(renderer, nameTexture, nullptr, &nameRect);
+            SDL_FreeSurface(nameSurface);
+            SDL_DestroyTexture(nameTexture);
+        }
+    }                   
+}
 
 /*
 ----------------------------------------------------
@@ -1109,4 +1236,3 @@ bool HandleSpritePickerClick(SDL_Renderer* renderer, const int mouseX, const int
 
     return false;
 }
-

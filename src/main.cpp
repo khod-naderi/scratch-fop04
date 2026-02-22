@@ -200,6 +200,9 @@ int main(int argc, char *argv[])
         else if ( currentState == State_Sprite_Picker ) {
             DrawSpritePickerScreen(renderer, font, mouseX, mouseY);
         }
+        else if ( currentState == State_Background_Picker ) {
+            DrawBackgroundPickerScreen(renderer, font, mouseX, mouseY);
+        }
         drawBlockColumn(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
 
