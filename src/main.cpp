@@ -215,7 +215,6 @@ int main(int argc, char *argv[])
 
         //  Logger rendering goes HERE
         // (call the real function that exists in logger.cpp, not assumed methods)
-        render_logger(renderer, font);
 
         // Run the engine
         engineRun();

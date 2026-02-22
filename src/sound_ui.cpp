@@ -6,10 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 #include <SDL2/SDL_ttf.h>
-extern "C"
-{
 #include "tinyfiledialogs.h"
-}
 #include <algorithm>
 
 #include <filesystem>

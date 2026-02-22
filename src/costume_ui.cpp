@@ -11,10 +11,7 @@
 #include <string>
 #include <algorithm>
 
-extern "C"
-{
 #include "tinyfiledialogs.h"
-}
 
 extern EditorTab currentTab;
 
