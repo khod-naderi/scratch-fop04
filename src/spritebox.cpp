@@ -445,7 +445,7 @@ void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect Sprite
          }
 
          const int bgbuttonSize = 80;
-         BackgroundButtonRect = { AddSpriteButtonRect.x , AddSpriteButtonRect.y + bgbuttonSize + 10 , bgbuttonSize, bgbuttonSize };
+         BackgroundButtonRect = { AddSpriteButtonRect.x - bgbuttonSize - 5 , AddSpriteButtonRect.y , bgbuttonSize, bgbuttonSize };
 
          isHoveringBackgroundButton = (mouseX >= BackgroundButtonRect.x && mouseX <= BackgroundButtonRect.x + BackgroundButtonRect.w &&
                               mouseY >= BackgroundButtonRect.y && mouseY <= BackgroundButtonRect.y + BackgroundButtonRect.h);
@@ -1234,5 +1234,45 @@ bool HandleSpritePickerClick(SDL_Renderer* renderer, const int mouseX, const int
         }
     }
 
+    return false;
+}
+
+/*
+----------------------------------------------------
+This function is for handling clicks on background sprite area. 
+----------------------------------------------------
+*/
+
+bool HandleBackgroundPickerClick(SDL_Renderer* renderer, const int mouseX, const int mouseY) {
+    // Back button
+    SDL_Rect backButtonRect = { CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 100, 55, 80, 30 };
+    if (mouseX >= backButtonRect.x && mouseX <= backButtonRect.x + backButtonRect.w &&
+        mouseY >= backButtonRect.y && mouseY <= backButtonRect.y + backButtonRect.h) {
+        currentState = State_MainEditor;
+        return true;
+    }
+
+    // Background thumbnails
+    const int BG_THUMBNAIL_SIZE = 120;
+    const int spacing = 40;
+    const int BG_PER_ROW = 6;
+    int separatorY = 105;
+    int gridStartX = CATEGORY_COLUMN_WIDTH + BLOCKS_COLUMN_WIDTH + 150;
+    int gridStartY = separatorY + 30;
+
+    for (int i = 0; i < Available_Backgrounds_Count; i++) {
+        int row = i / BG_PER_ROW;
+        int col = i % BG_PER_ROW;
+        int bgX = gridStartX + col * (BG_THUMBNAIL_SIZE + spacing);
+        int bgY = gridStartY + row * (BG_THUMBNAIL_SIZE + spacing + 20);
+        SDL_Rect thumbRect = { bgX, bgY, BG_THUMBNAIL_SIZE, BG_THUMBNAIL_SIZE };
+
+        if (mouseX >= thumbRect.x && mouseX <= thumbRect.x + thumbRect.w &&
+            mouseY >= thumbRect.y && mouseY <= thumbRect.y + thumbRect.h) {
+            // Set background , we will need to implement a function for this part . 
+            currentState = State_MainEditor;
+            return true;
+        }
+    }
     return false;
 }

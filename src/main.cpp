@@ -148,6 +148,9 @@ int main(int argc, char *argv[])
                     else if ( currentState == State_Sprite_Picker ) {
                         HandleSpritePickerClick(renderer, mouseX, mouseY);
                     }
+                    else if ( currentState == State_Background_Picker ) {
+                       HandleBackgroundPickerClick(renderer, mouseX, mouseY);
+                    }
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
                     controlUiElementClickDown(mouseX, mouseY);
