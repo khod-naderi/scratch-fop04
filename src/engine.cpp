@@ -179,6 +179,44 @@ void engineRunStep(Proccess *p)
                 }
             }
         }
+        else if (def->id == 24) // Forever block
+        {
+            // Check if we're already in a loop for this block
+            bool inLoop = false;
+            if (!p->callStack.empty() && p->callStack.top().blockInst == p->nowInst)
+            {
+                inLoop = true;
+            }
+
+            if (!inLoop)
+            {
+                // First time entering this forever block
+                if (p->nowInst->bodies[0] != -1)
+                {
+                    // Push a new stack frame for this infinite loop
+                    StackFrame frame;
+                    frame.blockInst = p->nowInst;
+                    frame.loopCounter = 0;
+                    frame.loopMax = -1; // -1 means infinite
+                    frame.bodyIndex = 0;
+                    p->callStack.push(frame);
+
+                    // Enter the body
+                    p->nowInst = findBlockInstanceById(p->nowInst->bodies[0]);
+                    return;
+                }
+            }
+            else
+            {
+                // We're returning from the body, loop forever
+                StackFrame &frame = p->callStack.top();
+                frame.loopCounter++;
+
+                // Always loop again (infinite loop)
+                p->nowInst = findBlockInstanceById(frame.blockInst->bodies[0]);
+                return;
+            }
+        }
         else if (def->id == 5) // If-else block
         {
             // The condition is in the result
@@ -211,6 +249,25 @@ void engineRunStep(Proccess *p)
                 return;
             }
         }
+        else if (def->id == 25) // If block (without else)
+        {
+            // The condition is in the result
+            bool condition = result.asBool();
+
+            if (condition && p->nowInst->bodies[0] != -1)
+            {
+                // Enter the "if" body
+                StackFrame frame;
+                frame.blockInst = p->nowInst;
+                frame.loopCounter = 0;
+                frame.loopMax = 1;
+                frame.bodyIndex = 0;
+                p->callStack.push(frame);
+
+                p->nowInst = findBlockInstanceById(p->nowInst->bodies[0]);
+                return;
+            }
+        }
     }
 
     // Check if we're at the end of a body and need to return to parent
@@ -232,6 +289,13 @@ void engineRunStep(Proccess *p)
                     p->nowInst = findBlockInstanceById(frame.blockInst->bodies[0]);
                     return;
                 }
+            }
+            else if (parentDef->id == 24) // Forever block
+            {
+                // Always loop again (infinite loop)
+                frame.loopCounter++;
+                p->nowInst = findBlockInstanceById(frame.blockInst->bodies[0]);
+                return;
             }
 
             // Pop the frame and continue after the parent block
@@ -294,7 +358,6 @@ void engineEventHandler(SDL_Event &event)
 
         executionContextSetVariable(*ctx, "_mouseX", fromNumber(event.motion.x));
         executionContextSetVariable(*ctx, "_mouseY", fromNumber(event.motion.y));
-        executionContextSetVariable(*ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
 
         EventType eventType;
         if (event.type == SDL_MOUSEMOTION)
@@ -312,9 +375,18 @@ void engineEventHandler(SDL_Event &event)
         {
             eventType = KEYBOARD_KEYHIT;
         }
+
+        if (eventType == KEYBOARD_KEYHIT)
+        {
+            executionContextSetVariable(*ctx, "_keysym", fromNumber((int)event.key.keysym.sym));
+        }
         executionContextSetVariable(*ctx, "_eventType", fromNumber((int)eventType));
 
-        bool isTrigered = def->execute(*ctx, nullptr, 0).asBool();
+        // Get the input values for the event block
+        Value *inputs = getValueArray(&cs->instances[i], *ctx);
+        bool isTrigered = def->execute(*ctx, inputs, cs->instances[i].inputCount).asBool();
+        delete[] inputs;
+
         if (isTrigered)
         {
             enginePushProcess(ctx, findBlockInstanceById(cs->instances[i].nextId));
