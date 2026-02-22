@@ -81,6 +81,17 @@ availableSprite availableSprites[AVAILABLE_SPRITES_COUNT] = {
 };
 /*
 -------------------------------------------------
+these variables are for background screen
+-------------------------------------------------
+*/
+const int Available_Backgrounds_Count = 2;
+availableSprite availableBackgrounds[Available_Backgrounds_Count] = {
+    {"Basketball" , "assets/Backgrounds/backgrounds/BackgroundBasketball.jpg", nullptr },
+    {"Nature" , "assets/Backgrounds/backgrounds/BackgroundNature.jpf" , nullptr },
+};
+
+/*
+-------------------------------------------------
 This function is for adding and initializeing top bar of sprite box
 this function will run on every frame.
 -------------------------------------------------
@@ -433,6 +444,30 @@ void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect Sprite
             SDL_DestroyTexture(textTexture);
          }
 
+         const int bgbuttonSize = 80;
+         BackgroundButtonRect = { AddSpriteButtonRect.x , AddSpriteButtonRect.y + bgbuttonSize + 10 , bgbuttonSize, bgbuttonSize };
+
+         isHoveringBackgroundButton = (mouseX >= BackgroundButtonRect.x && mouseX <= BackgroundButtonRect.x + BackgroundButtonRect.w &&
+                              mouseY >= BackgroundButtonRect.y && mouseY <= BackgroundButtonRect.y + BackgroundButtonRect.h);
+
+         // drawing background button 
+         SDL_SetRenderDrawColor ( renderer, 70, 130, 200, 255 );
+         SDL_RenderFillRect (renderer, &BackgroundButtonRect );
+
+         if ( backgroundIcon ) {
+            SDL_RenderCopy(renderer, backgroundIcon, nullptr, &BackgroundButtonRect );
+         }
+
+         if ( isHoveringBackgroundButton ) {
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 100);
+            SDL_RenderFillRect(renderer, &BackgroundButtonRect);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+         }
+         
+         SDL_SetRenderDrawColor(renderer, 50, 100, 180, 255);
+         SDL_RenderDrawRect(renderer, &BackgroundButtonRect);
+
      }
      
 /*
@@ -764,8 +799,9 @@ bool loadSpriteBoxMenuIcons(SDL_Renderer* renderer) {
     randomIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteRandomIcon.png");
     searchIcon = renderImage(renderer, "assets/icons/SpriteBox/addSpriteChooseIcon.png");
     TrashIcon = renderImage(renderer, "assets/icons/SpriteBox/TrashIcon.png");
+    backgroundIcon = renderImage(renderer, "assets/Backgrounds/iconBackground.png");
 
-    if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon || !TrashIcon) {
+    if (!catIcon || !paintIcon || !uploadIcon || !randomIcon || !searchIcon || !TrashIcon || !backgroundIcon ) {
         std::cerr << "Failed to load one or more sprite box menu icons." << std::endl;
         return false;
     }
