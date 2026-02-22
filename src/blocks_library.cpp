@@ -181,7 +181,7 @@ Value execThink(ExecutionContext &ctx, Value inputs[], int inputCount)
 Value execChangeSizeBy(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     // TODO: Add scale field to SprintBody
-    // ctx.sprite->scale += inputs[0].asNumber() / 100.0;
+    ctx.sprite->size += inputs[0].asNumber() / 100.0;
     logger_log("Change size");
     return Value();
 }
@@ -189,7 +189,7 @@ Value execChangeSizeBy(ExecutionContext &ctx, Value inputs[], int inputCount)
 Value execSetSizeTo(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     // TODO: Add scale field to SprintBody
-    // ctx.sprite->scale = inputs[0].asNumber() / 100.0;
+    ctx.sprite->size = inputs[0].asNumber() / 100.0;
     logger_log("Set size");
     return Value();
 }

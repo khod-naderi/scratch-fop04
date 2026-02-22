@@ -20,6 +20,7 @@ struct SprintBody
     std::string name; // sprint name, like "bob".
     int posX, posY;   // sprint position related to Canvas Screen.
     SDL_Texture *nowCustome;
+    double size;
     // SDL_Texture **allCustome // TODO: Add this later for multicostume sprints
     // unsigned int selectedCustome = 0;
     // int customeCount;

@@ -37,8 +37,8 @@ void drawCanvasScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, 
         SDL_Rect imageRect = {
             CANVAS_BOX.x + (thisSprint.posX - (SPRINT_IMG_WITDH / 2)),
             CANVAS_BOX.y + (thisSprint.posY - (SPRINT_IMG_HEIGHT / 2)),
-            SPRINT_IMG_WITDH,
-            SPRINT_IMG_HEIGHT,
+            int(SPRINT_IMG_WITDH * thisSprint.size),
+            int(SPRINT_IMG_HEIGHT * thisSprint.size),
         };
         SDL_RenderCopyEx(renderer, thisSprint.nowCustome, NULL, &imageRect, thisSprint.angleRotation, NULL, SDL_FLIP_NONE);
     }
