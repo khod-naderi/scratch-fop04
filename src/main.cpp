@@ -15,6 +15,7 @@
 #include "saveload.h"
 #include "logger.h"
 #include "sound_ui.h"
+#include "costume_ui.h"
 #include "engine.h"
 
 int main(int argc, char *argv[])
@@ -192,6 +193,10 @@ int main(int argc, char *argv[])
         else if (currentTab == TAB_SOUND)
         {
             drawSoundEditor(renderer, font, mouseX, mouseY);
+        }
+        else if (currentTab == TAB_COSTUME)
+        {
+            drawCostumeEditor(renderer, font, mouseX, mouseY);
         }
 
         // always visible
