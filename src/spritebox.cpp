@@ -23,7 +23,7 @@ which is called in main loop to render sprite box every frame.
 #include <ctime>
 
 // selected sprite id in sprite box
-int SelectedSpriteID = -1;
+int SelectedSpriteID = 0;
 
 // state of the screen
 ScreenState currentState = State_MainEditor;
