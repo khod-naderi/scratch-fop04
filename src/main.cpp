@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
     }
     DEFAULT_FONT = font;
 
-    
     // loading JPG image support
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     int initted = IMG_Init(imgFlags);
-    if ( ( initted & imgFlags ) != imgFlags ){
+    if ((initted & imgFlags) != imgFlags)
+    {
         std::cerr << "Failed to initialize SDL_image with PNG and JPG support: " << IMG_GetError() << std::endl;
         return -1;
     }
@@ -146,14 +146,17 @@ int main(int argc, char *argv[])
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
-                    if ( currentState == State_MainEditor ){
+                    if (currentState == State_MainEditor)
+                    {
                         SpriteBoxClick(mouseX, mouseY);
                     }
-                    else if ( currentState == State_Sprite_Picker ) {
+                    else if (currentState == State_Sprite_Picker)
+                    {
                         HandleSpritePickerClick(renderer, mouseX, mouseY);
                     }
-                    else if ( currentState == State_Background_Picker ) {
-                       HandleBackgroundPickerClick(renderer, mouseX, mouseY);
+                    else if (currentState == State_Background_Picker)
+                    {
+                        HandleBackgroundPickerClick(renderer, mouseX, mouseY);
                     }
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
@@ -201,33 +204,37 @@ int main(int argc, char *argv[])
         SDL_RenderClear(renderer);
 
         // Draw each part of screen
-        drawEditorTabs(renderer, font, mouseX, mouseY);
-        if ( currentState == State_MainEditor ){
-        if (currentTab == TAB_CODE)
+        if (currentState == State_MainEditor)
         {
-            drawCatagoryColumn(renderer, font, mouseX, mouseY);
-            drawBlockColumn(renderer, font, mouseX, mouseY);
-            drawWorkspaceScreen(renderer, font, mouseX, mouseY);
-            render_logger(renderer, font);
+            if (currentTab == TAB_CODE)
+            {
+                drawCatagoryColumn(renderer, font, mouseX, mouseY);
+                drawBlockColumn(renderer, font, mouseX, mouseY);
+                drawWorkspaceScreen(renderer, font, mouseX, mouseY);
+                render_logger(renderer, font);
+            }
+            else if (currentTab == TAB_SOUND)
+            {
+                drawSoundEditor(renderer, font, mouseX, mouseY);
+            }
+            else if (currentTab == TAB_COSTUME)
+            {
+                drawCostumeEditor(renderer, font, mouseX, mouseY);
+            }
+            drawEditorTabs(renderer, font, mouseX, mouseY);
+            drawCanvasScreen(renderer, font, mouseX, mouseY);
         }
-        else if (currentTab == TAB_SOUND)
+        else if (currentState == State_Sprite_Picker)
         {
-            drawSoundEditor(renderer, font, mouseX, mouseY);
-        }
-        else if (currentTab == TAB_COSTUME)
-        {
-            drawCostumeEditor(renderer, font, mouseX, mouseY);
-        }}
-        else if ( currentState == State_Sprite_Picker ) {
             DrawSpritePickerScreen(renderer, font, mouseX, mouseY);
         }
-        else if ( currentState == State_Background_Picker ) {
+        else if (currentState == State_Background_Picker)
+        {
             DrawBackgroundPickerScreen(renderer, font, mouseX, mouseY);
         }
 
         // always visible
         drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
-        drawCanvasScreen(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
 
         if (isOnLoadScreen)
