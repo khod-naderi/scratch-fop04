@@ -8,5 +8,6 @@
 
 extern Block blocksLibrary[];
 extern int blocksLibraryCount;
+int doBounceWall(ExecutionContext &ctx);
 
 #define BLOCKS_COUNT blocksLibraryCount // for backward compatibaly

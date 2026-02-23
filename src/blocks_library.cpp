@@ -115,8 +115,8 @@ Value execGotoMousePointer(ExecutionContext &ctx, Value inputs[], int inputCount
 
     if (mouseXVar && mouseYVar)
     {
-        ctx.sprite->posX = mouseXVar->asNumber();
-        ctx.sprite->posY = mouseYVar->asNumber();
+        ctx.sprite->posX = mouseXVar->asNumber() - CANVAS_BOX.x;
+        ctx.sprite->posY = mouseYVar->asNumber() - CANVAS_BOX.y;
     }
 
     doBounceWall(ctx);

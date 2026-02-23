@@ -310,6 +310,8 @@ void engineRunStep(Proccess *p)
         }
     }
 
+    doBounceWall(*p->ctx);
+
     // prepare for next step
     p->nowInst = findBlockInstanceById(p->nowInst->nextId);
     if (!p->nowInst)
