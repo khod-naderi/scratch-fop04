@@ -4,6 +4,7 @@
 #include "canvas.h"
 #include "logger.h"
 #include <iostream>
+#include "spritebox.h"
 
 int lastProccessId = 0;
 std::vector<Proccess> programCounters;
@@ -352,9 +353,11 @@ void engineEventHandler(SDL_Event &event)
 
         ExecutionContext *ctx = new ExecutionContext();
 
-        SprintBody *spt = &aliveSprints[0]; // TODO: get it dynamicly
-
-        ctx->sprite = spt;
+        SprintBody *spt = getSprintById(SelectedSpriteID);
+        if (spt)
+            ctx->sprite = spt;
+        else
+            ctx->sprite = &aliveSprints[0];
 
         executionContextSetVariable(*ctx, "_mouseX", fromNumber(event.motion.x));
         executionContextSetVariable(*ctx, "_mouseY", fromNumber(event.motion.y));

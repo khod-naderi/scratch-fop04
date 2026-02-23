@@ -1385,3 +1385,17 @@ bool HandleBackgroundPickerClick(SDL_Renderer *renderer, const int mouseX, const
     }
     return false;
 }
+
+/*
+This function will return sprint pointer to realted id
+*/
+SprintBody *getSprintById(int sid)
+{
+    for (SprintBody &sp : aliveSprints)
+    {
+        if (sp.id == sid)
+            return &sp;
+    }
+
+    return nullptr;
+}

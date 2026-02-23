@@ -24,26 +24,27 @@ struct SprintBody
     // SDL_Texture **allCustome // TODO: Add this later for multicostume sprints
     // unsigned int selectedCustome = 0;
     // int customeCount;
-    double angleRotation; // rotation of the sprint. ROTATION IS CLOCKWISE
-    int scale = 100;        // scale of the sprint in percentage. 100 means original size.
+    double angleRotation;  // rotation of the sprint. ROTATION IS CLOCKWISE
+    int scale = 100;       // scale of the sprint in percentage. 100 means original size.
     bool isVisible = true; // if fale, not available on canvas, there will be an option on top bar to handle visibility.
 };
 
 extern int SelectedSpriteID; // this variable will save selected sprite in sprite box
 
-
-// this struct&enum will handle sprite choosing logic and menu bar 
-enum AddSpriteMenuState {
-    Menu_Closed, // not shown
+// this struct&enum will handle sprite choosing logic and menu bar
+enum AddSpriteMenuState
+{
+    Menu_Closed,     // not shown
     Menu_Hover_Main, // hovering on main button
-    Menu_Open // menu is open, showing 4 options: add, random, upload , paint
+    Menu_Open        // menu is open, showing 4 options: add, random, upload , paint
 };
 
-struct MenuOption {
-    const char* icon; 
+struct MenuOption
+{
+    const char *icon;
     std::string name; // "choose a sprite", "paint", "upload", "random"
-    SDL_Rect rect; // position and size of option
-    bool isHovered; 
+    SDL_Rect rect;    // position and size of option
+    bool isHovered;
 };
 
 /*
@@ -51,18 +52,20 @@ struct MenuOption {
 this part is for handling sprite choosing screen.
 ----------------------------------------------------
 */
-const int AVAILABLE_SPRITES_COUNT = 9; 
-struct availableSprite {
-    //std::string id;
+const int AVAILABLE_SPRITES_COUNT = 9;
+struct availableSprite
+{
+    // std::string id;
     std::string name;
     std::string imagePath;
-    SDL_Texture* texture;
+    SDL_Texture *texture;
 };
 
-enum ScreenState {
+enum ScreenState
+{
     State_MainEditor,
     State_Sprite_Picker,
-    State_Background_Picker, 
+    State_Background_Picker,
 };
 
 extern ScreenState currentState; // this variable will save current screen state, like main editor or sprite picker
@@ -71,7 +74,7 @@ extern ScreenState currentState; // this variable will save current screen state
 #define SPRINT_IMG_WITDH 100
 #define SPRINT_IMG_HEIGHT 100
 
-// making sprite top bar text boxes 
+// making sprite top bar text boxes
 
 //--------------------------------
 
@@ -81,9 +84,10 @@ void drawSpriteBoxScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouse
 void SpriteBoxClick(const int mouseX, const int mouseY);
 void DrawTopBarOfSpriteBox(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect topBar);
 bool loadSpriteBoxMenuIcons(SDL_Renderer *renderer);
-void DrawAddSpriteMenu ( SDL_Renderer *renderer, TTF_Font *font, SDL_Rect SpriteArea , const int mouseX, const int mouseY );
+void DrawAddSpriteMenu(SDL_Renderer *renderer, TTF_Font *font, SDL_Rect SpriteArea, const int mouseX, const int mouseY);
 void DrawSpritePickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
-void DrawBackgroundPickerScreen(SDL_Renderer * renderer, TTF_Font *font, const int mouseX, const int mouseY);
-bool HandleSpritePickerClick(SDL_Renderer * renderer, const int mouseX, const int mouseY );
-bool HandleBackgroundPickerClick(SDL_Renderer* renderer, const int mouseX, const int mouseY);
+void DrawBackgroundPickerScreen(SDL_Renderer *renderer, TTF_Font *font, const int mouseX, const int mouseY);
+bool HandleSpritePickerClick(SDL_Renderer *renderer, const int mouseX, const int mouseY);
+bool HandleBackgroundPickerClick(SDL_Renderer *renderer, const int mouseX, const int mouseY);
+SprintBody *getSprintById(int sid);
 #endif
