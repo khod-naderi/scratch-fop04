@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#if !defined(__APPLE__)
 #include <SDL2/SDL2_gfxPrimitives.h>
+#endif
 #include <SDL2/SDL_audio.h>
 #include <iostream>
 #include <string>
@@ -49,6 +51,15 @@ int main(int argc, char *argv[])
         return SDL_FONT_NOT_FOUND;
     }
     DEFAULT_FONT = font;
+
+    
+    // loading JPG image support
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+    int initted = IMG_Init(imgFlags);
+    if ( ( initted & imgFlags ) != imgFlags ){
+        std::cerr << "Failed to initialize SDL_image with PNG and JPG support: " << IMG_GetError() << std::endl;
+        return -1;
+    }
 
     // Creating a static windows
     SDL_Window *window = SDL_CreateWindow(
@@ -135,6 +146,15 @@ int main(int argc, char *argv[])
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
+                    if ( currentState == State_MainEditor ){
+                        SpriteBoxClick(mouseX, mouseY);
+                    }
+                    else if ( currentState == State_Sprite_Picker ) {
+                        HandleSpritePickerClick(renderer, mouseX, mouseY);
+                    }
+                    else if ( currentState == State_Background_Picker ) {
+                       HandleBackgroundPickerClick(renderer, mouseX, mouseY);
+                    }
                     controlBlockColumnClickDown(mouseX, mouseY);
                     controlWorkspaceClickDown(mouseX, mouseY);
                     controlUiElementClickDown(mouseX, mouseY);
@@ -182,7 +202,7 @@ int main(int argc, char *argv[])
 
         // Draw each part of screen
         drawEditorTabs(renderer, font, mouseX, mouseY);
-
+        if ( currentState == State_MainEditor ){
         if (currentTab == TAB_CODE)
         {
             drawCatagoryColumn(renderer, font, mouseX, mouseY);
@@ -197,6 +217,12 @@ int main(int argc, char *argv[])
         else if (currentTab == TAB_COSTUME)
         {
             drawCostumeEditor(renderer, font, mouseX, mouseY);
+        }}
+        else if ( currentState == State_Sprite_Picker ) {
+            DrawSpritePickerScreen(renderer, font, mouseX, mouseY);
+        }
+        else if ( currentState == State_Background_Picker ) {
+            DrawBackgroundPickerScreen(renderer, font, mouseX, mouseY);
         }
 
         // always visible
@@ -231,6 +257,7 @@ int main(int argc, char *argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();
+    IMG_Quit();
     SDL_Quit();
 
     return 0;
