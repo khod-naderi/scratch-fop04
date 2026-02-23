@@ -9,13 +9,53 @@
 #include "logger.h"
 #include "ui.h"
 #include "engine.h"
+#include <string>
 // #include <iostream>
+
+int doBounceWall(ExecutionContext &ctx)
+{
+    SprintBody *sp = ctx.sprite;
+
+    bool isColision = false;
+    if (sp->posX > CANVAS_BOX.w)
+    {
+        sp->posX = CANVAS_BOX.w;
+        isColision = true;
+    }
+    else if (sp->posX < 0)
+    {
+        sp->posX = 0;
+        isColision = true;
+    }
+    else if (sp->posY > CANVAS_BOX.h)
+    {
+        sp->posY = CANVAS_BOX.h;
+        isColision = true;
+    }
+    else if (sp->posY < 0)
+    {
+        sp->posY = 0;
+        isColision = true;
+    }
+
+    if (isColision)
+    {
+        std::string msg = "[Warning]: Sprint ";
+        msg = msg + sp->name;
+        msg = msg + " bounced from wall.";
+        logger_log(msg);
+    }
+
+    return isColision;
+}
 
 Value execMoveSteps(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     double steps = inputs[0].asNumber();
     ctx.sprite->posX += steps * SDL_cos(ctx.sprite->angleRotation * (M_PI / 180));
     ctx.sprite->posY += steps * SDL_sin(ctx.sprite->angleRotation * (M_PI / 180));
+
+    doBounceWall(ctx);
     return Value();
 }
 
@@ -78,13 +118,15 @@ Value execGotoMousePointer(ExecutionContext &ctx, Value inputs[], int inputCount
         ctx.sprite->posX = mouseXVar->asNumber();
         ctx.sprite->posY = mouseYVar->asNumber();
     }
+
+    doBounceWall(ctx);
     return Value();
 }
 
 Value execGotoRandomPoint(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
-    ctx.sprite->posX = rand() % 800 - 400; // Random x between -400 and 400
-    ctx.sprite->posY = rand() % 600 - 300; // Random y between -300 and 300
+    ctx.sprite->posX = rand() % CANVAS_BOX.w; // Random x between 0 and CANVAS width
+    ctx.sprite->posY = rand() % CANVAS_BOX.h; // Random y between 0 and CANVAS height
     return Value();
 }
 
@@ -92,6 +134,8 @@ Value execGotoXY(ExecutionContext &ctx, Value inputs[], int inputCount)
 {
     ctx.sprite->posX = inputs[0].asNumber();
     ctx.sprite->posY = inputs[1].asNumber();
+
+    doBounceWall(ctx);
     return Value();
 }
 
