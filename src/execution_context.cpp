@@ -6,9 +6,7 @@ To create an empty execution context
 */
 ExecutionContext::ExecutionContext()
 {
-    spriteX = 0;
-    spriteY = 0;
-    spriteAngle = 0;
+    sprite = nullptr;
     variableCount = 0;
 
     for (int i = 0; i < MAX_VARIABLES; i++)

@@ -32,6 +32,7 @@ extern const SDL_Rect CANVAS_BOX;
 extern const SDL_Rect SPRITE_BOX;
 extern const SDL_Rect SAVELOAD_BOX;
 extern const SDL_Rect LOGGER_Box;
+extern const SDL_Rect GREENFLAG_BTN;
 SDL_Texture *renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, const SDL_Color &color);
 SDL_Texture *renderImage(SDL_Renderer *renderer, const char *imgPath);
 bool isPointInRect(int x, int y, const SDL_Rect &rect);
@@ -41,6 +42,10 @@ void render_categories(SDL_Renderer *renderer, Category categories[], int count,
 void render_blocks(SDL_Renderer *renderer, Block blocks[], int count, float scroll_offset, SDL_Rect viewport);
 void render_extension_button(SDL_Renderer *renderer, SDL_Rect bounds);
 void draw_thick_rect(SDL_Renderer *renderer, const SDL_Rect &rect, int thickness);
+void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mouseY);
+void drawEditorTabs(SDL_Renderer *renderer, TTF_Font *font, int mouseX, int mouseY);
+void controlEditorTabClick(int mouseX, int mouseY);
+
 // Define menu reactangles
 extern const SDL_Rect fileMenuRect;
 extern const SDL_Rect editMenuRect;

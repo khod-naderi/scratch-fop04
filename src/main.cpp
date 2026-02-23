@@ -16,6 +16,9 @@
 #include "workspace.h"
 #include "saveload.h"
 #include "logger.h"
+#include "sound_ui.h"
+#include "costume_ui.h"
+#include "engine.h"
 
 int main(int argc, char *argv[])
 {
@@ -139,6 +142,7 @@ int main(int argc, char *argv[])
             {
                 if (eventSDL.button.button == SDL_BUTTON_LEFT)
                 {
+                    controlEditorTabClick(mouseX, mouseY);
                     controlSaveClickDown(mouseX, mouseY);
                     controlMenubarClickDown(mouseX, mouseY);
                     controlCategoryColumnClickDown(mouseX, mouseY);
@@ -175,6 +179,9 @@ int main(int argc, char *argv[])
             {
                 controlUiElementKeyboardHit(eventSDL.key.keysym);
             }
+
+            // pass to engine event handler
+            engineEventHandler(eventSDL);
         }
 
         /*
@@ -194,19 +201,33 @@ int main(int argc, char *argv[])
         SDL_RenderClear(renderer);
 
         // Draw each part of screen
-        drawCatagoryColumn(renderer, font, mouseX, mouseY);
-        if ( currentState == State_MainEditor ){ 
+        drawEditorTabs(renderer, font, mouseX, mouseY);
+        if ( currentState == State_MainEditor ){
+        if (currentTab == TAB_CODE)
+        {
+            drawCatagoryColumn(renderer, font, mouseX, mouseY);
+            drawBlockColumn(renderer, font, mouseX, mouseY);
             drawWorkspaceScreen(renderer, font, mouseX, mouseY);
-            drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
-            drawCanvasScreen(renderer, font, mouseX, mouseY);
+            render_logger(renderer, font);
         }
+        else if (currentTab == TAB_SOUND)
+        {
+            drawSoundEditor(renderer, font, mouseX, mouseY);
+        }
+        else if (currentTab == TAB_COSTUME)
+        {
+            drawCostumeEditor(renderer, font, mouseX, mouseY);
+        }}
         else if ( currentState == State_Sprite_Picker ) {
             DrawSpritePickerScreen(renderer, font, mouseX, mouseY);
         }
         else if ( currentState == State_Background_Picker ) {
             DrawBackgroundPickerScreen(renderer, font, mouseX, mouseY);
         }
-        drawBlockColumn(renderer, font, mouseX, mouseY);
+
+        // always visible
+        drawSpriteBoxScreen(renderer, font, mouseX, mouseY);
+        drawCanvasScreen(renderer, font, mouseX, mouseY);
         drawMenubar(renderer, font, mouseX, mouseY);
 
         if (isOnLoadScreen)
@@ -220,7 +241,9 @@ int main(int argc, char *argv[])
 
         //  Logger rendering goes HERE
         // (call the real function that exists in logger.cpp, not assumed methods)
-        render_logger(renderer, font);
+
+        // Run the engine
+        engineRun();
 
         // show next frame
         SDL_RenderPresent(renderer);

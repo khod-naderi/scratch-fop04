@@ -8,6 +8,7 @@ witch sprint, witch position, variables, stop intrupt and etc.
 
 #include "value.h"
 #include <string>
+#include "spritebox.h"
 
 #define MAX_VARIABLES 64
 
@@ -20,10 +21,8 @@ struct Variable
 
 struct ExecutionContext
 {
-    // sprite state
-    int spriteX;
-    int spriteY;
-    double spriteAngle;
+    // sprite pointer
+    SprintBody *sprite;
 
     // user variables
     Variable variables[MAX_VARIABLES];

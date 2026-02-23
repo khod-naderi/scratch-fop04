@@ -37,5 +37,14 @@ Menubar Logo properties
 
 // for DebugMode
 #define DEBUG_MODE
+// for adding the three tabs
+enum EditorTab
+{
+    TAB_CODE,
+    TAB_COSTUME,
+    TAB_SOUND
+};
+
+inline EditorTab currentTab = TAB_CODE;
 
 #endif

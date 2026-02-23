@@ -12,6 +12,7 @@ inline int SDL_SetRenderDrawColor(SDL_Renderer *renderer, SDL_Color color)
 {
     return SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
+#define color_activeTabGray 200, 200, 200, 255
 
 extern const SDL_Color color_white;
 extern const SDL_Color color_blue;

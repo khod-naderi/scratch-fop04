@@ -79,10 +79,11 @@ std::string lprintf(const char *format, const InputValue values[])
             i++;
             if (format[i] == 's')
             {
-                if (values[i].isBlock)
+                if (values[j].isBlock)
                 {
-                    // TODO: BlockInstance *inst = findIn values->blockInstanceId
-                    out += values[j].literal.asString();
+                    // For blocks, we show a placeholder or the block's representation
+                    // The actual value will be computed at execution time
+                    out += "[block]";
                 }
                 else
                 {
